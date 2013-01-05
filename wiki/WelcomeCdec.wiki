@@ -6,8 +6,7 @@ Cdec project is a subset of foundation library of Kingsoft Cloud. When we're bui
 
 Before we worked on Kingsoft Kuaipan (金山快盘), our team has been using C++ for over ten years building a tens of millions code lines project. That you might know, the Kingsoft Office (also named WPS). We enjoyed the high run-time performance and system level control ability that this programming language offers, at the same time, we suffered the complexity and lower developing performance as a side effect.
 
-
-
+[Not finished yet]
 
 = Details =
 
