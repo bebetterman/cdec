@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include "../../../test_support.h"
+#include "../../test_support.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -81,6 +81,7 @@ public:
 
 	void testAtomReadStream()
 	{
+#ifndef X_OS_WINDOWS
 		stringx sampleFile = TestEnv::get_sample_path(__X("txtr_samp_1.txt"));
 		ref<FileStream> pStrm = gc_new<FileStream>(sampleFile, FileStream::AccessRead, false);
 		INT64 length = pStrm->Length();
@@ -97,10 +98,12 @@ public:
 			//printf("c=%c\n",c[i]);
 			UNITTEST_ASSERT(*(BYTE *)buf==c[i]);
 		}
+#endif
 	}
 
 	void testAtomWriteStream()
 	{
+#ifndef X_OS_WINDOWS
 		stringx sampleFile = TestEnv::get_sample_path(__X("txtw_samp_AtomWrite.txt"));
 		File::Delete(sampleFile);
 		ref<FileStream> pStrm = gc_new<FileStream>(sampleFile, FileStream::AccessWrite, true);
@@ -133,6 +136,7 @@ public:
 
 		UNITTEST_ASSERT(File::Exists(sampleFile));
 		UNITTEST_ASSERT(File::Delete(sampleFile));
+#endif
 	}
 
 	void testSeekStream()
