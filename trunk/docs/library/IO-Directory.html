@@ -1,0 +1,39 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+<meta content="zh-cn" http-equiv="Content-Language" />
+<title>Directory Class</title>
+<link href="../main.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+
+<h1>Directory Class (Core/IO)</h1>
+<p>Directory 类是一个静态类，用于对目录进行整体性操作。</p>
+<h2>Methods</h2>
+<p class="declaration">static bool Exists(stringx path)</p>
+<p>判断目标目录是否存在。</p>
+<p>如果目标路径是一个有效的文件，此函数返回 false。</p>
+<p class="declaration">static void Create(stringx path)</p>
+<p>创建目标目录。</p>
+<p>如果目标路径是一个有效目录，此函数不会抛出异常。</p>
+<p class="declaration">static void Delete(stringx path)</p>
+<p>删除目标目录。</p>
+<p>如果目标目录包含文件或子目录，此函数将抛出 IOException 异常。</p>
+<p class="declaration">static void Move(stringx pathOld, stringx pathNew)</p>
+<p>将文件移动（改名）到目标路径。</p>
+<p>如果两个路径不在同一个卷上，将抛出 IOException 异常。</p>
+<p class="declaration">ref&lt;StringVector&gt; GetDirectories(stringx path)</p>
+<p>枚举指定目录下的所有子目录名。</p>
+<p class="declaration">ref&lt;StringVector&gt; GetFiles(stringx path)</p>
+<p>枚举指定目录下的所有文件名。</p>
+<p class="declaration">ref&lt;StringVector&gt; GetFileSystemEntries(stringx path)</p>
+<p>枚举指定目录下所有文件和子目录名。</p>
+<hr />
+<p><a href="index.html">C-- Library Reference</a></p>
+
+</body>
+
+</html>

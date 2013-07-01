@@ -1,0 +1,84 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+<meta content="zh-cn" http-equiv="Content-Language" />
+<title>C--参考手册：数值操作函数</title>
+<link href="../main.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+
+<h1>数值操作函数</h1>
+<h2>综述</h2>
+<p>数值操作函数提供了一组常用的数值操作实现，并且经过一些优化，使用它们可以简化代码编写。</p>
+<p>数值操作函数通常支持多种数值类型，它包含如下几种情况。</p>
+<p>UINT64 支持。该方法包含两个版本，以 GetBitCount 为例，GetBitCount 用于 UINT32 参数，而 GetBitCount64 
+用于 UINT64 参数。</p>
+<p>泛整型支持。该方法包含三个版本，以 SetBit 为例，SetBit 用于 UINT32 参数，SetBit64 用于 UINT64 参数，SetBitX 
+则是一个模版方法，但只期望用于整数类型。</p>
+<h2>逻辑异或</h2>
+<p>C++ 操作符 ^ 是位异或操作，以下函数提供对应逻辑操作：</p>
+<ul>
+	<li>LOGXOR 逻辑异或，当两个参数都为真或都为假时，结果为假；否则结果为真</li>
+	<li>LOGEOR 逻辑同或，与上规则相反</li>
+</ul>
+<p>示例：LOGXOR(2&gt;1, 1+1==2) 返回 true。</p>
+<h2>位设置操作</h2>
+<p>包含如下函数（泛整型支持）。</p>
+<ul>
+	<li>void SetBit(T&amp; value, T mask) 将给定屏蔽位全部置为 1</li>
+	<li>void SetBit(T&amp; value, T mask, bool f) 将给定屏蔽位全部置为指定值</li>
+	<li>void ClearBits(T&amp; value, T mask) 将给定屏蔽位全部置为 0</li>
+	<li>T GetMaskBits(T value, T mask) 获取给定屏蔽位的值</li>
+	<li>SetMaskBits(T value, T mask, T mask_value) 将给定屏蔽位设置为 mask_value 的值</li>
+	<li>bool IsBitsUsed(T&amp; value, T mask) 获取给定屏蔽位是否有至少一位为 1。</li>
+	<li>void UpdateBitAccording(T&amp; value, T value_mask, T refer, T 
+	refer_mask)</li>
+	<li>bool IsBitIdentical(T value1, T value2, T mask)</li>
+</ul>
+<p>其中，SetBit 1 和 ClearBits 可以使用 SetBit 2 来实现。IsBitsUsed 可以使用 GetMaskBits 来实现。</p>
+<p>注意 GetMaskBits / SetMaskBits 其操作方式是和屏蔽位对应的，例如：<br />
+GetMaskBits(11100100, 110011) =&gt; 100000<br />
+SetMaskBits(11100100, 110011, <span lang="ja">00</span>1111) =&gt;<span lang="ja"> 
+11000011<br />
+</span>为便于理解，以上示例采用 2 进制表示方式。</p>
+<p>UpdateBitAccording 的作用如下，当 refer 的 refer_mask 位为 1 或 0 时，将 value 的 value_mask 
+位改为 1 或 0。例如：<br />
+value = 0000, value_mask = 1000, refer = 1111, refer_mask = 0001，则结果为 value = 
+1000。</p>
+<h2>位转换函数</h2>
+<p>包含如下函数。</p>
+<ul>
+	<li>int GetHighTrueBit(UINT value)<br />
+	获取从高位开始第一个为 1 的位，如果所有位都为 0，返回 0</li>
+	<li>int GetLowTrueBit(UINT value)<br />
+	获取从低位开始第一个为 1 的位，如果所有位都为 0，返回 31</li>
+	<li>int GetHighFalseBit(UINT value)<br />
+	获取从高位开始第一个为 0 的位，如果所有位都为 1，返回 0</li>
+	<li>int GetLowFalseBit(UINT value)<br />
+	获取从低位开始第一个为 0 的位，如果所有位都为 1，返回 31</li>
+	<li>UINT GetBitCount(UINT value)<br />
+	返回二进制值中为 1 的位的个数</li>
+	<li>UINT GetBitMask(int i)<br />
+	返回第 i 位的 mask 值，例如，第 3 位的 mask 值为 8</li>
+	<li>UINT GetAccuHigh(int i)<br />
+	返回低 i 位为 1，其余高位为 0 的值，例如 i 为 6 时返回 0x3F</li>
+	<li>UINT GetAccuLow(int i)<br />
+	返回高 i 位为 1，其余低位为 0 的值，例如 i 为 6 时返回 0xFC000000</li>
+</ul>
+<h2>其他计算函数</h2>
+<p>包含如下函数：</p>
+<ul>
+	<li>UINT AlignmentN(UINT value, UINT n)<br />
+	返回大于等于 value 的 n 的最小整数倍值</li>
+	<li>UINT Alignment2(UINT value, UINT n)<br />
+	类似 AlignmentN，但 n 必须是 2 的整数次幂</li>
+</ul>
+<hr />
+<p><a href="index.html">C-- Quick Manual</a></p>
+
+</body>
+
+</html>

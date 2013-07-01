@@ -1,0 +1,527 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+<meta http-equiv="Content-Language" content="zh-cn" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>2008-5-15 C-- 引用对象系统</title>
+<link rel="stylesheet" type="text/css" href="../main.css" />
+<style type="text/css">
+.style1 {
+	color: #FF0000;
+}
+.style2 {
+	color: #008000;
+}
+</style>
+</head>
+
+<body>
+
+<h1>2008-5-15 C-- 引用对象系统</h1>
+<p>现在开始做 C-- 的实现，首先是引用对象系统。我们倾向于使用统一的 ref 引用方式来控制对象的生命周期，并且提供 GC 的能力。</p>
+<h2>Object 对象基类</h2>
+<p>我们约定，（除 COM 实现类外）所有类均继承自 Object，包括接口。如果一个类有基类，那么它就已经隐含地继承自 
+Object，不应该再重复继承一次。例如：</p>
+<p class="code">class CA: public Object;<br />
+interface ISample: Object;<br />
+class CSample: ISample;<br />
+class CComplex: CA, CSample;</p>
+<p>使用 ref 引用的类通过引用计数来完成基础的生命周期控制，引用计数通过来自基类 Object 定义的纯虚方法完成。</p>
+<p class="code">virtual UINT AddRef() = 0;<br />
+virtual UINT Release() = 0;</p>
+<p>最简单的，我们可以在最终实现类上实现此方法。定义宏：</p>
+<p class="code">#define DECLARE_REF_CLASS(type) \<br />
+protected: \<br />
+&nbsp;&nbsp;&nbsp; RefCounter _ref; \<br />
+public: \<br />
+&nbsp;&nbsp;&nbsp; UINT AddRef() { return ++_ref; } \<br />
+&nbsp;&nbsp;&nbsp; UINT Release() { \<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if (--_ref == 0) { \<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; GcCreation&lt;type &gt;::DestroyInstance(this); 
+\<br />
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; return 0; \<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; } \<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; return _ref; \<br />
+&nbsp;&nbsp;&nbsp;
+}</p>
+<p>其中，RefCounter 是一个简单对象，它的存在是为了初始化引用计数值。</p>
+<p class="code">struct RefCounter<br />
+{<br />
+&nbsp;&nbsp;&nbsp; int _value;<br />
+&nbsp;&nbsp;&nbsp; RefCounter(): _value(1) {}<br />
+&nbsp;&nbsp;&nbsp; UINT operator++() { return ++_value; }<br />
+&nbsp;&nbsp;&nbsp; UINT operator--() { return --_value; }<br />
+&nbsp;&nbsp;&nbsp; operator UINT() const { return _value; }<br />
+};</p>
+<p>这样，在最终类中，使用宏 DECLARE_REF_CLASS，就可以加上引用计数特性。例如：</p>
+<p class="code">class CSample: public Object<br />
+{<br />
+&nbsp;&nbsp;&nbsp; DECLARE_REF_CLASS(CSample)<br />
+&nbsp;&nbsp;&nbsp; &lt;&lt; 类的其他内容 &gt;&gt;<br />
+};</p>
+<p>这里有一个问题，假设有两个类 CA, CB，CB 继承自 CA。那么，在 CB 
+的实体中将会有两份引用计数成员变量存在，虽然不会引起问题（虚函数可以正确处理），但是会造成一个 DWORD 的内存浪费。后文将探讨一种解决办法。</p>
+<h2>ref 引用类</h2>
+<p>ref 本质上是一个智能指针，其基础实现如下：</p>
+<p class="code">template&lt;class _Ty&gt;<br />
+class ref<br />
+{<br />
+protected:<br />
+&nbsp;&nbsp;&nbsp; _Ty* _ptr;<br />
+<br />
+&nbsp;&nbsp;&nbsp; void _assign(_Ty* p) {<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if (p != NULL) p-&gt;AddRef();<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if (_ptr != NULL) _ptr-&gt;Release();<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; _ptr = p;<br />
+&nbsp;&nbsp;&nbsp; }<br />
+&nbsp;&nbsp;&nbsp; void _clear() {<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if (_ptr != NULL) {<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; _ptr-&gt;Release();<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; _ptr = NULL;<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }<br />
+&nbsp;&nbsp;&nbsp; }<br />
+<br />
+public:<br />
+&nbsp;&nbsp;&nbsp; ref(): _ptr(NULL) {}<br />
+&nbsp;&nbsp;&nbsp; ref(const ref&lt;_Ty&gt;&amp; r): _ptr(NULL) { _assign(r._ptr); }<br />
+&nbsp;&nbsp;&nbsp; ~ref() { _clear(); }<br />
+<br />
+&nbsp;&nbsp;&nbsp; bool operator==(const ref&lt;_Ty&gt;&amp; r) const { return _ptr == 
+r._ptr; }<br />
+&nbsp;&nbsp;&nbsp; bool operator!=(const ref&lt;_Ty&gt;&amp; r) const { return _ptr != 
+r._ptr; }<br />
+<br />
+&nbsp;&nbsp;&nbsp; bool operator==(_Ty* _null) const { ASSERT(_null == 0); 
+return _ptr == _null; };<br />
+&nbsp;&nbsp;&nbsp; bool operator!=(_Ty* _null) const { ASSERT(_null == 0); 
+return _ptr != _null; };<br />
+<br />
+&nbsp;&nbsp;&nbsp; ref&lt;_Ty&gt;&amp; operator=(const ref&lt;_Ty&gt;&amp; r) {<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; _assign(r._ptr);<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; return *this;<br />
+&nbsp;&nbsp;&nbsp; }<br />
+&nbsp;&nbsp;&nbsp; ref&lt;_Ty&gt;&amp; operator=(_Ty* _null) {<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ASSERT(_null == NULL);<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; _assign(_null);<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; return *this;<br />
+&nbsp;&nbsp;&nbsp; }<br />
+<br />
+&nbsp;&nbsp;&nbsp; _Ty* operator-&gt;() const { return _ptr; }<br />
+};</p>
+<p>其中，== 和 = 操作符都有接收普通指针的版本，它仅仅用于空指针（NULL）场合。</p>
+<p>在解引用上，ref 类只提供了 -&gt; 操作符，亦即，我们只期望使用如下的方式来使用一个实例的能力：</p>
+<p class="code">ref&lt;CSample&gt; s;<br />
+s-&gt;foo();</p>
+<p>而不希望实例的指针被轻易取出来，用于构造不安全代码（除非使用显式的互操作特性）。</p>
+<h2>gc_new 操作符</h2>
+<p>一个令人兴奋的挑战来自 gc_new 的设定，我们希望它使用起来能和 new 操作符类似。例如：</p>
+<p class="code">ref&lt;CSample&gt; s = gc_new CSample(&quot;Hello&quot;);</p>
+<p>这里包含两个很重要的细节：1 分配语法的细节，2 参数构造函数的支持。</p>
+<p>要支持 new 操作符风格的语法，从 C++ 标准语法上来说，推荐通过 new 的某种重载方式实现。例如：</p>
+<p class="code">#define gc_new new(_gc_new)</p>
+<p>其中，_gc_new 是一个枚举，为了在函数重载上进行区分。</p>
+<p>不幸的是，这样子会有问题。在很多调试支持代码中（包括 KFC），都会在 CPP 文件的开头定义这样一个宏：</p>
+<p class="code">#define new DEBUG_NEW</p>
+<p>而 DEBUG_NEW 也用到了上述的写法，例如：</p>
+<p class="code">#define DEBUG_NEW new(__FILE__, __LINE__)</p>
+<p>这样子，gc_new 展开会变成如下情况：</p>
+<p class="code">gc_new CSample ==&gt; new(__FILE__, __LINE__)(_gc_new) CSample</p>
+<p>这件产生令人沮丧的错误。而且，我们也不能要求在每一个需要创建对象的 CPP 中，屏蔽 DEBUG_NEW 调试能力。</p>
+<p>因此，最后考虑，将创建语法略加改动，类似如下的样子：</p>
+<p class="code">ref&lt;CSample&gt; s = gc_new&lt;CSample&gt;(&quot;Hello&quot;);</p>
+<p>此时，gc_new 实现为一个模板函数，后文详述其具体实现。</p>
+<h2>gc_new 细节：引用计数控制</h2>
+<p>这里我们先处理 gc_new 的第一个细节，引用计数控制。由于 ref 
+类（和其他智能指针一样）会在接收到一个指针时，进行增加引用操作。考虑如下的代码，它会引起内存泄漏：</p>
+<p class="code">CComPtr sp = new ComSampleClass();</p>
+<p>因为在创建时，引用计数缺省为 1，智能指针 sp 将其增加到 2。但是智能指针在析构时，只负责解除自己增加的一次引用，因此造成了对象无法释放。</p>
+<p>如果使用如下的语法可以解决问题：</p>
+<p class="code">ref&lt;CSample&gt; s;<br />
+gc_new&lt;CSample&gt;(s, &quot;Hello&quot;);</p>
+<p>但是感觉怪怪的。因为作为接受者的智能指针和构造函数参数混在了一起。</p>
+<p>不过上述方法确实可以解决问题，因此我们可以考虑将其隐藏在实现中。即：gc_new 直接返回一个 ref 引用，而这个临时对象构造时，不对引用计数加 1。</p>
+<p>我们需要对 ref 做如下修改：</p>
+<p class="code">enum gc_create_signature { _gc_create_signature };<br />
+<br />
+template&lt;class _Ty&gt; class ref {<br />
+&nbsp;&nbsp;&nbsp; ref(_Ty* p, gc_create_signature): _ptr(p) {}<br />
+&nbsp;&nbsp;&nbsp; ...<br />
+};</p>
+<p>这个特殊的构造函数，仅用于 gc_new。然后，我们可以写出 gc_new 的实现：</p>
+<p class="code">template&lt;class _Ty, class _Arg1&gt;<br />
+inline ref&lt;_Ty&gt; gc_new(_Arg1 arg1)<br />
+{<br />
+&nbsp;&nbsp;&nbsp; _Ty* p = GcCreation&lt;_Ty&gt;::AllocInstanceMemory();<br />
+&nbsp;&nbsp;&nbsp; new(p) _Ty(arg1);<br />
+&nbsp;&nbsp;&nbsp; return ref&lt;_Ty&gt;(p, _gc_create_signature);<br />
+}</p>
+<p><em><strong>注：这个实现在 VC6 下可能带来一个 Bug，后文详述。</strong></em></p>
+<p>它用到了 GcCreation 类，这是一个分配释放的辅助类。如下：</p>
+<p class="code">template&lt;class _Ty&gt;<br />
+struct GcCreation {<br />
+&nbsp;&nbsp;&nbsp; inline static _Ty* AllocInstanceMemory() {<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; return (_Ty*)AlgAlloc2(sizeof(_Ty));<br />
+&nbsp;&nbsp;&nbsp; }<br />
+&nbsp;&nbsp;&nbsp; inline static void FreeInstanceMemory(_Ty* p) {<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; AlgFree2(p, sizeof(_Ty));<br />
+&nbsp;&nbsp;&nbsp; }<br />
+&nbsp;&nbsp;&nbsp; inline static void DestroyInstance(_Ty* p) {<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ASSERT(p != NULL);<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; p-&gt;~_Ty();<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; FreeInstanceMemory(p);<br />
+&nbsp;&nbsp;&nbsp; }<br />
+};</p>
+<p>这里使用的，都是一些成熟技巧，不再说明。其中，内存分配和释放部分使用了效率较高的 Memfix 服务。</p>
+<p>虽然这个 gc_new 函数有两个模板参数，但是在调用时，可以只给出前一部分，剩余的编译器会自动推导。</p>
+<h2>gc_new 细节：带参数的构造</h2>
+<p>上述实现支持带有一个参数的构造函数，但是构造函数的数目并不总是相同。我们通过模板函数重载来实现这个效果。如下：</p>
+<p class="code">template&lt;class _Ty&gt;<br />
+inline ref&lt;_Ty&gt; gc_new() {<br />
+&nbsp;&nbsp;&nbsp; ...<br />
+&nbsp;&nbsp;&nbsp; new(p) _Ty();<br />
+&nbsp;&nbsp;&nbsp; ...<br />
+}<br />
+<br />
+template&lt;class _Ty, class _Arg1&gt;<br />
+inline ref&lt;_Ty&gt; gc_new(_Arg1 arg1)<br />
+{<br />
+&nbsp;&nbsp;&nbsp; ...<br />
+&nbsp;&nbsp;&nbsp; new(p) _Ty(arg1);<br />
+&nbsp;&nbsp;&nbsp; ...<br />
+}<br />
+<br />
+template&lt;class _Ty, class _Arg1, class _Arg2&gt;<br />
+inline ref&lt;_Ty&gt; gc_new(_Arg1 arg1, _Arg2 arg2)<br />
+{<br />
+&nbsp;&nbsp;&nbsp; ...<br />
+&nbsp;&nbsp;&nbsp; new(p) _Ty(arg1, arg2);<br />
+&nbsp;&nbsp;&nbsp; ...<br />
+}<br />
+<br />
+template&lt;class _Ty, class _Arg1, class _Arg2, class _Arg3&gt;<br />
+inline ref&lt;_Ty&gt; gc_new(_Arg1 arg1, _Arg2 arg2, _Arg3 arg3)<br />
+{<br />
+&nbsp;&nbsp;&nbsp; ...<br />
+&nbsp;&nbsp;&nbsp; new(p) _Ty(arg1, arg2, arg3);<br />
+&nbsp;&nbsp;&nbsp; ...<br />
+}<br />
+<br />
+... // 更多的参数支持，只要需要</p>
+<p>这种做法虽然不太美，但能解决问题。</p>
+<h2>gc_new 细节：VC 6 下的 Bug</h2>
+<p>我们尝试分别在 VC 6 和 VC 8（VS 2005）下运行一段相同的代码：</p>
+<p class="code">template&lt;class _Ty, class _Arg1&gt;<br />
+void foo(_Arg1 arg1)<br />
+{<br />
+&nbsp;&nbsp;&nbsp; printf(&quot;foo(%ld, %ld)\n&quot;, sizeof(_Ty), arg1);<br />
+}<br />
+<br />
+struct CA { int a; };<br />
+struct CB { int a, b; };<br />
+<br />
+int main()<br />
+{<br />
+&nbsp;&nbsp;&nbsp; foo&lt;CA&gt;(1);<br />
+&nbsp;&nbsp;&nbsp; foo&lt;CB&gt;(1);<br />
+<br />
+&nbsp;&nbsp;&nbsp; return 0;<br />
+}</p>
+<p>VC 8 的返回是：</p>
+<p class="syntax">foo(4, 1)<br />
+foo(8, 1)</p>
+<p>而 VC 6 的返回是：</p>
+<p class="syntax">foo(<span class="style1">8</span>, 1)<br />
+foo(8, 1)</p>
+<p>这是因为 VC 6 下处理函数重载时，仅仅是按照函数参数判断的。而类型 _Ty 并没有体现在函数参数中，因此 VC 6 
+为两次调用决议（Resolve）到同一个函数实现上，因而引发错误。</p>
+<p>注：gcc 3, gcc 4 上测试的结果均与 VC 8 相同。</p>
+<p>这个似乎可以算作编译器的责任，但是目前不得不找个途径绕开。要模拟一个函数的行为，可以使用构造函数来实现。如下：</p>
+<p class="code">template&lt;class _Ty&gt;<br />
+class gc_new: public ref&lt;_Ty&gt;<br />
+{<br />
+public:<br />
+&nbsp;&nbsp;&nbsp; template&lt;class _Arg1, class _Arg2, class _Arg3&gt;<br />
+&nbsp;&nbsp;&nbsp; gc_new(_Arg1 arg1, _Arg2 arg2, _Arg3 arg3) {<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; _ptr = GcCreation&lt;_Ty&gt;::AllocInstanceMemory();<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; new(_ptr) _Ty(arg1, arg2, arg3);<br />
+&nbsp;&nbsp;&nbsp; }<br />
+<br />
+&nbsp;&nbsp;&nbsp; template&lt;class _Arg1, class _Arg2&gt;<br />
+&nbsp;&nbsp;&nbsp; gc_new(_Arg1 arg1, _Arg2 arg2) {<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; _ptr = GcCreation&lt;_Ty&gt;::AllocInstanceMemory();<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; new(_ptr) _Ty(arg1, arg2);<br />
+&nbsp;&nbsp;&nbsp; }<br />
+<br />
+&nbsp;&nbsp;&nbsp; template&lt;class _Arg1&gt;<br />
+&nbsp;&nbsp;&nbsp; gc_new(_Arg1 arg1) {<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; _ptr = GcCreation&lt;_Ty&gt;::AllocInstanceMemory();<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; new(_ptr) _Ty(arg1);<br />
+&nbsp;&nbsp;&nbsp; }<br />
+<br />
+&nbsp;&nbsp;&nbsp; gc_new() {<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; _ptr = GcCreation&lt;_Ty&gt;::AllocInstanceMemory();<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; new(_ptr) _Ty();<br />
+&nbsp;&nbsp;&nbsp; }<br />
+};</p>
+<p>这样子，原先为 gc_new 而加的 gc_create_signature 枚举和接受此枚举的 ref 类特殊构造函数就不再需要了。</p>
+<p>这个实现带来一个副作用写法：</p>
+<p class="code">gc_new&lt;CA&gt; o;</p>
+<p>它看起来非常怪异，在语法层次上我们不能阻止这样写，但只要我们的程序员主动回避就可以了，不值得为此付出太大代价。</p>
+<h2>ref_cast 操作符</h2>
+<p>我们希望在类型转换时使用 ref_cast （伪）操作符的方式。例如：</p>
+<p class="code">ref&lt;CA&gt; a = ...;<br />
+ref&lt;CB&gt; b = ref_cast&lt;CA&gt;(a);</p>
+<p>这也比较符合 C++ 的语法特征。</p>
+<p>实现这个（伪）操作符的技巧和 gc_new 类似，它同样是一个 ref 的继承类。</p>
+<p class="code">template&lt;class _Ty&gt;<br />
+class ref_cast: public ref&lt;_Ty&gt;<br />
+{<br />
+public:<br />
+&nbsp;&nbsp;&nbsp; template&lt;class _U&gt;<br />
+&nbsp;&nbsp;&nbsp; ref_cast(const ref&lt;_U&gt;&amp; r) {<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; _assign(static_cast&lt;_Ty*&gt;(r.__GetPointer()));<br />
+&nbsp;&nbsp;&nbsp; }<br />
+};</p>
+<p>这要求 ref 类提供一个特殊的函数，用于取出另一个 ref 实例（并且模板参数不同）里保存的指针。</p>
+<p class="code">template&lt;class _Ty&gt;<br />
+class ref {<br />
+&nbsp;&nbsp;&nbsp; ... // 其他实现<br />
+&nbsp;&nbsp;&nbsp; _Ty* __GetPointer() const { return _ptr; }<br />
+};</p>
+<p>请不要在其他代码中使用这个函数。</p>
+<p>需要注意的是，这里实际调用的转换操作符是 static_cast，这是因为从以往的时间看来，一个良好设计的系统是不需要 dynamic_cast 
+的，而静态转换同时也提供更好的性能。另外，考虑到 C-- 设计的初衷（代码安全性），我们决定不提供与 reinterpret_cast 类似的能力。</p>
+<h2>隐式类型转换</h2>
+<p>在 C++ 中，从派生类到基类可以执行隐式转换。这意味着，我们也希望在语法中支持如下的调用：</p>
+<p class="code">interface ISample: Object { ... };<br />
+class CSample: public ISample { ... };<br />
+<br />
+{<br />
+&nbsp;&nbsp;&nbsp; ref&lt;CSample&gt; cs = ...;<br />
+&nbsp;&nbsp;&nbsp; ref&lt;ISample&gt; is = cs;<br />
+}</p>
+<p>执行隐式转换即要求 ref 接收来自另一个模板参数的实例，这包括构造函数和 = 操作符。例如，我们提供如下的构造函数：</p>
+<p class="code">template&lt;class _Ty&gt;<br />
+class ref<br />
+{<br />
+&nbsp;&nbsp;&nbsp; ...<br />
+&nbsp;&nbsp;&nbsp; // 隐式类型转换<br />
+&nbsp;&nbsp;&nbsp; template&lt;class _U&gt;<br />
+&nbsp;&nbsp;&nbsp; ref(const ref&lt;_U&gt;&amp; r): _ptr(NULL) {<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; _assign(r.__GetPointer());<br />
+&nbsp;&nbsp;&nbsp; }<br />
+&nbsp;&nbsp;&nbsp; ...<br />
+};</p>
+<p>在 VC 6 中，要求 ref 类还必须有复制构造（接受 const ref&lt;_Ty&gt;&amp; 
+的构造函数），它实际上是这个模板函数的一个特化，并且必须放在这个模板函数的后面。如果没有定义，则同类型复制时，将采用 Bit-Copy 
+而不是调用构造函数（因而，导致引用计数错误）；如果定义在模板版本之前，则产生编译错误。VC 8 也要求显式定义复制构造，但是不要求函数定义顺序。</p>
+<p>同样的，operator = 也需要同时有一个范型版本和一个本类型特化版本，并且要保持顺序，原因同上。</p>
+<p>另外，我们还可以支持如下的类型转换写法：</p>
+<p class="code">ref&lt;CA&gt; a = ...;<br />
+ref&lt;CB&gt; b = (ref&lt;CB&gt;)a;</p>
+<p>理论上，它可以用类型转换操作符实现。但是，我们不鼓励使用 C 风格的类型转换，因此在 C-- 实现中不提供这个能力。</p>
+<h2>weak_ref 弱引用类</h2>
+<p>由于 ref 引用会锁住引用计数，因此如果两个对象都有对于对方的引用，则会产生循环引用。在没有 GC 
+循环探测的情况下，会导致两个对象，以及它们直接或间接引用的其他所有对象，都不能被释放。即使有 GC 循环探测，也会导致对象释放时间的延后。</p>
+<p>这种情况的一个典型案例是父子对象的相互引用，例如，在一个表格软件实现中，Book 对象需要管理所有的 Sheet 对象，而 Sheet 也可能需要访问 
+Book 的一些能力。由于生命周期模型非常清晰（即，在 OMC 类图中，呈现一个毫无争议的单向管理关系），可以让 Sheet 对象采用弱引用的方式引用父 
+Book 对象。</p>
+<p>弱引用类 weak_ref 用于这种场合，它代表对目标类的引用，但是不影响被引用对象的生命周期。weak_ref 和 ref 
+之间可以任意转换，为了实现这一点，我们让 weak_ref 成为 ref 的基类。</p>
+<p class="code">template&lt;class _Ty&gt;<br />
+class weak_ref<br />
+{<br />
+protected:<br />
+&nbsp;&nbsp;&nbsp; _Ty* _ptr;<br />
+<br />
+public:<br />
+&nbsp;&nbsp;&nbsp; // 默认构造<br />
+&nbsp;&nbsp;&nbsp; weak_ref(): _ptr(NULL) {}<br />
+&nbsp;&nbsp;&nbsp; // 隐式类型转换<br />
+&nbsp;&nbsp;&nbsp; template&lt;class _U&gt;<br />
+&nbsp;&nbsp;&nbsp; weak_ref(const weak_ref&lt;_U&gt;&amp; r): _ptr(r.__GetPointer()) {}<br />
+&nbsp;&nbsp;&nbsp; // 复制构造必须在上一个方法后面<br />
+&nbsp;&nbsp;&nbsp; weak_ref(const weak_ref&lt;_Ty&gt;&amp; r): _ptr(r._ptr) {}<br />
+&nbsp;&nbsp;&nbsp; // 析构函数<br />
+&nbsp;&nbsp;&nbsp; ~weak_ref() { _ptr = NULL; }<br />
+<br />
+&nbsp;&nbsp;&nbsp; // 引用比较函数<br />
+&nbsp;&nbsp;&nbsp; bool operator==(const weak_ref&lt;_Ty&gt;&amp; r) const { return _ptr 
+== r._ptr; }<br />
+&nbsp;&nbsp;&nbsp; bool operator!=(const weak_ref&lt;_Ty&gt;&amp; r) const { return _ptr 
+!= r._ptr; }<br />
+&nbsp;&nbsp;&nbsp; // 引用比较函数（指针只期望是 NULL）<br />
+&nbsp;&nbsp;&nbsp; bool operator==(_Ty* _null) const { ASSERT(_null == 0); 
+return _ptr == _null; };<br />
+&nbsp;&nbsp;&nbsp; bool operator!=(_Ty* _null) const { ASSERT(_null == 0); 
+return _ptr != _null; };<br />
+<br />
+&nbsp;&nbsp;&nbsp; // 赋值操作符<br />
+&nbsp;&nbsp;&nbsp; template&lt;class _U&gt;<br />
+&nbsp;&nbsp;&nbsp; weak_ref&lt;_Ty&gt;&amp; operator=(const weak_ref&lt;_U&gt;&amp; r) { _ptr = 
+r.__GetPointer(); return *this; }<br />
+&nbsp;&nbsp;&nbsp; weak_ref&lt;_Ty&gt;&amp; operator=(const weak_ref&lt;_Ty&gt;&amp; r) { _ptr = 
+r._ptr; return *this; }<br />
+&nbsp;&nbsp;&nbsp; weak_ref&lt;_Ty&gt;&amp; operator=(_Ty* _null) { ASSERT(_null == NULL); 
+_ptr = _null; return *this; }<br />
+<br />
+&nbsp;&nbsp;&nbsp; // 解引用<br />
+&nbsp;&nbsp;&nbsp; _Ty* operator-&gt;() const { return _ptr; }<br />
+<br />
+&nbsp;&nbsp;&nbsp; // 内部使用，请不要使用此方法<br />
+&nbsp;&nbsp;&nbsp; _Ty* __GetPointer() const { return _ptr; }<br />
+&nbsp;&nbsp;&nbsp; // 禁止取地址<br />
+&nbsp;&nbsp;&nbsp; void operator* () {}<br />
+};<br />
+<br />
+template&lt;class _Ty&gt;<br />
+class ref: public weak_ref&lt;_Ty&gt;<br />
+{<br />
+protected:<br />
+&nbsp;&nbsp;&nbsp; void _assign(_Ty* p) {<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if (p != NULL) p-&gt;AddRef();<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if (_ptr != NULL) _ptr-&gt;Release();<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; _ptr = p;<br />
+&nbsp;&nbsp;&nbsp; }<br />
+&nbsp;&nbsp;&nbsp; void _clear() {<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if (_ptr != NULL) { _ptr-&gt;Release(); 
+_ptr = NULL; }<br />
+&nbsp;&nbsp;&nbsp; }<br />
+public:<br />
+&nbsp;&nbsp;&nbsp; // 默认构造<br />
+&nbsp;&nbsp;&nbsp; ref() {}<br />
+&nbsp;&nbsp;&nbsp; // 隐式类型转换<br />
+&nbsp;&nbsp;&nbsp; template&lt;class _U&gt;<br />
+&nbsp;&nbsp;&nbsp; ref(const weak_ref&lt;_U&gt;&amp; r) { _assign(r.__GetPointer()); }<br />
+&nbsp;&nbsp;&nbsp; // 复制构造必须在上一个方法后面<br />
+&nbsp;&nbsp;&nbsp; ref(const ref&lt;_Ty&gt;&amp; r) { _assign(r._ptr); }<br />
+&nbsp;&nbsp;&nbsp; // 析构函数<br />
+&nbsp;&nbsp;&nbsp; ~ref() { _clear(); }<br />
+<br />
+&nbsp;&nbsp;&nbsp; // 赋值操作符<br />
+&nbsp;&nbsp;&nbsp; template&lt;class _U&gt;<br />
+&nbsp;&nbsp;&nbsp; ref&lt;_Ty&gt;&amp; operator=(const weak_ref&lt;_U&gt;&amp; r) { _assign(r.__GetPointer()); 
+return *this; }<br />
+&nbsp;&nbsp;&nbsp; ref&lt;_Ty&gt;&amp; operator=(const ref&lt;_Ty&gt;&amp; r) { _assign(r._ptr); 
+return *this; }<br />
+&nbsp;&nbsp;&nbsp; ref&lt;_Ty&gt;&amp; operator=(_Ty* _null) { ASSERT(_null == NULL); 
+_assign(_null); return *this; }<br />
+};</p>
+<p>同时，ref_cast 也要做一点小修改：</p>
+<p class="code">template&lt;class _Ty&gt;<br />
+class ref_cast: public ref&lt;_Ty&gt;<br />
+{<br />
+public:<br />
+&nbsp;&nbsp;&nbsp; template&lt;class _U&gt;<br />
+&nbsp;&nbsp;&nbsp; ref_cast(const <span class="style1">weak_ref</span>&lt;_U&gt;&amp; r) { 
+... }<br />
+};</p>
+<p>这样修改后，ref_cast 也适用于弱引用类，虽然引用计数会颠簸一下，但是不影响结果。例如：</p>
+<p class="code">ref&lt;CA&gt; a = ...;<br />
+weak_ref&lt;CB&gt; b = ref_cast&lt;CB&gt;(a);<br />
+ref&lt;CA&gt; c = ref_cast&lt;CA&gt;(b);</p>
+<p>理论上，weak_ref 也可以接受 gc_new 的结果，不过由于锁不住创建的对象（由于没有增加引用计数），这样做是没有意义的。</p>
+<h2>null_ref 空引用（不引入）</h2>
+<p>在 weak_ref / ref 的方法中，有一些接受 _Ty* 参数，它们实际上仅仅期望 NULL 指针。为了避免被误用，我们可以定义 null_ref 
+空引用常量，来表示一个空的引用。</p>
+<p class="code">struct _null_ref<br />
+{<br />
+&nbsp;&nbsp;&nbsp; void* _ptr;<br />
+&nbsp;&nbsp;&nbsp; _null_ref(): _ptr(NULL) {}<br />
+};<br />
+const _null_ref null_ref;</p>
+<p>然后，修改与指针相关的代码，使它们接受 _null_ref 类型而不是 _Ty*。这包括：构造函数、操作符 =, ==, !=。</p>
+<p>虽然代码可以正常工作，但是由于可以很容易检查指针是否为 NULL。使用 null_ref 
+不仅带来了更大的复杂度（造成编译器负担），而且新的关键字也造成开发人员负担，因此<strong>最后决定不引用</strong>。</p>
+<h2>多余的 RefCounter 实例</h2>
+<p>前文提到，假设类 CB 继承 CA，并且均为可创建类。那么，在 CB 的对象模型中，有两个 RefCounter，一个来自 CA 
+部分数据，并且不被使用。这造成了一定的浪费。</p>
+<p>然而，如果将 RefCounter 定义在 Object 基类中，一个典型的菱形继承将会导致访问的二义性，这也是非常讨厌的事情。</p>
+<p>如果采用外部包装类，我们又遇到另一个问题，就是要支持可变参数的构造函数。虽然我们可以在外部包装类里面采用和 gc_new 类似的技巧，形如：</p>
+<p class="code"><span class="style2">template&lt;class _Ty&gt;<br />
+class ObjectWrapper: public _Ty<br />
+{<br />
+protected:<br />
+&nbsp;&nbsp;&nbsp; RefCounter _ref;<br />
+public:<br />
+&nbsp;&nbsp;&nbsp; ObjectWrapper(): _Ty() {}<br />
+&nbsp;&nbsp;&nbsp; template&lt;class _Arg1&gt;<br />
+&nbsp;&nbsp;&nbsp; ObjectWrapper(_Arg1 arg1): _Ty(arg1) {}<br />
+&nbsp;&nbsp;&nbsp; template&lt;class _Arg1, class _Arg2&gt;<br />
+&nbsp;&nbsp;&nbsp; ObjectWrapper(_Arg1 arg1, _Arg2 arg2): _Ty(arg1, arg2) {}<br />
+&nbsp;&nbsp;&nbsp; template&lt;class _Arg1, class _Arg2, class _Arg3&gt;<br />
+&nbsp;&nbsp;&nbsp; ObjectWrapper(_Arg1 arg1, _Arg2 arg2, _Arg3 arg3): _Ty(arg1, 
+arg2, arg3) {}<br />
+<br />
+&nbsp;&nbsp;&nbsp; UINT AddRef() { return ++_ref; }<br />
+&nbsp;&nbsp;&nbsp; UINT Release() {<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if (--_ref == 0) {<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; GcCreation&lt;ObjectWrapper&lt;_Ty&gt; 
+&gt;::DestroyInstance(this);<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; return 0;<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; return _ref;<br />
+&nbsp;&nbsp;&nbsp; }<br />
+};<br />
+</span><br />
+template&lt;class _Ty&gt;<br />
+class gc_new: public ref&lt;_Ty&gt;<br />
+{<br />
+public:<br />
+<span class="style2">&nbsp;&nbsp;&nbsp; typedef ObjectWrapper&lt;_Ty&gt; WrapperType;<br />
+&nbsp;&nbsp;&nbsp; typedef GcCreation&lt;WrapperType&gt; GcCreationType;<br />
+</span><br />
+&nbsp;&nbsp;&nbsp; template&lt;class _Arg1, class _Arg2, class _Arg3&gt;<br />
+&nbsp;&nbsp;&nbsp; gc_new(_Arg1 arg1, _Arg2 arg2, _Arg3 arg3) {<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; _ptr = <span class="style1">
+GcCreationType</span>::AllocInstanceMemory();<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; new(_ptr) <span class="style1">
+WrapperType</span>(arg1, arg2, arg3);<br />
+&nbsp;&nbsp;&nbsp; }<br />
+<br />
+&nbsp;&nbsp;&nbsp; template&lt;class _Arg1, class _Arg2&gt;<br />
+&nbsp;&nbsp;&nbsp; gc_new(_Arg1 arg1, _Arg2 arg2) {<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; _ptr = <span class="style1">
+GcCreationType</span>::AllocInstanceMemory();<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; new(_ptr) <span class="style1">
+WrapperType</span>(arg1, arg2);<br />
+&nbsp;&nbsp;&nbsp; }<br />
+<br />
+&nbsp;&nbsp;&nbsp; template&lt;class _Arg1&gt;<br />
+&nbsp;&nbsp;&nbsp; gc_new(_Arg1 arg1) {<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; _ptr = <span class="style1">
+GcCreationType</span>::AllocInstanceMemory();<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; new(_ptr) <span class="style1">
+WrapperType</span>(arg1);<br />
+&nbsp;&nbsp;&nbsp; }<br />
+<br />
+&nbsp;&nbsp;&nbsp; gc_new() {<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; _ptr = <span class="style1">
+GcCreationType</span>::AllocInstanceMemory();<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; new(_ptr) <span class="style1">
+WrapperType</span>();<br />
+&nbsp;&nbsp;&nbsp; }<br />
+};</p>
+<p>这样就可以支持参数构造函数了。</p>
+<p>但是，还有一个问题，如果一个菱形继承 CX: (CA: Object), (CB: Object)。虽然创建时 Wrapper 
+填上了正确的函数，但是，ref 使用的是 CX*，即：</p>
+<p class="code">ref&lt;CX&gt; cx = gc_new&lt;CX&gt;();</p>
+<p>ref&lt;CX&gt; 在访问 AddRef 和 Release 方法时还是会由于二义性而导致编译失败。</p>
+<p>要解决这个问题，还需要在每一个类上引入 AddRef / Release 的定义，即将 DECLARE_REF_CLASS 改为：</p>
+<p class="code">#define DECLARE_REF_CLASS(type) \<br />
+public: \<br />
+&nbsp;&nbsp;&nbsp; virtual UINT AddRef() = 0; \<br />
+&nbsp;&nbsp;&nbsp; virtual UINT Release() = 0;</p>
+<p>至此问题解决。 </p>
+
+<hr class="tail" />
+<p class="remark">See Also: <a href="index.htm">Journal</a></p>
+<p class="history">Document created on 2008-5-15 and released as Version 1 on 
+2008-5-16</p>
+<p class="history">Document last updated on 2008-5-16</p>
+
+</body>
+
+</html>

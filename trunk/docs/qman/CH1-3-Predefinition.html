@@ -1,0 +1,112 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+<meta content="zh-cn" http-equiv="Content-Language" />
+<title>C--参考手册：预定义</title>
+<link href="../main.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+
+<h1>预定义</h1>
+<h2>平台信息</h2>
+<p>预定义宏定义在文件 predef/platform.h 中。</p>
+<p>操作系统</p>
+<ul>
+	<li>X_OS_WINDOWS - 32 位或 64 位 Windows 系统，仅支持 Windows XP 或以上系统</li>
+	<li>X_OS_WIN32 - 32 位 Windows 系统</li>
+	<li>X_OS_WIN64 - 64 位 Windows 系统</li>
+	<li>X_OS_LINUX - Linux 系统</li>
+</ul>
+<p>编译器</p>
+<ul>
+	<li>X_CC_VC - MSVC</li>
+	<li>X_CC_GCC - GCC</li>
+</ul>
+<p>CPU 体系结构</p>
+<ul>
+	<li>X_CPU_X86 - X86</li>
+	<li>X_CPU_X64 - X64</li>
+</ul>
+<h2>基础库引用</h2>
+<p>基础库引用在文件 predef/stdlibs.h 中。它包含了 Cdec Core 依赖的头文件，包括：</p>
+<ul>
+	<li>C / C++ 标准库部分头文件</li>
+	<li>STL 部分头文件</li>
+</ul>
+<h2>基本类型</h2>
+<p>基本类型定义在文件 predef/stdtypes.h 中。要开发跨平台应用程序，请确保只使用下面的类型。</p>
+<p>整数类型</p>
+<ul>
+	<li>int / INT - 带符号整数，在目前支持的平台下等同于 INT32</li>
+	<li>UINT - 无符号整数，在目前支持的平台下等同于 UINT32</li>
+	<li>INT8 - 单字节字符，8 位带符号整数</li>
+	<li>UINT8 / BYTE - 字节类型，8 位无符号整数</li>
+	<li>INT16 - 16 位带符号整数</li>
+	<li>UINT16 / WORD - 16 位无符号整数</li>
+	<li>INT32 - 32 位带符号整数</li>
+	<li>UINT32 / DWORD - 32 位无符号整数</li>
+	<li>INT64 - 64 位带符号整数</li>
+	<li>UINT64 - 64 位无符号整数</li>
+</ul>
+<p>字符类型</p>
+<ul>
+	<li>char - 单字节字符</li>
+	<li>WCHAR - 双字节字符 UCS-2</li>
+</ul>
+<p>浮点数</p>
+<ul>
+	<li>float - 32 位浮点数</li>
+	<li>double - 64 位浮点数</li>
+</ul>
+<p>布尔类型</p>
+<ul>
+	<li>bool - 单字节布尔类型（关键字）</li>
+</ul>
+<p>指针</p>
+<ul>
+	<li>标准指针 - X86 体系下为 32 位，X64 体系下为 64 位</li>
+	<li>INT_PTR - X86 下为 INT32，X64 下为 INT64</li>
+	<li>UINT_PTR - X86 下为 UINT32，X64 下为 UINT64</li>
+</ul>
+<p>避免使用如下的类型：</p>
+<ul>
+	<li>(unsigned) long / LONG / ULONG - 它们在不同平台下可能不一致（目前均为 4 字节）</li>
+	<li>long double - 它们在不同平台下可能不一致（目前均为 8 字节）</li>
+	<li>wchar_t - 它们在不同平台下并不一致</li>
+</ul>
+<p>其他注意事项：</p>
+<ul>
+	<li>在 Windows 平台下 DWORD 与 UINT32 长度相同但编译器作为两种不同类型（因为 Windows 
+	头文件的定义），可以安全地进行类型转换</li>
+</ul>
+<h2>基础定义</h2>
+<p>基础定义在文件 predef/stddef.h 中。</p>
+<p>伪关键字：</p>
+<ul>
+	<li>interface - 用于定义普通或 C-- 接口</li>
+	<li>__novtable</li>
+	<li>__forceinline - 强制内联，仅用于 MSVC</li>
+	<li>___noop - 空函数</li>
+</ul>
+<p>简单调试：</p>
+<ul>
+	<li>ASSERT - 断言</li>
+</ul>
+<p>函数修饰：</p>
+<ul>
+	<li>EXTERN_C - extern &quot;c&quot;</li>
+	<li>__stdcall</li>
+	<li>__cdec</li>
+	<li>__fastcall</li>
+	<li>DECLSPEC_IMPORT - 申明导入函数，MSVC 需要</li>
+	<li>DECLSPEC_EXPORT - 申明导出函数，MSVC 需要</li>
+</ul>
+<hr />
+<p><a href="index.html">C-- Quick Manual</a></p>
+
+</body>
+
+</html>

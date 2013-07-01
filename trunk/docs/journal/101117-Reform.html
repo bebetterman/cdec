@@ -1,0 +1,75 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+<meta content="zh-cn" http-equiv="Content-Language" />
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+<title>2010-11-17 风格变更</title>
+<link rel="stylesheet" type="text/css" href="../main.css" />
+</head>
+
+<body>
+
+<h1>2010-11-17 风格变更</h1>
+<p>在实际使用 C-- 风格代码时，有一个大家一致觉得很麻烦的地方就是，要加 ref 的地方太多。例如：<br />
+ref&lt;X&gt; CombineX ( ref&lt;X&gt; a, ref&lt;X&gt; b );</p>
+<p>希望能去掉 ref 直接写成：<br />
+X CombineX ( X a, X b );</p>
+<p>因为变量定义使用的次数远高于类定义，因此我们准备对之前的代码风格进行改造。</p>
+<h2>调整思路</h2>
+<p>一种解决方法是将名字直接给引用，即：<br />
+class _X;<br />
+typedef ref&lt;_X&gt; X;</p>
+<p>这样的话，在如下场合会引起一定的不便，因为要使用类本身的名字：</p>
+<ul>
+	<li>构造函数</li>
+	<li>继承</li>
+	<li>静态成员（函数、变量和类型）</li>
+</ul>
+<p>但目前尚未找到更好的解决方法。</p>
+<h2>风格示例</h2>
+<p>定义类和实例化：</p>
+<p class="code">class Ref(X) { ... };<br />
+typedef ref&lt;Ref(X)&gt; X;<br />
+<br />
+X CreateX() { return gc_new&lt;X&gt;(); }<br />
+bool CompareX(X lhs, X rhs);</p>
+<p>构造函数和析构函数：</p>
+<p class="code">class Ref(X)<br />
+{<br />
+&nbsp;&nbsp;&nbsp; Ref(X)();<br />
+&nbsp;&nbsp;&nbsp; Ref(X)(int);<br />
+&nbsp;&nbsp;&nbsp; Ref(X)(X rhs);<br />
+&nbsp;&nbsp;&nbsp; ~Ref(X)();<br />
+};</p>
+<p>继承：</p>
+<p class="code">class Ref(X) {...};<br />
+class Ref(Y): public Ref(X) {...};<br />
+<br />
+X x = gc_new&lt;Y&gt;();<br />
+Y y = ref_cast&lt;Y&gt;(x);</p>
+<p>静态成员：</p>
+<p class="code">class Ref(X)<br />
+{<br />
+&nbsp;&nbsp;&nbsp; static void f();<br />
+};<br />
+<br />
+Ref(X)::f();</p>
+<p>总体来说，这并不是一种好的代码风格。</p>
+<h2>结论</h2>
+<p>暂时先搁置这方面的工作，还是显式地使用 ref 来标识引用。</p>
+<p>在实际使用时，可以约定一个 typedef 来指定引用类型（在类名末尾加下划线），例如：</p>
+<p class="code">class X { ... };<br />
+typedef ref&lt;X&gt; X_;<br />
+X_ x = gc_new&lt;X&gt;();</p>
+<p>其中，gc_new 可以接受类名 X，也可以接受引用类 X_。但建议不要使用后者。</p>
+
+<hr class="tail" />
+<p class="remark">See Also: <a href="index.htm">Journal</a></p>
+<p class="history">Document created on 2010-11-17 and released as Version 1 on 
+2010-11-18</p>
+<p class="history">Document last updated on 2010-11-18</p>
+
+</body>
+
+</html>

@@ -1,0 +1,212 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+<title>2008-5-8 Decorated C++ 设计思路</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="../main.css" />
+</head>
+
+<body>
+
+<h1>2008-5-8 Decorated C++ 设计思路</h1>
+<p>Decorated C++ 的设计思路是在效率不敏感代码域中，通过改变代码风格，辅以运行库支持，使得应用代码更加简洁，从而达到降低潜在的低层（指与 C++ 
+细节相关，不涉及到设计方案的）错误，提高使用 C++ 开发功能代码效率的目的。</p>
+<p>关于其简写，最开始选择的是 Dec C++，不过我觉得写成 C-- 也比较有趣。</p>
+<p><em>本文档是日志类型文档，完成之后将保持原貌不再修改（除一些低级错误，例如错别字），设计思路的变更将在更新的日志文档中体现。</em></p>
+<h2>设计要点</h2>
+<p>通过观察 WPS V6 代码本身和历史上的 Bug，以及将 C++ 与大量 RAD 语言开发实例做对比。我觉得在如下几个点是 C-- 设计需要考虑的：</p>
+<ol>
+	<li>对象生命周期管理，即所谓的 GC (Garbage collector)。</li>
+	<li>避免直接内存操作，典型的是指针运算，另外有比如静态数组（含 C 风格字符串），以及没有安全检查的 STL 容器等。</li>
+	<li>简化模块边界代码的书写。</li>
+	<li>使用异常作为错误处理的主要机制（这个主要是针对 WPS V6 原有的代码风格而言）。</li>
+	<li>对 COM 相关代码提供更强的支持（相对于已有的 ATL / KFC 代码）。</li>
+	<li>对类型的动态检测能力（RTTI 的调试能力）。</li>
+	<li>与上述风格一致的库支持，以减少互操作（Interoperation）代价。</li>
+</ol>
+<p>在整个设计中，需要强调的几个方面为：</p>
+<ul>
+	<li>效率：C++ 程序员经常会陷入代码级效率的沼泽，从而在非效率热点上花费大量开发时间，并牺牲可维护性。C-- 
+	代码明确定位在效率不敏感代码域，因此在设计思路上，代码的可维护性绝对优先于效率。</li>
+	<li>一致性：C-- 风格代码与传统 C++ 
+	代码在交互时不可避免有互操作代价，包括代码复杂度增加、效率降低以及潜在错误增多。因此我们希望，在设计上将两种风格代码严格分开，减少混合型代码出现的几率。我认为，甚至应该为 
+	C-- 风格代码提供独立的运行库（C-- RTL）。</li>
+</ul>
+<h2>对象</h2>
+<p>为提供一致的对象操作风格，我们对类和类型的使用作了如下一些约定。</p>
+<p><strong>1 类对象</strong></p>
+<p>类是一种引用类型（Reference type），它<strong>只能在堆上创建</strong>，也只能以引用的方式使用。引用是 C-- 
+对于类对象的统一生命周期管理模型。</p>
+<p>我们可能会以如下的方式传递和使用一个类对象。</p>
+<p class="code">class Contacts: public Object<br />
+{<br />
+&nbsp;&nbsp;&nbsp; ref&lt;Vector&lt;Contact&gt; &gt; m_contacts;<br />
+&nbsp;&nbsp;&nbsp; ref&lt;Contact&gt; CreateContact ( )<br />
+&nbsp;&nbsp;&nbsp; {<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ref&lt;Contact&gt; contact = gc_new 
+Contact();<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; m_contacts-&gt;Add(contact);<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; return contact;<br />
+&nbsp;&nbsp;&nbsp; }<br />
+};</p>
+<p>在这个例子里，我们始终通过 ref 来使用一个类。并且不用手动管理其生命周期。当 ref 退出作用域时，GC 
+来判断是否回收一个对象。要提前暗示（但是不能决定）GC 回收一个对象，可以将相应的引用设置为 NULL，就像对一个智能指针一样。</p>
+<p><strong>2 类对象应该继承自 Object，并且保持单继承体系</strong></p>
+<p>通过提供统一的基类，代码可以在契约（参见关于 DbC 相关日志）中执行更多的动态检查。这些检查里最关键的，就是对于类型正确性的检查。</p>
+<p>考虑到多继承带来的对象模型的复杂性，我们为 C-- 代码定义了只能单继承的约束。在大多数情况下这样是够用的，但是有如下一些例外：</p>
+<ol>
+	<li>该对象要实现多个接口。</li>
+	<li>该对象是一个 COM 实现者。</li>
+</ol>
+<p>我们将对这些情况作特殊处理，后文详述。</p>
+<p><strong>3 使用 ref_cast 进行类型转换</strong></p>
+<p>由于 Object 体系携带类型信息，因此我们要求，除安全隐式转换（从派生类的引用转换到基类的引用）外，一律使用 ref_cast 
+进行类型转换。其用法类似如下：</p>
+<p class="code">ref&lt;MyBase&gt; mybase = Get...();<br />
+ref&lt;MyDerived&gt; myderived = ref_cast&lt;MyDerived&gt;(mybase);</p>
+<p>实际上，ref_cast 是一个隐含行为，亦即，代码可以直接写成如下：</p>
+<p class="code">ref&lt;MyDerived&gt; myderived = (ref&lt;MyDerived&gt;)myBase;</p>
+<p>至少在调试版中，ref_cast 会对类型系统进行检查，以确定转换是否能够安全进行。</p>
+<p><strong>4 接口</strong></p>
+<p>接口是对单继承体系打开的一个缺口，因此使用上需要被严格约束。</p>
+<p>在定义接口时，需要继承自 Interface。这个基类是一个 Object 协调器，它协调多继承带来的多 Object 基类问题。</p>
+<p>接口之间可以进行多继承，一个类也可以同时实现多个接口。</p>
+<p>接口中能够包括纯虚方法，不能有其它元素。</p>
+<p>注：这个要求过严了，实际上，静态成员和方法不会带来什么影响。但是，为避免未来可能遇到的新问题，我们先将尺度放严。</p>
+<p>同样的，对接口也要使用 ref 引用，在进行类型转换时要使用 ref_cast。</p>
+<p><strong>5 结构体</strong></p>
+<p>结构体是一种值类型（Value type），C-- 
+倾向于对它执行最简单的生命周期管理策略。它一般定义在栈上（局部变量）或者对象成员中，在作为参数传递时，采用传值的方式。如果要在堆上创建一个值类型，并且希望 GC 
+控制其生命周期，则需要进行装箱。</p>
+<p>作为一个设计准则，结构体不应该保存大量数据，它应该能适应频繁的拷贝操作。同时，结构体不能有虚函数。</p>
+<p>可以在类或结构体中使用位域（Bit field）。但是联合体（Union）只能被视作结构体。</p>
+<p>结构体在以值拷贝的方式传递时，不使用 ref 引用。但是，它可以被装箱成类对象，使用如下的方式：</p>
+<p class="code">ref&lt;box&lt;Point&gt; &gt; pt = gc_new box&lt;Point&gt;();</p>
+<p>其中，box 将结构体包装成了类对象。显然，box 也可以对基本数据类型（例如 int）进行封箱，使其可以被作为类对象使用。</p>
+<p><strong>6 传递引用型参数</strong></p>
+<p>有时候，希望通过在参数中传递结果给调用者。在 C++ 标准写法中，可以用指针（*）或者引用（&amp;）完成。在 C-- 风格代码中，则应该统一采用引用。例如：</p>
+<p class="code">void foo ( int&amp; a, stringx&amp; b, ref&lt;MyClass&gt;&amp; c )</p>
+<p>在使用时，应当避免再次获取这些引用的指针。不过，引用可以继续传递给下一级的函数作为引用型参数。</p>
+<h2>字符串</h2>
+<p>在代码中涉及到大量对于字符串的使用，目前我们可用到的方式大概有如下几种：</p>
+<ol>
+	<li>C 风格字符串，是以 char / wchar_t 数组为载体的字符串，通常涉及到直接内存操作。</li>
+	<li>std::(w)string：是 STL 提供的字符串类，包括其 KFC 变体 ks_(w)string（考虑去除）。它们方便了字符串的操作，但是在参数传递和生命周期管理上仍没有彻底解决。</li>
+	<li>BSTR / VARIANT：与 COM 操作相关代码使用，也常被泛用到接口之中，是一种 C 
+	风格字符串变体。虽然有很多封装类（真的很多），但其细节还是很麻烦。</li>
+</ol>
+<p>我们将使用 stringx 来提供 C-- 风格的一致的字符串处理方案。它具有以下特性：</p>
+<p><strong>1 被视作简单数据类型</strong></p>
+<p>stringx 在实现上是一个类，但它和之前的类对象不同。在使用时，它作为一个简单类型。例如：</p>
+<p class="code">stringx Concatenate(stringx a, stringx b)<br />
+{<br />
+&nbsp;&nbsp;&nbsp; return a + b;<br />
+}</p>
+<p>显然，stringx 在传递时并没有复制字符串内容，因此并不会带来明显的效率问题。</p>
+<p><strong>2 与 MSR 服务集成</strong></p>
+<p>运算库 MSR 服务，是一个共享字符串池。stringx 通过内置方法完成对全局或似有 MSR 服务的集成。由于内核多数字符串都保存在 MSR 
+中，通过返回 stringx 可以保持对 MSR 资源的引用，从而在诸如字符串比较等部分操作中获取更高的性能，且不需要书写专门的代码。</p>
+<p><strong>3 与其他字符串资源的互操作</strong></p>
+<p>stringx 可以与 C 风格字符串、STL 字符串（std::(w)string）、BSTR 
+进行互操作。然而，互操作过程意味着字符串内容的拷贝，因此，应该在功能代码中使用一致的 stringx，仅在需要的边界使用互操作。</p>
+<h2>Variant</h2>
+<p>由于 API 代码大量使用 VARIANT 作为调用传递参数，因此必须提供对之的封装。variant_x 类型用来做此操作。</p>
+<p>应该将 variant_x 视作一个值类型（实际上，VARIANT 也是这样设计的）。这意味着，当在参数中传递 variant_x 
+时，实际上会不断执行复制操作。这会带来一定的效率影响，不过 SDK 的 variant_t 和 ATL 的 CComVariant 也是这样做的。</p>
+<p>在 COM 边界，对于函数的输入参数，可以直接采用 variant_x 来接受一个 VARIANT 值；或者使用 VARIANT 
+值来作为参数，但是将其转换为一个只读 variant_x 引用。对于函数输出参数（VARIANT*），可以转换为一个可写的 variant_x 引用。形如：</p>
+<p class="code">void foo (VARIANT p, VARIANT* q)<br />
+{<br />
+&nbsp;&nbsp;&nbsp; const variant_x&amp; _p = p;<br />
+&nbsp;&nbsp;&nbsp; variant_x&amp; _q = q;<br />
+&nbsp;&nbsp;&nbsp; ...<br />
+}</p>
+<p>但是，这种代码只应该存在于 COM 边界。对于非边界代码，应该一致性地使用 variant_x，可以通过 box 
+装箱成引用类型。但是，最推荐的做法是，尽可能使用更准确的类型，而不要到处传递 variant_x。</p>
+<p>对 VARIANT 的另一个特殊处理是 VT_BYREF 标记，从当前看来其主要是用于减少复制，而非用于向外传递结果（VB 的 byref 
+参数样式），因此暂时只做复制处理。</p>
+<h2>数组与容器</h2>
+<p>为保持代码的一致性，C-- 代码段中不应使用 C 风格的数组和 STL 容器。C-- 
+在对应的库中提供与之等价的容器类，它是模板类，但是不可以定制内存分配器（allocator）。</p>
+<p>容器类本身是类对象，因此，其创建和使用方式与其他类对象相同。例如：</p>
+<p class="code">ref&lt;Array&lt;MySample&gt; &gt; arraySamples = gc_new Array&lt;MySample&gt;(10);</p>
+<p>如果容器内的元素为引用类型（类对象），则容器内的每个元素实际上是一个对对象的引用。例如：</p>
+<p class="code">ref&lt;MySample&gt; sample = ...;<br />
+arraySamples[0] = sample;<br />
+arraySamples[1] = sample;</p>
+<p>此时，sample, arraySamples[0], arraySamples[1] 都指向同一个对象。</p>
+<p>如果容器内的元素为值类型，则容器内的每一个元素都是一个值拷贝。将值复制出并修改并不会改动容器中的元素本身。不过，由于 [ ] 
+操作符返回一个引用，此时可以直接修改元素。</p>
+<p>当然，如果元素为值类型的装箱类型，它仍然属于引用类型。</p>
+<h2>直接内存操作</h2>
+<p>在 C-- 代码风格中不允许使用直接内存操作，也不允许应用程序自身分配和释放内存。这些代码被定义为传统 C/C++ 
+风格代码，它们应该被集中处理，并且通过互操作访问。</p>
+<p>通过 pin_ptr，可以取得一个对象的指针。这个指针同时阻止了 GC 变更对象的位置，直到所有 pin_ptr 离开生命周期。例如：</p>
+<p class="code">void native_method(Sample* pSample);<br />
+<br />
+void foo()<br />
+{<br />
+&nbsp;&nbsp;&nbsp; ref&lt;Sample&gt; sample = ...;<br />
+&nbsp;&nbsp;&nbsp; native_method(pin_ptr&lt;Sample&gt;(sample));<br />
+}</p>
+<p>对于元素为值类型的定长数组（Array）和 Vector 
+容器（可能还有相似的其他容器），它们可能将对象放置于连续的空间，并提供特殊的方法返回第一个对象的地址和对象数目。传统 C++ 
+风格代码可以对这段内存进行直接操作。对于元素为引用类型的容器而言，请避免获取数据指针。</p>
+<p>另外，有一些类，如 Buffer，包装了与一段内存块对应的操作，也提供裸指针用于互操作用途。stringx 和 variant_x 
+类型也提供一些互操作方法可以访问其缓冲区。</p>
+<p>实际上，为了兼顾效率，很多运行库代码（例如容器）都需要这样做。</p>
+<p>在进行直接内存操作时，应充分理解不当操作可能带来的风险，并且它们很难以被检测到。</p>
+<h2>GC</h2>
+<p>C-- 风格的程序整体建立在一个完善的 GC 上。虽然 GC 的实现细节尚未确定，但是它应该是 C-- 风格代码统一的内存分配和释放者。</p>
+<p>传统的基于引用计数的 GC 机制可以使对象在没有引用之时立即释放，它保证了析构函数的即时性。但是，当对象之间存在循环引用时，这种机制将不能正确释放对象。</p>
+<p>是否引入基于引用跟踪和循环探测算法的 GC（如同 .NET CLR）目前还不能确定。但是，我们也推荐显式断开循环或者使用 weak_ref 引用。因为即使 
+GC 能够自行解开循环，也不能保证析构函数调用的即时性。</p>
+<h2>跨模块能力</h2>
+<p>由于内存操作被 GC 所统一，因此所有的 C-- 风格的类理论上都可以跨模块传递，这样我们就不用为了使类能传递而采用接口了。显然，与 C-- 
+风格代码配套的运行库中的类，都是可以跨模块使用和传递的。</p>
+<p>不过，对于大尺度的对象，比如 etcore 暴露的 Book 
+对象。则建议还是保留接口/实现的样式而不是直接写成跨模块类。当然，还有另一种可行的方案，就是将 Book 对象的能力分解到对象树的下级对象，然后 Book 
+本身只提供一层薄封装，且实现为一个跨模块类。</p>
+<h2>异常</h2>
+<p>在传统的 WPS V6 代码中，函数总是返回 HRESULT，并且用大量的 CHECK 
+宏来控制跳转。而且我发现在很多代码中，大家都没有那么辛勤地在每一行调用后紧接着使用 CHECK 宏，这意味着可能的错误被直接忽略。</p>
+<p>为了解决这种情况，我们在 ET 的内核代码中全部使用异常机制进行错误处理（ET, 2003年9月）。不过，在模块边界，我们仍然拦截了异常并且转换为 
+HRESULT 返回。这个操作不仅麻烦，而且频繁的 try（每一次对内核的调用都会导致一次）也会带来效率问题。</p>
+<p>
+目前我们正在仔细考虑异常的细节问题，以决定是否在代码中使用跨模块异常。由于开发环境的可控性，以及异常本身被限制为不能用于可能的正常流程，因此在很大几率上这是可行的。</p>
+<h2>COM 互操作</h2>
+<p>在这一次试验性实施中，我们的方案将考虑 ET 的如下三个模块：AppCore, API, UI。由于 UI 建立在 API 基础之上，而 API 
+代码必须与 COM 规范相容。因此，COM 互操作的问题也是我们需要首先解决的。</p>
+<p>除了 stringx 和 variant_x 对于 BSTR 和 VARIANT 数据类型的支持。我们还需要解决如下问题。</p>
+<p><strong>1 COM 接口的引用</strong></p>
+<p>COM 接口通常是通过 IDL 自动生成的，并且，COM 规范上也不允许其继承自 Interface 
+基类。因此，对于接口的引用应该有所不同。幸运的是，由于 ref 也是通过 Addref / Release 方法来控制生命周期，因此仍然可以用于 COM 
+接口上，只是没有 GC 的帮助，对于循环引用无能为例（同样的，这里也可以使用显式断开循环，或者 weak_ref）。</p>
+<p>但是，在类型转换时，问题就复杂一些了。由于两者的动态转换机制不同。因此我们引入一个新的 com_cast 
+来负责转换。借助一些技巧，我们有望支持如下的代码：</p>
+<p class="code">ref&lt;IThis&gt; a = ...;<br />
+ref&lt;IThat&gt; b = com_cast&lt;IThis&gt;(a);</p>
+<p>甚至直接写作：</p>
+<p class="code">ref&lt;IThat&gt; b = (ref&lt;IThat&gt;)a;</p>
+<p>不过，VC 6 下面可能做不到。</p>
+<p><strong>2 COM 对象的实现</strong></p>
+<p>由于 COM 对象的实现方式可能非常多样，由此引入的库也可能非常不同（例如 MFC 和 ATL，以及被修改的 KFC 
+ATL）。因此我们确实有理由担心无法给出一个完全相容的框架，使得 COM 对象同时是一个 GC 类对象。（我们会在实现时努力尝试，但失败的可能性很大）</p>
+<p>一个保守的方案是 COM 对象不作为 GC 对象，亦即，也不使用 gc_new 来创建。由于 ref 
+仍然可以辅助解决生命周期管理问题，因此这个方案也是可接受的。</p>
+<h2>运行库</h2>
+<p>一个新的程序风格离不开一组与之相容的运行库，否则，互操作带来的（开发和运行）代价足以抵消所有其他的好处。因此，我们也准备为 C-- 
+风格代码提供全新的运行库。</p>
+<p>运行库的结构将参考类似 .NET 和 Java 的组织方式，并且是在使用过程中不断积累。相信当运行库逐渐开始完善之时，C-- 
+为开发效率带来的贡献就能被观察到了。</p>
+
+<hr class="tail" />
+<p class="remark">See Also: <a href="index.htm">Journal</a></p>
+<p class="history">Document created on 2008-5-8 and released as Version 1 on 
+2008-5-8</p>
+<p class="history">Document last updated on 2008-5-8</p>
+
+</body>
+
+</html>

@@ -1,0 +1,76 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+<meta content="zh-cn" http-equiv="Content-Language" />
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+<title>2008-10-15 VC 调试器的配置</title>
+<link rel="stylesheet" type="text/css" href="../main.css" />
+</head>
+
+<body>
+
+<h1>Oct 15, 2008 VC 调试器的配置</h1>
+
+<p>由于 C-- 工程的主要开发工作在 VC 中进行，因此我们使用了一些额外的技巧来配置 VC 调试器，使之更方便我们的工作。</p>
+<h2>自动显示字符串内容</h2>
+<p>在调试使用 STL 字符串 std::(w)string 的代码时，字符串的内容可以在调试器的 Watch 和 Tooltip 中直接显示出来。而使用 
+stringx，则必须要手动展开好几层才能看到字符串的内容，显然非常不方便。</p>
+<p>实际上，VC 的调试器并没有硬编码这个规则，而是保存在一个配置文件中。根据章庆元提供的一份<a href="http://www.codeguru.com/cpp/v-s/debug/article.php/c1281">网上资料</a>，我们可以通过修改 
+autoexp.dat 来实现。</p>
+<p class="code">cdec::stringx = &lt;m_pContent-&gt;m_pContent,su&gt;</p>
+<p>该配置可以工作（VC 调试器是每次启动调试的时候都读一次配置，所以检验修改比较方便），但是对于空字符串 NULL 显示的是 {???}，不够正规。浏览 
+autoexp 看到，VS 2008 提供了新的区段 Visualizer，其支持的语法更多。因此仿写了一段 Visualizer 来替代前文。</p>
+<p class="code">cdec::stringx{<br />
+&nbsp;&nbsp;&nbsp; preview ( <br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #if(($e.m_pContent) != 0) ([$e.m_pContent-&gt;m_pContent,su])<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #else (&quot;NULL&quot;)<br />
+&nbsp;&nbsp;&nbsp; )<br />
+&nbsp;&nbsp;&nbsp; stringview (<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #if(($e.m_pContent) != 0) ([$e.m_pContent-&gt;m_pContent,sub])<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #else (&quot;NULL&quot;)<br />
+&nbsp;&nbsp;&nbsp; )<br />
+}</p>
+<p>其中，preview 是在 tooltip 以及 watch 的未展开时显示的内容，stringview 是在 preview 
+基础上展开字符串的显示内容（参见调试器界面）。</p>
+<p>这段配置正常工作，对于空字符串显示的是 “NULL”。</p>
+<h2>自动显示 ref 指向的指针</h2>
+<p>智能指针也是 autoexp 中不可缺少的一员，我给他们定义了如下的 Visualizer。</p>
+<p class="code">cdec::weak_ref&lt;*&gt;|cdec::ref&lt;*&gt;{<br />
+&nbsp;&nbsp;&nbsp; preview ( <br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #if(($e._ptr) != 0) ( #(&quot;ptr=&quot;, $e._ptr) 
+) <br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #else (&quot;NULL&quot;)<br />
+&nbsp;&nbsp;&nbsp; )<br />
+}</p>
+<p>这里 #( ... ) 应该是连接字符串内容的操作符。这段规则同时应用于 ref 和 weak_ref，并且他们两者都是模板类。</p>
+<p>目前尚无很好的办法来直接读出对象的引用计数。</p>
+<h2>F11 时自动跳过</h2>
+<p>目前调试的另一个问题是，在使用 F11 单步调试时，会频繁进入基础类（如 ref 和 stringx 的构造函数），影响调试进程。VC 
+调试器支持的另一个特性可以解决这个问题，但是其使用方式随 VC 版本不同而不同，参见<a href="http://bka-bonn.de/wordpress/index.php/category/visual-studio/">此文档</a>。</p>
+<p>对于 VC 2008，此信息在注册表如下位置：</p>
+<p class="code">HKEY_LOCAL_MACHINE\Software\Microsoft\VisualStudio\9.0\NativeDE\StepOver</p>
+<p>我们首先尝试建立一个字符串值（Registry Value）：</p>
+<p class="code">&quot;stringx constructor&quot; = &quot;cdec\:\:stringx\:\:stringx&quot;</p>
+<p>其值是一个正则表达式，这里表示 cdec::stringx::stringx。这个配置可以工作。</p>
+<p>但是，如果用 &quot;cdec\:\:ref\:\:ref&quot; 并不能跳过 ref 的构造函数，因为 ref 是一个模板类，因此，需要修改成：</p>
+<p class="code">&quot;ref constructor&quot; = &quot;cdec\:\:ref\&lt;.*\&gt;\:\:ref.*&quot;</p>
+<p>不知道为什么，不加末尾的 .*，仍然不能匹配构造函数。</p>
+<p>实际上，我们可以直接指定 Step Over 这些基础类的所有函数，因此，可以简单地直接定义如下：</p>
+<p class="code">&quot;stringx&quot; = &quot;cdec\:\:stringx\:\:.*&quot;<br />
+&quot;ref&quot; = &quot;cdec\:\:ref\&lt;.*\&gt;\:\:.*&quot;</p>
+<p>其他一些基础类，如 weak_ref, ref_cast, pin_ptr 等，也都如此定义。</p>
+<p>不过，gc_new 没有包括在内，因为很多时候可能需要 Step In 目标对象的构造函数。</p>
+<p>另外，为了单元测试调试方便，也跳过了 KfcUnit 的 Assert 函数：</p>
+<p class="code">&quot;kfcunit assert&quot; = &quot;UnitTest\:\:_TestAssert&quot;</p>
+<p>这样子代码调试起来就比较方便了。当然，除了要调试基础类本身的时候。</p>
+
+<hr class="tail" />
+<p class="remark">See Also: <a href="index.htm">Journal</a></p>
+<p class="history">Document created on 2008-10-15 and released as Version 1 on 
+2008-10-15</p>
+<p class="history">Document last updated on 2008-10-15</p>
+
+</body>
+
+</html>

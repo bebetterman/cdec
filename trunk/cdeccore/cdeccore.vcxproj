@@ -1,0 +1,240 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCTargetsPath Condition="'$(VCTargetsPath11)' != '' and '$(VSVersion)' == '' and '$(VisualStudioVersion)' == ''">$(VCTargetsPath11)</VCTargetsPath>
+  </PropertyGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{0F55D194-2349-4B76-A618-53981A6F7E22}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>cdeccore</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+    <OutDir>..\product\win32d\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>true</LinkIncremental>
+    <OutDir>..\product\win64d\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+    <OutDir>..\product\win32\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>false</LinkIncremental>
+    <OutDir>..\product\win64\</OutDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;CDECCORE_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
+      <AdditionalLibraryDirectories>$(OutDir)</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;CDECCORE_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
+      <ImportLibrary>..\product\win64d\$(TargetName).lib</ImportLibrary>
+      <AdditionalLibraryDirectories>$(OutDir)</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;CDECCORE_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalLibraryDirectories>$(OutDir)</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;CDECCORE_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalLibraryDirectories>$(OutDir)</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="..\include\cdeccore.h" />
+    <ClInclude Include="..\include\cdeccore\collection\array.h" />
+    <ClInclude Include="..\include\cdeccore\collection\map.h" />
+    <ClInclude Include="..\include\cdeccore\collection\vector.h" />
+    <ClInclude Include="..\include\cdeccore\common\bitconverter.h" />
+    <ClInclude Include="..\include\cdeccore\common\console.h" />
+    <ClInclude Include="..\include\cdeccore\common\converter.h" />
+    <ClInclude Include="..\include\cdeccore\common\datetime.h" />
+    <ClInclude Include="..\include\cdeccore\common\math.h" />
+    <ClInclude Include="..\include\cdeccore\common\stringbuilder.h" />
+    <ClInclude Include="..\include\cdeccore\crypto\crypto.h" />
+    <ClInclude Include="..\include\cdeccore\crypto\hash.h" />
+    <ClInclude Include="..\include\cdeccore\essential\foreach.h" />
+    <ClInclude Include="..\include\cdeccore\essential\gc.h" />
+    <ClInclude Include="..\include\cdeccore\essential\interop.h" />
+    <ClInclude Include="..\include\cdeccore\essential\predef.h" />
+    <ClInclude Include="..\include\cdeccore\essential\ref.h" />
+    <ClInclude Include="..\include\cdeccore\essential\string.h" />
+    <ClInclude Include="..\include\cdeccore\io\directory.h" />
+    <ClInclude Include="..\include\cdeccore\io\mapping.h" />
+    <ClInclude Include="..\include\cdeccore\io\stream.h" />
+    <ClInclude Include="..\include\cdeccore\io\textreader.h" />
+    <ClInclude Include="..\include\cdeccore\io\textwriter.h" />
+    <ClInclude Include="..\include\cdeccore\text\encoding.h" />
+    <ClInclude Include="..\include\cdeccore\threading\criticalsection.h" />
+    <ClInclude Include="..\include\cdeccore\xmlce\xmldom.h" />
+    <ClInclude Include="..\include\cdeccore\xmlce\xmlreader.h" />
+    <ClInclude Include="..\include\cdeccore\xmlce\xmlwriter.h" />
+    <ClInclude Include="crypto\aesalg.h" />
+    <ClInclude Include="crypto\md5.h" />
+    <ClInclude Include="crypto\sha1.h" />
+    <ClInclude Include="io\filewrap.h" />
+    <ClInclude Include="text\codeconv.h" />
+    <ClInclude Include="xmlce\domaccept.h" />
+    <ClInclude Include="xmlce\parsecore.h" />
+    <ClInclude Include="stdafx.h" />
+    <ClInclude Include="test_support.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="cdeccore.cpp" />
+    <ClCompile Include="collection\test\test_coll_array.cpp" />
+    <ClCompile Include="collection\test\test_coll_map.cpp" />
+    <ClCompile Include="collection\test\test_coll_vector.cpp" />
+    <ClCompile Include="common\console.cpp" />
+    <ClCompile Include="common\converter.cpp" />
+    <ClCompile Include="common\test\test_bitconverter.cpp" />
+    <ClCompile Include="common\test\test_converter.cpp" />
+    <ClCompile Include="crypto\aesalg.cpp" />
+    <ClCompile Include="crypto\crypto.cpp" />
+    <ClCompile Include="crypto\md5.cpp" />
+    <ClCompile Include="crypto\sha1.cpp" />
+    <ClCompile Include="crypto\test\test_crypto_aes.cpp" />
+    <ClCompile Include="crypto\test\test_crypto_hash.cpp" />
+    <ClCompile Include="essential\string.cpp" />
+    <ClCompile Include="essential\test\test_ess_interop.cpp" />
+    <ClCompile Include="essential\test\test_ess_ref.cpp" />
+    <ClCompile Include="essential\test\test_ess_string.cpp" />
+    <ClCompile Include="io\directory.cpp" />
+    <ClCompile Include="io\directory_linux.cpp" />
+    <ClCompile Include="io\filewrap_posix.cpp" />
+    <ClCompile Include="io\filewrap_stdc.cpp" />
+    <ClCompile Include="io\filewrap_win.cpp" />
+    <ClCompile Include="io\mapping.cpp" />
+    <ClCompile Include="io\stream.cpp" />
+    <ClCompile Include="io\test\test_io_directory.cpp" />
+    <ClCompile Include="io\test\test_io_filestream.cpp" />
+    <ClCompile Include="io\test\test_io_mapping.cpp" />
+    <ClCompile Include="io\test\test_io_textrw.cpp" />
+    <ClCompile Include="io\textreader.cpp" />
+    <ClCompile Include="io\textwriter.cpp" />
+    <ClCompile Include="text\codeconv.cpp" />
+    <ClCompile Include="text\encoding.cpp" />
+    <ClCompile Include="text\test\test_text_encoding.cpp" />
+    <ClCompile Include="xmlce\domaccept.cpp" />
+    <ClCompile Include="xmlce\parsecore.cpp" />
+    <ClCompile Include="xmlce\test\test_xmlce_dom.cpp" />
+    <ClCompile Include="xmlce\test\test_xmlce_read.cpp" />
+    <ClCompile Include="xmlce\test\test_xmlce_write.cpp" />
+    <ClCompile Include="xmlce\xmldom.cpp" />
+    <ClCompile Include="xmlce\xmlreader.cpp" />
+    <ClCompile Include="xmlce\xmlwriter.cpp" />
+    <ClCompile Include="stdafx.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="test_support.cpp" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

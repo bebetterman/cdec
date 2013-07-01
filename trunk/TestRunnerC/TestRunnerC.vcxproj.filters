@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="stdafx.cpp" />
+    <ClCompile Include="TestRunnerC.cpp" />
+    <ClCompile Include="report.cpp" />
+    <ClCompile Include="runner.cpp" />
+    <ClCompile Include="RunnerDll.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="stdafx.h" />
+    <ClInclude Include="RunnerDll.h" />
+    <ClInclude Include="report.h" />
+    <ClInclude Include="runner.h" />
+    <ClInclude Include="..\include\unittest\testenv_common.h">
+      <Filter>export</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\unittest\testenv_impl.h">
+      <Filter>export</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\unittest.h">
+      <Filter>export</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="export">
+      <UniqueIdentifier>{4ffe355e-8fa3-4405-8b8a-f1a411dbd8a9}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

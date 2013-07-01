@@ -1,0 +1,4 @@
+Hello, KFC
+中文：第2行
+
+END

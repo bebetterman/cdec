@@ -1,0 +1,42 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+<meta content="zh-cn" http-equiv="Content-Language" />
+<title>C-- Quick Manual - HTTP Server</title>
+<link href="../main.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+
+<h1>HTTP Server</h1>
+<h2>综述</h2>
+<p>工程 httpserv 使用 <a href="http://www.gnu.org/software/libmicrohttpd/">GNU 
+microhttpd</a> 提供一个轻量级的 HTTP Server 实现。为使用简单，适用于 Windows 平台的二进制文件已经包含在 C-- 
+源码包中；Linux 版本下需要自行安装所需的库。</p>
+<h2>概念模型</h2>
+<p>Cdec httpserv 是一个简单的 HTTP Server 实现。它提供了 Servlet 级别的功能支持，并支持自定义 URL 映射以优化 URL 
+Dispatch 的速度。</p>
+<p>Server 类是提供服务的主类，首先需要装配的是 URL 派发器，可以使用默认的 DefaultUrlDispatcher 类。</p>
+<h2>Windows 工程编译</h2>
+<p>重要：该工程目前不支持 X64 版本。</p>
+<p>为使用简单，Cdec 代码库已包含了所需的二进制文件，位于 import-win\libmicrohttpd-0.9.17-w32 目录。该目录文件如下：</p>
+<ul>
+	<li>include 目录：头文件，由 httpserv.h 自动引用</li>
+	<li>lib 目录：LIB 文件，使用工程需要显式连接</li>
+	<li>bin 目录：DLL 文件，需要在运行时复制到应用程序目录（或 System32 目录）</li>
+</ul>
+<p>原始的安装包位于<a href="ftp://ftp.gnu.org/gnu/libmicrohttpd/">此处</a>，文件名 
+libmicrohttpd-0.9.17-w32.zip。该文件也位于代码库的 package 目录。</p>
+<p>libmicrohttpd 二进制包还需要的 DLL 如下，为简单起见，这些文件也放入上述 bin 目录。</p>
+<ul>
+	<li><a href="http://www.mingw.org/wiki/InstallationHOWTOforMinGW">
+	libiconv-2.dll</a></li>
+</ul>
+<hr />
+<p><a href="index.html">C-- Quick Manual</a></p>
+
+</body>
+
+</html>
