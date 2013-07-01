@@ -1,0 +1,100 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+<meta content="zh-cn" http-equiv="Content-Language" />
+<title>C-- Quick Manual - 简介</title>
+<link href="../main.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+
+<h1>C-- 简介</h1>
+<h2>C-- 综述</h2>
+<p>C-- (C Decrement) 是一套基于标准 C++ 实现的语言风格框架和运行库。它被设计为满足如下目标：</p>
+<ul>
+	<li>在<strong>不需要</strong>对编译器、开发工具做任何修改，或者增加额外的代码转译工作的前提下，通过为 C++ 程序员提供类似 
+	Java 或者 C# 的<strong>代码风格和运行库</strong>支持，<strong>提高</strong>应用程序开发的生产率。</li>
+</ul>
+<p>C-- 项目具有如下的特点：</p>
+<ol>
+	<li>完全基于标准 C++ 实现，没有对预处理器和编译器做任何修改</li>
+	<li>提供类似 Java / C# 的代码书写风格</li>
+	<li>与传统风格 C++ 代码无缝整合，提供 C/C++ 级别的底层控制能力（因为本来就是 C++ 代码）</li>
+	<li>可以跨模块边界使用（静态库或共享库）</li>
+	<li>提供跨平台的，统一风格的 Library 实现</li>
+</ol>
+<p>从逻辑上，C-- 项目包含三个部分：</p>
+<ul>
+	<li>Essential：提供支持 C-- 代码风格和 Library 实现的标准定义</li>
+	<li>Tools：用于 C++ 代码的工具库，通常用于效率优化，C-- 的库可能会使用它们</li>
+	<li>Library：提供跨平台的运行库，包含实现在 C-- 主工程中的标准库和独立的扩展库</li>
+</ul>
+<h2>发展历史</h2>
+<p>C-- 项目启动于 2008 年 5 月 8 日，最初的目的是通过实施一种新的语言风格，简化 C++ 应用程序的写法。最开始的尝试在 WPS Office 
+项目的 KFC 工程中，代号是 Decorated C++。但因为项目阶段的问题，该尝试未进行推广。</p>
+<p>2009 年，WPS Office Web 
+项目启动，其中电子表格部分采用服务端计算模型。该项目中，对原有电子表格内核的封装工作采用新的代码风格完成，并将其命名为 C--。新的 C-- 相关代码位于从 
+KFC 分离出的 KfcWOW 工程。</p>
+<p>快盘项目启动后，KfcWOW 进一步简化为 Kfclite。去掉了 KFC 中带有明显 Office 功能特色，或不适合放入基础库的内容。该工程主要工作在 
+MS VC 和 GCC 环境下。</p>
+<h2>代码示例</h2>
+<p>下面是一段 C-- 程序例子，其用途是递归遍历并显示一个目录中的所有文件和文件夹。</p>
+<pre class="code">void DeleteFilesRecursive(stringx path)
+{
+    ref&lt;ArrayV&lt;stringx&gt; &gt; names = Directory::GetFiles(path);
+    for_each (stringx, name, names)
+	File::Delete(Path::Join(path, name));
+
+    names = Directory::GetDirectory(path);
+    DeleteFilesRecursive(Path::Join(path, name));
+
+    Directory::Delete(path);
+}</pre>
+<p>与之对应的 C# 代码如下。</p>
+<pre class="code">void DeleteFilesRecursive(string path)
+{
+    string[] names = Directory.GetFiles(path);
+    foreach (string name in names)
+	File.Delete(name);
+
+    names = Directory.GetDirectory(path);
+    DeleteFilesRecursive(name);
+
+    Directory.Delete(path);
+}</pre>
+<p>请注意 C# 和 C-- 中枚举文件/子目录方法的返回稍有不同，前者返回全路径，后者返回文件名。除此区别之外，两段代码可以一一对应。</p>
+<h2>兼容性</h2>
+<p>C-- 基于标准 C++，在 C++ 03 体系中有较好的兼容性。C-- 不支持过旧的编译器，例如 VC 6，它对于 C++ 03 
+标准的一些支持存在问题。</p>
+<p>考虑到适用性，C-- 不依赖 C++ 11（C++ 0x）。但有一些细节特性，在不支持 C++ 11 的编译器上会有一些区别，如下：</p>
+<ul>
+	<li>C-- 使用 16 位 Unicode 字符串（UCS-2），参见后文</li>
+</ul>
+<h2>Unicode</h2>
+<p>在 Unicode 支持上，C-- 使用 C++ 11 定义的 16 位字符类型（UCS-2）。我们建议使用 WCHAR 类型来表示字符类型，它一定是 
+16 位的。</p>
+<p>在不同的编译器下，实现细节稍有不同。对于纯 C-- 代码，不需要关注这个细节问题。但在使用传统 C++ 代码混合编程时，需要考虑它带来的影响。</p>
+<ul>
+	<li>MSVC：定义为 wchar_t，因为同为 16 位，因此所有 CRT 函数均可使用。</li>
+	<li>GCC：在不支持 C++ 11 的编译器下定义为 unsigned short int，在支持 C++ 11 的编译下定义为 
+	char16_t。没有提供对应的 CRT 函数。</li>
+</ul>
+<p>当构造跨平台应用时，我们推荐按如下顺序选择字符串操作方法。</p>
+<ol>
+	<li>首选是 C-- 提供的字符串类型和字符串相关类，例如 StringBuilder，Converter 等。</li>
+	<li>其次使用 C-- 定义的 wstring16 类，它是 STL basic_string 的一个特化。不要使用 wstring 类或 
+	u16string 类。</li>
+	<li>wstring16.h 中定义了少量字符串函数，也可以使用（不推荐）。</li>
+</ol>
+<h2>互操作性</h2>
+<p>C-- 使用标准 C++ 实现，没有对预处理器或编译器做任何改动，因此可以非常方便地与传统 C++ 风格代码混合开发。通常我们建议整体上采用 C-- 
+风格，利用混合开发来进行热点代码的优化，以及引用非 C-- 风格的库。</p>
+<p>请参阅 CH 1-6 互操作 了解细节信息。</p>
+<hr />
+<p><a href="index.html">C-- Quick Manual</a></p>
+
+</body>
+
+</html>

@@ -1,0 +1,100 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+<meta http-equiv="Content-Language" content="zh-cn" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>2008-5-19 C-- 字符串</title>
+<link rel="stylesheet" type="text/css" href="../main.css" />
+</head>
+
+<body>
+
+<h1>2008-5-19 C-- 字符串</h1>
+<p>下面我们讨论 C-- 实现中，与字符串相关的部分。</p>
+<h2>cdec::stringx 类</h2>
+<p>C-- 基础库提供 stringx 类的实现，但它在使用上不应该被视为类对象，也不要使用 ref 引用。我们期望以类似整数一样的方式来使用字符串，例如：</p>
+<p class="code">stringx StringConcatenate ( stringx a, stringx b )<br />
+{<br />
+&nbsp;&nbsp;&nbsp; return a + b;<br />
+}<br />
+<br />
+void foo ()<br />
+{<br />
+&nbsp;&nbsp;&nbsp; stringx a = L&quot;Hello, &quot;, b = L&quot;C--&quot;;<br />
+&nbsp;&nbsp;&nbsp; stringx c = StringConcatenate(a, b);<br />
+}</p>
+<p>很显然，在 stringx 传递时，并没有真正地复制字符串。它们只是增加了对一份称为 String Content 的数据的引用。</p>
+<p>注 1：令人惊讶的是，采用这种方式来处理字符串有时候反而有助于提高效率。在 ET 
+的实践中，经常出现字符串的接收者（例如，一个工作表名）无法判断传入的字符串的生命周期是否足够持久，从而必须武断地复制一份。而 stringx 
+可以使复制操作延迟到必须发生之时，通常意味着不必复制。</p>
+<p>注 2：虽然主流的 STL 实现中，string 也是采用 Copy-on-write 技术。但是，由于它体积较大（stringx 在实现上只是一个指向 
+content 的指针），并且不能跨模块传递，因此并不适合 C-- 风格。</p>
+<h2>stringx 方法的风格</h2>
+<p>STL 的 string 和 .NET 的 string 给出了两种不同的操作风格。前者被认为是一个复杂的类，它包装了 C 
+风格字符串（即字符的数组）；后者被认为是一个数值类型，并且其数据本身不可修改，即被视为原子性数值。</p>
+<p>作为例子，我们考虑一个方法，它将字符串转为小写，两种风格的定义可以是：</p>
+<p class="code">// 风格 1, 类似 STL string<br />
+string&amp; string::ToLower()<br />
+{<br />
+&nbsp;&nbsp;&nbsp; &lt;&lt; 将自身内容转为小写 &gt;&gt;<br />
+&nbsp;&nbsp;&nbsp; return *this;<br />
+}<br />
+<br />
+// 风格 2, 类似 .NET string<br />
+string string::ToLower() const<br />
+{<br />
+&nbsp;&nbsp;&nbsp; string s = &lt;&lt; 内容的小写形式 &gt;&gt;;<br />
+&nbsp;&nbsp;&nbsp; return s;<br />
+}</p>
+<p>风格 1 改变了自身内容，返回引用是为了方便构造连续表达式；而风格 2 永远不改变字符串自身的内容，其结果总是通过返回新字符串给出。事实上，STL 
+string 的部分方法使用了风格 2，例如 substr 方法。</p>
+<p>后者虽然有效率的隐忧，但是它使得对象模型更为简单清晰（原子特性）。因此，我们在讨论后，决定统一使用风格 2 定义方法。</p>
+<p>作为代价，我们无法提供灵活的诸如 “<span class="code">s[0] = &#39;a&#39;</span>” 
+的字符串操作能力。但是，我们认为，如果对效率有所诉求，则不应使用 stringx。而应该使用 StringBuilder 类，或者传统 C++ 代码（包括 
+STL）。</p>
+<h2>互操作性</h2>
+<p>stringx 在构造/赋值操作中可以接受如下几种字符串：</p>
+<ul>
+	<li>C 风格 Unicode 字符串（const wchar_t*）</li>
+	<li>STL 字符串（const std::wstring&amp;）</li>
+</ul>
+<p>并且支持转换操作符输出 wstring。不过，不论是从其他类型转换到 stringx，还是反之，在转换过程中字符串内容都会被复制。</p>
+<p>如果要获得指向字符序列的指针，则需要使用 pin_ptr 类似的互操作支持。鉴于 wstring 的维护相对简单，建议先转换到 wstring，然后用 
+c_str 取出指针。</p>
+<p>stringx 与 BSTR / VARIANT 的互操作性，在进行到 COM 边界互操作时，再做讨论。</p>
+<p>MBCS 字符串的处理，交由运行库的 Encoding 部分完成，在进行到那一部分时，再做讨论。</p>
+<h2>MSR 托管字符串资源</h2>
+<p>运算库 MSR 服务是管理唯一字符串的服务，ET 的许多实现都使用了此服务。stringx 内建对此服务的支持，它包括：</p>
+<ol>
+	<li>使用 Register 方法将任意字符串注册到 MSR 服务，此时，该 stringx 代理了一个注册的字符串。</li>
+	<li>使用 FromRegisteredString 通过一个 MSR 句柄创建代理注册字符串的 stringx 实例。</li>
+</ol>
+<p>当一个 stringx 代理了已注册的字符串，任何传值操作都返回代理注册字符串的 stringx 实例，直到字符串内容被改变。</p>
+<p>在 ET 的实践中，由于内核大部分情况下保存的都是已注册的字符串，因此通过 stringx 从内核中取值可以避免大多数并不是必要的字符串复制操作。</p>
+<h2>stringx 实现</h2>
+<p>stringx 本质上是一个和 ref 类似的智能指针，它指向一个 StringContent 
+实例。后者包含了字符串的实体，以及引用计数，并且也可以保存一个注册字符串的句柄（stringx 代理注册字符串时）。</p>
+<p>StringContent 可以表示为类似如下结构：</p>
+<p class="code">class StringContent<br />
+{<br />
+&nbsp;&nbsp;&nbsp; bool _fRegistered;<br />
+&nbsp;&nbsp;&nbsp; UINT _ref;<br />
+&nbsp;&nbsp;&nbsp; union<br />
+&nbsp;&nbsp;&nbsp; {<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; kfc::vector_provider&lt;wchar_t&gt; 
+_buffer;<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; HANDLE _h_msr;<br />
+&nbsp;&nbsp;&nbsp; };<br />
+};</p>
+<p>具体实现时，会稍有差异。</p>
+
+<hr class="tail" />
+<p class="remark">See Also: <a href="index.htm">Journal</a></p>
+<p class="history">Document created on 2008-5-19 and released as Version 1 on 
+2008-5-19</p>
+<p class="history">Document last updated on 2008-5-19</p>
+
+</body>
+
+</html>

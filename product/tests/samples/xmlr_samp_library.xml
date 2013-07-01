@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<library name="Demo Library">
+	<owner>Somebody</owner>
+	<books>
+		<book title="梦想金山" price="42">
+			<comments />
+		</book>
+		<virtual title="WPS Help" price="0" />
+		<book title="My Diary" price="0" />
+	</books>
+</library>

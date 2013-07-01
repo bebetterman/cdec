@@ -1,0 +1,134 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClInclude Include="..\include\cdecegg\common\basic\bitorg.h">
+      <Filter>common\basic\export</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\cdecegg\common\basic\bitop.h">
+      <Filter>common\basic\export</Filter>
+    </ClInclude>
+    <ClInclude Include="stdafx.h">
+      <Filter>project</Filter>
+    </ClInclude>
+    <ClInclude Include="test_support.h">
+      <Filter>project</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\cdecegg\predef\exception.h">
+      <Filter>predef\export</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\cdecegg\predef\platform.h">
+      <Filter>predef\export</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\cdecegg\predef\stddef.h">
+      <Filter>predef\export</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\cdecegg\predef\stdlibs.h">
+      <Filter>predef\export</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\cdecegg\predef\stdtypes.h">
+      <Filter>predef\export</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\cdecegg\predef\wstring16.h">
+      <Filter>predef\export</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\cdecegg.h">
+      <Filter>project</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\cdecegg\intern\collection\bitarray.h">
+      <Filter>intern\collection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\cdecegg\intern\collection\guidset.h">
+      <Filter>intern\collection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\cdecegg\intern\collection\masshashset.h">
+      <Filter>intern\collection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\cdecegg\intern\collection\masshashset-impl.h">
+      <Filter>intern\collection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\cdecegg\intern\collection\vector_provider.h">
+      <Filter>intern\collection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\cdecegg\intern\algorithm\search.h">
+      <Filter>intern\algorithm\export</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="common\basic\bitorg.cpp">
+      <Filter>common\basic</Filter>
+    </ClCompile>
+    <ClCompile Include="common\basic\test\test_rtl_bitop.cpp">
+      <Filter>common\basic\test</Filter>
+    </ClCompile>
+    <ClCompile Include="common\basic\test\test_rtl_bitorg.cpp">
+      <Filter>common\basic\test</Filter>
+    </ClCompile>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>project</Filter>
+    </ClCompile>
+    <ClCompile Include="test_support.cpp">
+      <Filter>project</Filter>
+    </ClCompile>
+    <ClCompile Include="cdecegg.cpp">
+      <Filter>project</Filter>
+    </ClCompile>
+    <ClCompile Include="predef\exception.cpp">
+      <Filter>predef</Filter>
+    </ClCompile>
+    <ClCompile Include="predef\test\test_stdtypes.cpp">
+      <Filter>predef\test</Filter>
+    </ClCompile>
+    <ClCompile Include="predef\test\test_wstring16.cpp">
+      <Filter>predef\test</Filter>
+    </ClCompile>
+    <ClCompile Include="intern\algorithm\test\test_search.cpp">
+      <Filter>intern\algorithm\test</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="common">
+      <UniqueIdentifier>{2a2e6c35-9ed3-4996-a291-11599c7d0174}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="common\basic">
+      <UniqueIdentifier>{993a21a5-d359-4335-aafb-40ac5eaf972a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="common\basic\export">
+      <UniqueIdentifier>{a94c7b69-d111-488f-ae0a-11ad4e1587c4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="common\basic\test">
+      <UniqueIdentifier>{9d98489f-2835-4e92-a0ab-3048cda043d7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="project">
+      <UniqueIdentifier>{37b99345-a605-42a8-a566-848f2453b548}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="predef">
+      <UniqueIdentifier>{dc415e20-1eea-4201-8450-49f4d145d1a3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="predef\export">
+      <UniqueIdentifier>{00fe15e0-dc3f-4d15-b02f-82b24a589ecd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="predef\test">
+      <UniqueIdentifier>{a80a235b-7182-4a34-a027-ce41501626ec}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="intern">
+      <UniqueIdentifier>{c6fefa89-31dd-4fdd-a9fd-c7534d7e8ed0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="intern\collection">
+      <UniqueIdentifier>{d4395ec7-50fa-487b-aa89-c3d105ef52cc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="intern\algorithm">
+      <UniqueIdentifier>{ef519b8e-6858-4910-8b1c-80f8464fc210}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="intern\algorithm\export">
+      <UniqueIdentifier>{03564b31-5aa2-4f99-b728-71a06da2cdc9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="intern\algorithm\test">
+      <UniqueIdentifier>{f828ff8c-63d2-4b6e-a0a2-487950c24b13}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\include\cdecegg\intern\collection\guidset.inl">
+      <Filter>intern\collection</Filter>
+    </None>
+  </ItemGroup>
+</Project>

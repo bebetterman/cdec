@@ -1,0 +1,153 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+<meta content="zh-cn" http-equiv="Content-Language" />
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+<title>2008-10-7 Array 的实现</title>
+<link rel="stylesheet" type="text/css" href="../main.css" />
+</head>
+
+<body>
+
+<h1>2008-10-7 Array 的实现</h1>
+<h2>背景</h2>
+<p>Array 对象表示固定长度（创建之后）的数组，虽然它是一个非常基本的数据结构。但是直到开始构造文件操作的 Stream 类时，我们才开始实现它。因为 
+Stream 类的读写方法通常是如下形态。</p>
+<p>size_t Stream::Read ( void* pBuffer, size_t cbToRead )</p>
+<p>这个方法本身作为 Interop 支持被保留，但是，同时也需要一个更符合 C-- 风格的方法簇。很自然的，我们仿造 .NET 定义了如下方法。</p>
+<p>size_t Stream::Read ( ref&lt;Array&lt;BYTE&gt; &gt; buffer, size_t cbToRead, size_t 
+offset )</p>
+<p>这里产生了对 Array 的需求。</p>
+<h2>Concept</h2>
+<p>Array 的 Concept 定义非常简单，在初始化时给定长度，然后支持下标访问。</p>
+<p class="code">class Array&lt;T&gt;<br />
+{<br />
+&nbsp;&nbsp;&nbsp; Array(size_t length);<br />
+&nbsp;&nbsp;&nbsp; size_t Length();<br />
+&nbsp;&nbsp;&nbsp; ref&lt;T&gt;&amp; operator[](size_t index);<br />
+}</p>
+<p>其中，索引操作符的返回类型待定。</p>
+<h2>用于引用类型和值类型的 Array</h2>
+<p>按照之前的设想，我们希望使用一致的 Array 类，来处理引用类型和值类型。这意味着我们可以构造如下的代码：</p>
+<p class="code">ref&lt;Array&lt;int&gt; &gt; intArr = gc_new&lt;Array&lt;int&gt; &gt;(5);<br />
+intArr[0] = 1;<br />
+<br />
+// X 是一个自定义类<br />
+ref&lt;Array&lt;X&gt; &gt; xArr = gc_new&lt;Array&lt;X&gt; &gt;(5);<br />
+xArr[0] = gc_new&lt;X&gt;();</p>
+<p>由此带来的挑战是，Array 类需要自行识别类型 T 是值类型还是引用类型，以进行不同的处理。由于引用类型必须继承自 
+Object，所以我们可以首先应用一个判断继承的技巧。</p>
+<pre class="code">template &lt;class T, class U&gt;
+class Conversion
+{
+    typedef char Small;
+    class Big { char dummy[2]; };
+    static Small Test(U);
+    static Big Test(...);
+    static T MakeT();
+public:
+    enum { exists =
+        sizeof(Test(MakeT())) == sizeof(Small), sameType=0 };
+};
+ 
+template &lt;class T&gt;
+class Conversion&lt;T, T&gt;
+{
+public:
+    enum { exists = 1, sameType = 1 };
+};
+
+#define SUBCLASS(T, U) (Conversion&lt;const U*, const T*&gt;::exists)</pre>
+<p>宏 SUBCLASS 可以判断 T 是否为 U 的显式基类（并且没有二义性）。这段代码来自《C++ 新思维》，略有更改。</p>
+<p>据此，我们可以做一个 Policy，来根据不同的类型，展现不同行为。</p>
+<p class="code">template&lt;class T, bool f&gt;<br />
+struct Policy<br />
+{<br />
+&nbsp;&nbsp;&nbsp; enum { fRefClass = 1 };<br />
+&nbsp;&nbsp;&nbsp; typedef ref&lt;T&gt; element_type;<br />
+};<br />
+<br />
+template&lt;class T&gt;<br />
+struct Policy&lt;T, false&gt;<br />
+{<br />
+&nbsp;&nbsp;&nbsp; enum { fRefClass = 0 };<br />
+&nbsp;&nbsp;&nbsp; typedef T element_type;<br />
+};<br />
+<br />
+template&lt;class T&gt;<br />
+class Single<br />
+{<br />
+public:<br />
+&nbsp;&nbsp;&nbsp; typedef Policy&lt;T, SUBCLASS(Object, T) &gt; policy_type;<br />
+&nbsp;&nbsp;&nbsp; typedef typename policy_type::element_type element_type;<br />
+&nbsp;&nbsp;&nbsp; enum { fRefClass = policy_type::fRefClass };<br />
+private:<br />
+&nbsp;&nbsp;&nbsp; element_type m_value;<br />
+public:<br />
+&nbsp;&nbsp;&nbsp; element_type&amp; Value() { return m_value; }<br />
+&nbsp;&nbsp;&nbsp; static bool IsRefClass() { return fRefClass; }<br />
+}; </p>
+<p>这个例子展示了一个 Single 类，它封装了一个 T 的实例。并且，对于引用对象和值对象呈现不同的行为。</p>
+<p>尽管实际测试该方法可以正常工作，但是由于此方法过于复杂，同时给编译器带来了较大的负担（boost 
+的副作用）。因此我们决定用最原始的方案，使用两个不同的类：Array 用于引用对象，ArrayV 用于值对象。</p>
+<h2>Array 定义</h2>
+<p>由于需要支持对索引元素的修改（形如：“a[2]=...” 的调用），因此该方法需要定义如下：</p>
+<p class="syntax">ref&lt;T&gt;&amp; operator[](size_t);</p>
+<p>这将直接决定 Array 类缓冲区的类型。如果缓冲区是 ref&lt;T&gt; 的数组，则可以直接返回该元素，形如：</p>
+<p class="code">ref&lt;T&gt;* m_buffer;<br />
+ref&lt;T&gt;&amp; operator[]( size_t i )<br />
+{<br />
+&nbsp;&nbsp;&nbsp; return m_buffer[i];<br />
+}</p>
+<p>但是如果缓冲区是 T 的数组，则要么需要通过一个辅助类来实现这个效果（更新引用关系），要么（在当前空 GC 实现下）采用如下黑客方法：</p>
+<p class="code">T* m_buffer;<br />
+ref&lt;T&gt;&amp; operator[]( size_t i )<br />
+{<br />
+&nbsp;&nbsp;&nbsp; return (ref&lt;T&gt;&amp;)(m_buffer[i]);<br />
+}</p>
+<p>我们决定采用最直观的方式，即使用 ref&lt;T&gt; 的数组。</p>
+<h2>构造和析构</h2>
+<p>这一段代码遇到了一个意想不到的问题，本来我们是这样构造 ref&lt;T&gt; 数组的缓冲区的（代码经过适当简化）。</p>
+<p class="code">Array&lt;T&gt;::Array(size_t count)<br />
+{<br />
+&nbsp;&nbsp;&nbsp; m_count = count;<br />
+&nbsp;&nbsp;&nbsp; m_buffer = gc_type::AllocArrayMemory(count);<br />
+&nbsp;&nbsp;&nbsp; new(m_buffer) ref&lt;T&gt;[m_count];<br />
+}</p>
+<p>关键部分是使用 new[](size_t, void*) 操作符来调用各元素的构造函数（对于单个元素，对应的 new 
+操作符重载是有效的）。但是，这段代码在 VC 9 下工作不正常，gcc 下可以正常工作。</p>
+<p>经过调试，发现 VC 下 new[] 的构造函数调用代码里，将内存区域的前 4 字节用于保存数组元素的个数（以便 delete[] 
+正确调用析构函数）。这样造成了整体内存布局的错位，从而造成问题。gcc 
+是如何回避这个问题（或者可能有潜在问题）尚未仔细看。为保险起见，决定改用自己循环，逐个元素初始化。</p>
+<p>对于数组元素的构造和析构调用被转移到类 GcCreation 中，以便重用。</p>
+<h2>互操作性</h2>
+<p>回到最开始的问题上，Stream::Read 方法的实现。为避免效率损失，该方法需要进行内存级的操作，因此，ArrayV 
+有必要提供互操作方法，直接返回缓冲区内存指针。如下代码演示了整个过程：</p>
+<p class="code">template&lt;T&gt; class ArrayV<br />
+{<br />
+&nbsp;&nbsp;&nbsp; T* m_buffer;<br />
+&nbsp;&nbsp;&nbsp; pin_ptr&lt;T&gt; GetBuffer() { return pin_ptr&lt;T&gt;(m_buffer); }<br />
+};<br />
+<br />
+class Stream<br />
+{<br />
+&nbsp;&nbsp;&nbsp; size_t Read(ref&lt;ArrayV&lt;BYTE&gt; &gt; buffer, size_t length, size_t 
+offset)<br />
+&nbsp;&nbsp;&nbsp; {<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; pin_ptr&lt;BYTE&gt; pinBuffer = buffer-&gt;GetBuffer();<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; return Read(pinBuffer.ptr() + offset, 
+length);<br />
+&nbsp;&nbsp;&nbsp; }<br />
+};</p>
+<p>其中，pin_ptr 的作用是阻止 GC 回收过程（如果有）造成指针移动。</p>
+
+<hr class="tail" />
+<p class="remark">See Also: <a href="index.htm">Journal</a></p>
+<p class="history">Document created on 2008-10-7 and released as Version 1 on 
+2008-10-7</p>
+<p class="history">Document last updated on 2008-10-7</p>
+
+</body>
+
+</html>

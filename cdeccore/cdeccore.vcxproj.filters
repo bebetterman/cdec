@@ -1,0 +1,327 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="project">
+      <UniqueIdentifier>{dcf6325e-3c3b-4279-be65-8e660128ea64}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cdec">
+      <UniqueIdentifier>{780092a1-b413-4260-bde1-bdab32ebdffd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cdec\essential">
+      <UniqueIdentifier>{41d2cf2f-9652-4587-8954-e7bc6112563c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cdec\essential\export">
+      <UniqueIdentifier>{595260bb-5fe6-48f2-9534-a75042bb1b91}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cdec\collection">
+      <UniqueIdentifier>{ebedc976-810b-48ec-9933-669a3eb2fabc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cdec\collection\export">
+      <UniqueIdentifier>{6554b776-852c-42aa-813c-8ffde367ba6c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cdec\essential\test">
+      <UniqueIdentifier>{b5b4a607-4935-41dd-b350-a9346062caf9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cdec\collection\test">
+      <UniqueIdentifier>{69ec4723-6fa6-455f-9685-8abb22b99982}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cdec\text">
+      <UniqueIdentifier>{ddd5c630-9c28-445a-b8a0-b48d935584e9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cdec\text\export">
+      <UniqueIdentifier>{ab62df90-57a8-42c6-9dd9-1674fc01d0b2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cdec\io">
+      <UniqueIdentifier>{660d979b-e98f-4e6a-8ea4-e4fdb1df067e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cdec\io\export">
+      <UniqueIdentifier>{526497bc-a281-4fd6-8a6c-35769b14f6ac}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cdec\text\test">
+      <UniqueIdentifier>{087d9eb7-1b64-482f-88f1-1c78d8e67a95}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cdec\io\test">
+      <UniqueIdentifier>{aaea9b16-b6b1-4c00-9243-828c0b7a560f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cdec\crypto">
+      <UniqueIdentifier>{26f0c428-6880-4ab9-8a9c-eb2235ebcc37}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cdec\crypto\export">
+      <UniqueIdentifier>{1cc0059f-e1b2-4e6f-8017-43c8e59a3ac1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cdec\xmlce">
+      <UniqueIdentifier>{f930432a-54c2-4998-94dd-c04258a38b89}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cdec\xmlce\export">
+      <UniqueIdentifier>{4d9c6b38-5bb0-479a-b19f-df7a521ba30d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cdec\crypto\test">
+      <UniqueIdentifier>{3aefcc34-8c09-4f23-aa7f-96ceec461172}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cdec\xmlce\test">
+      <UniqueIdentifier>{0d2251de-8dfb-4e38-9f82-0a5d3cf4257e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cdec\common">
+      <UniqueIdentifier>{054f4d90-cbcb-4291-bdf4-e12c68e053c6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cdec\common\export">
+      <UniqueIdentifier>{7ce5a26f-d122-4d45-9dcd-3d1cb3173461}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cdec\threading">
+      <UniqueIdentifier>{a793c1a0-2bb9-4226-af0f-d80daff9c985}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cdec\threading\export">
+      <UniqueIdentifier>{763b2a1c-5fc2-4b18-aac0-b0bfdd348921}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cdec\common\test">
+      <UniqueIdentifier>{2ef43af7-e6e6-49c3-8306-d701010fde56}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="cdeccore.cpp">
+      <Filter>project</Filter>
+    </ClCompile>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>project</Filter>
+    </ClCompile>
+    <ClCompile Include="test_support.cpp">
+      <Filter>project</Filter>
+    </ClCompile>
+    <ClCompile Include="essential\string.cpp">
+      <Filter>cdec\essential</Filter>
+    </ClCompile>
+    <ClCompile Include="text\encoding.cpp">
+      <Filter>cdec\text</Filter>
+    </ClCompile>
+    <ClCompile Include="io\directory.cpp">
+      <Filter>cdec\io</Filter>
+    </ClCompile>
+    <ClCompile Include="io\stream.cpp">
+      <Filter>cdec\io</Filter>
+    </ClCompile>
+    <ClCompile Include="io\textreader.cpp">
+      <Filter>cdec\io</Filter>
+    </ClCompile>
+    <ClCompile Include="io\textwriter.cpp">
+      <Filter>cdec\io</Filter>
+    </ClCompile>
+    <ClCompile Include="io\filewrap_posix.cpp">
+      <Filter>cdec\io</Filter>
+    </ClCompile>
+    <ClCompile Include="io\filewrap_stdc.cpp">
+      <Filter>cdec\io</Filter>
+    </ClCompile>
+    <ClCompile Include="io\filewrap_win.cpp">
+      <Filter>cdec\io</Filter>
+    </ClCompile>
+    <ClCompile Include="text\codeconv.cpp">
+      <Filter>cdec\text</Filter>
+    </ClCompile>
+    <ClCompile Include="io\directory_linux.cpp">
+      <Filter>cdec\io</Filter>
+    </ClCompile>
+    <ClCompile Include="collection\test\test_coll_array.cpp">
+      <Filter>cdec\collection\test</Filter>
+    </ClCompile>
+    <ClCompile Include="collection\test\test_coll_vector.cpp">
+      <Filter>cdec\collection\test</Filter>
+    </ClCompile>
+    <ClCompile Include="essential\test\test_ess_interop.cpp">
+      <Filter>cdec\essential\test</Filter>
+    </ClCompile>
+    <ClCompile Include="essential\test\test_ess_ref.cpp">
+      <Filter>cdec\essential\test</Filter>
+    </ClCompile>
+    <ClCompile Include="essential\test\test_ess_string.cpp">
+      <Filter>cdec\essential\test</Filter>
+    </ClCompile>
+    <ClCompile Include="io\test\test_io_directory.cpp">
+      <Filter>cdec\io\test</Filter>
+    </ClCompile>
+    <ClCompile Include="io\test\test_io_filestream.cpp">
+      <Filter>cdec\io\test</Filter>
+    </ClCompile>
+    <ClCompile Include="io\test\test_io_textrw.cpp">
+      <Filter>cdec\io\test</Filter>
+    </ClCompile>
+    <ClCompile Include="text\test\test_text_encoding.cpp">
+      <Filter>cdec\text\test</Filter>
+    </ClCompile>
+    <ClCompile Include="crypto\crypto.cpp">
+      <Filter>cdec\crypto</Filter>
+    </ClCompile>
+    <ClCompile Include="crypto\md5.cpp">
+      <Filter>cdec\crypto</Filter>
+    </ClCompile>
+    <ClCompile Include="crypto\sha1.cpp">
+      <Filter>cdec\crypto</Filter>
+    </ClCompile>
+    <ClCompile Include="crypto\test\test_crypto_hash.cpp">
+      <Filter>cdec\crypto\test</Filter>
+    </ClCompile>
+    <ClCompile Include="xmlce\xmldom.cpp">
+      <Filter>cdec\xmlce</Filter>
+    </ClCompile>
+    <ClCompile Include="xmlce\xmlreader.cpp">
+      <Filter>cdec\xmlce</Filter>
+    </ClCompile>
+    <ClCompile Include="xmlce\xmlwriter.cpp">
+      <Filter>cdec\xmlce</Filter>
+    </ClCompile>
+    <ClCompile Include="xmlce\parsecore.cpp">
+      <Filter>cdec\xmlce</Filter>
+    </ClCompile>
+    <ClCompile Include="xmlce\domaccept.cpp">
+      <Filter>cdec\xmlce</Filter>
+    </ClCompile>
+    <ClCompile Include="xmlce\test\test_xmlce_dom.cpp">
+      <Filter>cdec\xmlce\test</Filter>
+    </ClCompile>
+    <ClCompile Include="xmlce\test\test_xmlce_read.cpp">
+      <Filter>cdec\xmlce\test</Filter>
+    </ClCompile>
+    <ClCompile Include="xmlce\test\test_xmlce_write.cpp">
+      <Filter>cdec\xmlce\test</Filter>
+    </ClCompile>
+    <ClCompile Include="common\console.cpp">
+      <Filter>cdec\common</Filter>
+    </ClCompile>
+    <ClCompile Include="common\test\test_converter.cpp">
+      <Filter>cdec\common\test</Filter>
+    </ClCompile>
+    <ClCompile Include="common\converter.cpp">
+      <Filter>cdec\common</Filter>
+    </ClCompile>
+    <ClCompile Include="crypto\aesalg.cpp">
+      <Filter>cdec\crypto</Filter>
+    </ClCompile>
+    <ClCompile Include="crypto\test\test_crypto_aes.cpp">
+      <Filter>cdec\crypto\test</Filter>
+    </ClCompile>
+    <ClCompile Include="common\test\test_bitconverter.cpp">
+      <Filter>cdec\common\test</Filter>
+    </ClCompile>
+    <ClCompile Include="collection\test\test_coll_map.cpp">
+      <Filter>cdec\collection\test</Filter>
+    </ClCompile>
+    <ClCompile Include="io\mapping.cpp">
+      <Filter>cdec\io</Filter>
+    </ClCompile>
+    <ClCompile Include="io\test\test_io_mapping.cpp">
+      <Filter>cdec\io\test</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="stdafx.h">
+      <Filter>project</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\cdeccore.h">
+      <Filter>project</Filter>
+    </ClInclude>
+    <ClInclude Include="test_support.h">
+      <Filter>project</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\cdeccore\xmlce\xmldom.h">
+      <Filter>cdec\xmlce\export</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\cdeccore\xmlce\xmlreader.h">
+      <Filter>cdec\xmlce\export</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\cdeccore\xmlce\xmlwriter.h">
+      <Filter>cdec\xmlce\export</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\cdeccore\crypto\hash.h">
+      <Filter>cdec\crypto\export</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\cdeccore\essential\foreach.h">
+      <Filter>cdec\essential\export</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\cdeccore\essential\gc.h">
+      <Filter>cdec\essential\export</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\cdeccore\essential\interop.h">
+      <Filter>cdec\essential\export</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\cdeccore\essential\predef.h">
+      <Filter>cdec\essential\export</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\cdeccore\essential\ref.h">
+      <Filter>cdec\essential\export</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\cdeccore\essential\string.h">
+      <Filter>cdec\essential\export</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\cdeccore\collection\array.h">
+      <Filter>cdec\collection\export</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\cdeccore\collection\vector.h">
+      <Filter>cdec\collection\export</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\cdeccore\text\encoding.h">
+      <Filter>cdec\text\export</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\cdeccore\io\directory.h">
+      <Filter>cdec\io\export</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\cdeccore\io\stream.h">
+      <Filter>cdec\io\export</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\cdeccore\io\textreader.h">
+      <Filter>cdec\io\export</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\cdeccore\io\textwriter.h">
+      <Filter>cdec\io\export</Filter>
+    </ClInclude>
+    <ClInclude Include="io\filewrap.h">
+      <Filter>cdec\io</Filter>
+    </ClInclude>
+    <ClInclude Include="text\codeconv.h">
+      <Filter>cdec\text</Filter>
+    </ClInclude>
+    <ClInclude Include="crypto\md5.h">
+      <Filter>cdec\crypto</Filter>
+    </ClInclude>
+    <ClInclude Include="crypto\sha1.h">
+      <Filter>cdec\crypto</Filter>
+    </ClInclude>
+    <ClInclude Include="xmlce\parsecore.h">
+      <Filter>cdec\xmlce</Filter>
+    </ClInclude>
+    <ClInclude Include="xmlce\domaccept.h">
+      <Filter>cdec\xmlce</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\cdeccore\common\stringbuilder.h">
+      <Filter>cdec\common\export</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\cdeccore\common\console.h">
+      <Filter>cdec\common\export</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\cdeccore\threading\criticalsection.h">
+      <Filter>cdec\threading\export</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\cdeccore\common\converter.h">
+      <Filter>cdec\common\export</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\cdeccore\common\math.h">
+      <Filter>cdec\common\export</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\cdeccore\common\datetime.h">
+      <Filter>cdec\common\export</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\cdeccore\crypto\crypto.h">
+      <Filter>cdec\crypto\export</Filter>
+    </ClInclude>
+    <ClInclude Include="crypto\aesalg.h">
+      <Filter>cdec\crypto</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\cdeccore\common\bitconverter.h">
+      <Filter>cdec\common\export</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\cdeccore\collection\map.h">
+      <Filter>cdec\collection\export</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\cdeccore\io\mapping.h">
+      <Filter>cdec\io\export</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
