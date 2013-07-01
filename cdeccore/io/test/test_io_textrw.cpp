@@ -7,7 +7,7 @@
 // -------------------------------------------------------------------------- //
 
 #include "stdafx.h"
-#include "../../../test_support.h"
+#include "../../test_support.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
