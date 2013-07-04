@@ -1,0 +1,81 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="import-win">
+      <UniqueIdentifier>{3b503e75-9973-4619-9173-59a151cbb695}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="import-win\cppcom">
+      <UniqueIdentifier>{fda2abc7-dc3e-453e-9e59-6e371ef20d29}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="test">
+      <UniqueIdentifier>{e5c875de-6a9f-4d17-97f2-5e06f7c49674}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\import-win\mysqlconn-1.1.3\include\mysql_connection.h">
+      <Filter>import-win</Filter>
+    </ClInclude>
+    <ClInclude Include="..\import-win\mysqlconn-1.1.3\include\mysql_driver.h">
+      <Filter>import-win</Filter>
+    </ClInclude>
+    <ClInclude Include="..\import-win\mysqlconn-1.1.3\include\cppconn\build_config.h">
+      <Filter>import-win\cppcom</Filter>
+    </ClInclude>
+    <ClInclude Include="..\import-win\mysqlconn-1.1.3\include\cppconn\config.h">
+      <Filter>import-win\cppcom</Filter>
+    </ClInclude>
+    <ClInclude Include="..\import-win\mysqlconn-1.1.3\include\cppconn\connection.h">
+      <Filter>import-win\cppcom</Filter>
+    </ClInclude>
+    <ClInclude Include="..\import-win\mysqlconn-1.1.3\include\cppconn\datatype.h">
+      <Filter>import-win\cppcom</Filter>
+    </ClInclude>
+    <ClInclude Include="..\import-win\mysqlconn-1.1.3\include\cppconn\driver.h">
+      <Filter>import-win\cppcom</Filter>
+    </ClInclude>
+    <ClInclude Include="..\import-win\mysqlconn-1.1.3\include\cppconn\exception.h">
+      <Filter>import-win\cppcom</Filter>
+    </ClInclude>
+    <ClInclude Include="..\import-win\mysqlconn-1.1.3\include\cppconn\metadata.h">
+      <Filter>import-win\cppcom</Filter>
+    </ClInclude>
+    <ClInclude Include="..\import-win\mysqlconn-1.1.3\include\cppconn\parameter_metadata.h">
+      <Filter>import-win\cppcom</Filter>
+    </ClInclude>
+    <ClInclude Include="..\import-win\mysqlconn-1.1.3\include\cppconn\prepared_statement.h">
+      <Filter>import-win\cppcom</Filter>
+    </ClInclude>
+    <ClInclude Include="..\import-win\mysqlconn-1.1.3\include\cppconn\resultset.h">
+      <Filter>import-win\cppcom</Filter>
+    </ClInclude>
+    <ClInclude Include="..\import-win\mysqlconn-1.1.3\include\cppconn\resultset_metadata.h">
+      <Filter>import-win\cppcom</Filter>
+    </ClInclude>
+    <ClInclude Include="..\import-win\mysqlconn-1.1.3\include\cppconn\sqlstring.h">
+      <Filter>import-win\cppcom</Filter>
+    </ClInclude>
+    <ClInclude Include="..\import-win\mysqlconn-1.1.3\include\cppconn\statement.h">
+      <Filter>import-win\cppcom</Filter>
+    </ClInclude>
+    <ClInclude Include="..\import-win\mysqlconn-1.1.3\include\cppconn\warning.h">
+      <Filter>import-win\cppcom</Filter>
+    </ClInclude>
+    <ClInclude Include="..\import-win\mysqlconn-1.1.3\include\fake_boost.h">
+      <Filter>import-win</Filter>
+    </ClInclude>
+    <ClInclude Include="stdafx.h" />
+    <ClInclude Include="test\testenv.h">
+      <Filter>test</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="mysqlcdec.cpp" />
+    <ClCompile Include="stdafx.cpp" />
+    <ClCompile Include="test\testenv.cpp">
+      <Filter>test</Filter>
+    </ClCompile>
+    <ClCompile Include="test\test_raw_basic.cpp">
+      <Filter>test</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
