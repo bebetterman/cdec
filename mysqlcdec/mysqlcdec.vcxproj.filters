@@ -93,5 +93,8 @@
     <ClCompile Include="test\test_operate_Ning.cpp">
       <Filter>test</Filter>
     </ClCompile>
+    <ClCompile Include="test\test_chp__mysql.cpp">
+      <Filter>test</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

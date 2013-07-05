@@ -49,6 +49,14 @@ public:
 			stringx w =  res->getString(2);
 			UNITTEST_ASSERT(s == w);
 		}
+		//dbutil->CloseConn();
+		prstmt  = dbutil->GetConn()->prepareStatement(__X("insert into stu values(? ,?)"));
+		for( int i=2; i<10; i++)
+		{
+			prstmt->SetInt(1,i);
+			prstmt->SetString(2,Converter::ToString(i));
+			prstmt->ExecuteUpdate();
+		}
 
 		dbutil->CloseConn();
 	}
