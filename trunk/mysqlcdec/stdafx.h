@@ -16,4 +16,7 @@
 #include "../import-win/mysqlconn-1.1.3/include/cppconn/statement.h"
 #include "../import-win/mysqlconn-1.1.3/include/cppconn/prepared_statement.h"
 
-using namespace std;
+#include "statement.h"
+#include "resultset.h"
+#include "prepareStatement.h"
+#include "dbUtil.h"

@@ -14,6 +14,7 @@ class TestRawBasic : public UnitTestSuite
 {
 	UNITTEST_SUITE(TestRawBasic)
 		UNITTEST_METHOD(testSimpleConn)
+
 	UNITTEST_SUITE_END()
 
 public:
@@ -23,7 +24,7 @@ public:
 
 	void testSimpleConn()
 	{
-		cout << endl;
+		std::cout << std::endl;
 
 		try {
 			sql::Driver *driver;
@@ -40,24 +41,24 @@ public:
 			stmt = con->createStatement();
 			res = stmt->executeQuery("SELECT * from stu");
 			while (res->next()) {
-				cout << "id = ";
-				cout << res->getString(1) << endl;
-				cout << "name = ";
-				cout << res->getString("name") << endl;
+				std::cout << "id = ";
+				std::cout << res->getString(1) << std::endl;
+				std::cout << "name = ";
+				std::cout << res->getString("name") << std::endl;
 			}
 			delete res;
 			delete stmt;
 			delete con;
 
 		} catch (sql::SQLException &e) {
-			cout << "# ERR: SQLException in " << __FILE__;
-			cout << "(" << __FUNCTION__ << ") on line i"            << __LINE__ << endl;
-			cout << "# ERR: " << e.what();
-			cout << " (MySQL error code: " << e.getErrorCode();
-			cout << ", SQLState: " << e.getSQLState() << " )" << endl;
+			std::cout << "# ERR: SQLException in " << __FILE__;
+			std::cout << "(" << __FUNCTION__ << ") on line i"            << __LINE__ << std::endl;
+			std::cout << "# ERR: " << e.what();
+			std::cout << " (MySQL error code: " << e.getErrorCode();
+			std::cout << ", SQLState: " << e.getSQLState() << " )" << std::endl;
 		}
 
-		cout << endl;
+		std::cout << std::endl;
 	}
 
 	void tearDown()
