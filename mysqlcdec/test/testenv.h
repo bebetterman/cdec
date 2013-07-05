@@ -30,5 +30,18 @@ struct ObjectRefSpy: _Ty
 };
 
 // -------------------------------------------------------------------------- //
-
+class TestEnv
+{
+public:
+	// 获取测试样张目录
+	static stringx get_sample_path(stringx fname)
+	{
+#ifdef X_OS_WINDOWS
+		static stringx pathSampleBase = __X("..\\mysqltests\\");
+#else
+		static stringx pathSampleBase = __X("../mysqltests/");
+#endif
+		return pathSampleBase + fname;
+	}
+};
 #endif

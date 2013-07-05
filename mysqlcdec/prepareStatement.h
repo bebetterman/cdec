@@ -13,7 +13,7 @@ public:
 	PrepareStatement(stringx sql);
 	void Close();
 	int ExecuteUpdate();
-	ref<ResultSet> ExecuteQuery(stringx sql);
+	ref<ResultSet> ExecuteQuery();
 	void SetString(UINT index, stringx value);
 	void SetInt(UINT index, INT value);
 	

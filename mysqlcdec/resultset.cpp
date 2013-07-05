@@ -23,7 +23,7 @@ ResultSet::~ResultSet()
 	}
 }
 
-bool ResultSet::next()
+bool ResultSet::Next()
 {
 	return m_impl->next();
 }
@@ -36,6 +36,11 @@ stringx ResultSet::getString(UINT32 columIndex) const
 	//convert sql::SQLString to stringx
 	return SqlStr2Strx(sqlStr);
 }
+UINT64 ResultSet::RowsCount() 
+{
+	return m_impl->rowsCount();
+}
+
 
 stringx ResultSet::getString(stringx columLabel) const
 {

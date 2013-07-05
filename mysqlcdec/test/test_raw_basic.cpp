@@ -9,19 +9,51 @@ static char THIS_FILE[] = __FILE__;
 
 #if ENABLE_TEST
 // -------------------------------------------------------------------------- //
-
+struct StringxSpy: stringx
+{
+	using stringx::m_pContent;
+};
 class TestRawBasic : public UnitTestSuite
 {
 	UNITTEST_SUITE(TestRawBasic)
 		UNITTEST_METHOD(testSimpleConn)
+		UNITTEST_METHOD(testPrepareStatement)
+		
 
 	UNITTEST_SUITE_END()
 
 public:
+	inline StringContent* getStringContent(stringx& s)
+	{
+		return ((StringxSpy&)s).m_pContent;
+	}
 	void setUp()
 	{
 	}
+	void testPrepareStatement()
+	{
+		stringx confPath=TestEnv::get_sample_path(__X("dbconfig.xml"));
+		Console::WriteLine(confPath);
+		ref<DbUtil> dbutil = gc_new<DbUtil>(confPath);
+		dbutil->Conn();
+	//	dbutil->Execute(__X("drop table if exists stu "));
+		dbutil->Execute(__X("create table stu(idd int(4) primary key ,name varchar(20)))"));
+		dbutil->Execute(__X("delete from stu"));
+		dbutil->Execute(__X("insert into stu values(1,'test')"));
+		ref<PrepareStatement> prstmt  = dbutil->GetConn()->prepareStatement(__X("select * from stu where id=?"));
+		prstmt->SetInt(1,1);
+		ref<ResultSet> res = prstmt->ExecuteQuery();
+		UNITTEST_ASSERT(res->RowsCount() == 1);
+		while(res->Next())
+		{
+			Console::WriteLine(__X("res=") + res->getString(2)+__X("|"));
+			stringx s = __X("test");
+			stringx w =  res->getString(2);
+			UNITTEST_ASSERT(s == w);
+		}
+		Console::WriteLine(__X("end"));
 
+	}
 	void testSimpleConn()
 	{
 		std::cout << std::endl;

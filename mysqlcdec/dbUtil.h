@@ -25,7 +25,7 @@ protected:
 public:
 	DbUtil(stringx pathConfig);
 	ref<Connection> Conn();
-	ref<Connection> Getconn(){return m_conn;};
+	ref<Connection> GetConn(){return m_conn;};
 	bool Execute(stringx sql);
 	int ExecuteUpdate(stringx sql);
 	ref<ResultSet> ExecuteQuery(stringx sql);
