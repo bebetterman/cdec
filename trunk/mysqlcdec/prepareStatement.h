@@ -1,7 +1,8 @@
 #pragma once
 #include "stdafx.h"
-
 using namespace  cdec;
+
+
 class PrepareStatement: public Object
 {
 	_CDEC_SHARED_CLASS(PrepareStatement)
@@ -12,7 +13,8 @@ public:
 	PrepareStatement(stringx sql);
 	void Close();
 	int ExecuteUpdate();
+	ref<ResultSet> ExecuteQuery(stringx sql);
 	void SetString(UINT index, stringx value);
-	void SetInt(UINT index ,INT value);
-	//ref<ResultSet> ExecuteQuery(stringx sql);
+	void SetInt(UINT index, INT value);
+	
 };

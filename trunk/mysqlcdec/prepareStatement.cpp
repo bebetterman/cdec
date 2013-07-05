@@ -7,7 +7,8 @@
 void PrepareStatement::Close()
 {
 	try{
-		m_impl->close();
+		if(m_impl != NULL)
+			m_impl->close();
 	} catch (sql::SQLException &e) {
 		std::cout << "# ERR: SQLException in " << __FILE__;
 		std::cout << "  on line " << __LINE__ << std::endl;
