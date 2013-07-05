@@ -28,7 +28,7 @@ bool ResultSet::Next()
 	return m_impl->next();
 }
 
-stringx ResultSet::getString(UINT32 columIndex) const
+stringx ResultSet::GetString(UINT32 columIndex) const
 {
 
 	sql::SQLString sqlStr = m_impl->getString(columIndex);
@@ -42,7 +42,7 @@ UINT64 ResultSet::RowsCount()
 }
 
 
-stringx ResultSet::getString(stringx columLabel) const
+stringx ResultSet::GetString(stringx columLabel) const
 {
 	sql::SQLString sqlStr = m_impl->getString(Strx2SqlStr(columLabel));
 	return SqlStr2Strx(sqlStr);

@@ -39,9 +39,9 @@ public:
 		/*create a test table demonstrating the use of cdec::Statement.excute()*/
 		ref<Statement> stmt = conn->CreateStatement();
 		
-		UNITTEST_ASSERT(0 == stmt->execute(__X("USE ") + db));
-		UNITTEST_ASSERT(0 == stmt->execute(__X("DROP TABLE IF EXISTS ") + table));
-		UNITTEST_ASSERT(0 == stmt->execute(__X("CREATE TABLE ") + table + __X("(\
+		UNITTEST_ASSERT(0 == stmt->Execute(__X("USE ") + db));
+		UNITTEST_ASSERT(0 == stmt->Execute(__X("DROP TABLE IF EXISTS ") + table));
+		UNITTEST_ASSERT(0 == stmt->Execute(__X("CREATE TABLE ") + table + __X("(\
 			id CHAR(16), \
 			name CHAR(16)\
 			)")));
@@ -59,20 +59,20 @@ public:
 			sql.Append(__X(", 'name"));
 			sql.Append(Converter::ToString(i));
 			sql.Append(__X("');"));
-			UNITTEST_ASSERT(0 ==stmt->execute(sql));
+			UNITTEST_ASSERT(0 ==stmt->Execute(sql));
 		}
 		Console::WriteLine(__X("#\t Insert datas to ") + table + __X(" successfully!"));
 		stringx sql = __X("select * from ") + table;
-		ref<ResultSet> res = stmt->executeQuery(sql);
+		ref<ResultSet> res = stmt->ExecuteQuery(sql);
 		UNITTEST_ASSERT(res->RowsCount() == EXAMPLE_NUM_TEST_ROWS);
 		int row = 0;
 		while (res->Next())
 		{
-			UNITTEST_ASSERT(res->getString(1) == Converter::ToString(EXAMPLE_NUM_TEST_START + row));
-			UNITTEST_ASSERT(res->getString(2) == (__X("name") + Converter::ToString(row)));
+			UNITTEST_ASSERT(res->GetString(1) == Converter::ToString(EXAMPLE_NUM_TEST_START + row));
+			UNITTEST_ASSERT(res->GetString(2) == (__X("name") + Converter::ToString(row)));
 			++row;
 		}
-		UNITTEST_ASSERT(0 == stmt->execute(__X("DROP TABLE IF EXISTS ") + table));
+		UNITTEST_ASSERT(0 == stmt->Execute(__X("DROP TABLE IF EXISTS ") + table));
 		conn->Close();
 		Console::WriteLine(__X("#\t -------------- End connector/C++ connction usage unit test -----------"));
 	}

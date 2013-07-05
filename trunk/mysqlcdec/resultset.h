@@ -15,8 +15,8 @@ public:
 	
 	//---------db operator-----------------------------
 	bool Next();
-	stringx getString(UINT32 columIndex) const;
-	stringx getString(stringx columLabel) const;
+	stringx GetString(UINT32 columIndex) const;
+	stringx GetString(stringx columLabel) const;
 	UINT64 RowsCount();
 
 protected:

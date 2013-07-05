@@ -27,14 +27,14 @@ Statement::~Statement()
 	}
 }
 
-bool Statement::execute(stringx sql)
+bool Statement::Execute(stringx sql)
 {
 	//convert stringx to SQLString
 	sql::SQLString sqlStr = Strx2SqlStr(sql); 
 	return m_impl->execute(sqlStr);
 }
 
-int Statement::executeUpdate(stringx sql)
+int Statement::ExecuteUpdate(stringx sql)
 {
 	//convert stringx to SQLString
 	sql::SQLString sqlStr = Strx2SqlStr(sql); 
@@ -43,7 +43,7 @@ int Statement::executeUpdate(stringx sql)
 
 
 
-ref<ResultSet> Statement::executeQuery(stringx sql)
+ref<ResultSet> Statement::ExecuteQuery(stringx sql)
 {
 	//convert stringx to SQLString
 	sql::SQLString sqlStr = Strx2SqlStr(sql);

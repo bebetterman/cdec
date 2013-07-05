@@ -57,7 +57,7 @@ ref<Statement> Connection::CreateStatement()
     }
     return  gc_new<Statement>(stmt);
 }
-ref<PrepareStatement> Connection::prepareStatement(stringx sql)
+ref<PrepareStatement> Connection::CreatePrepareStatement(stringx sql)
 {
     ref<Encoding>	 encode = Encoding::get_UTF8();
     std::string stdSql = encode->FromUnicode(sql);
