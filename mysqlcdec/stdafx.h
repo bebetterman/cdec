@@ -16,7 +16,10 @@
 #include "../import-win/mysqlconn-1.1.3/include/cppconn/statement.h"
 #include "../import-win/mysqlconn-1.1.3/include/cppconn/prepared_statement.h"
 
+
+
 #include "statement.h"
 #include "resultset.h"
 #include "prepareStatement.h"
+#include "connection.h"
 #include "dbUtil.h"
