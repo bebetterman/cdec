@@ -9,10 +9,7 @@ static char THIS_FILE[] = __FILE__;
 
 #if ENABLE_TEST
 // -------------------------------------------------------------------------- //
-struct StringxSpy: stringx
-{
-	using stringx::m_pContent;
-};
+
 class TestRawBasic : public UnitTestSuite
 {
 	UNITTEST_SUITE(TestRawBasic)
@@ -21,12 +18,7 @@ class TestRawBasic : public UnitTestSuite
 		
 
 	UNITTEST_SUITE_END()
-
 public:
-	inline StringContent* getStringContent(stringx& s)
-	{
-		return ((StringxSpy&)s).m_pContent;
-	}
 	void setUp()
 	{
 	}
