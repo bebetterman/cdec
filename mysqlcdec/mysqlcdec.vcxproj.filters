@@ -87,5 +87,8 @@
     <ClCompile Include="resultset.cpp" />
     <ClCompile Include="statement.cpp" />
     <ClCompile Include="connection.cpp" />
+    <ClCompile Include="test\test_connection_ly.cpp">
+      <Filter>test</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
