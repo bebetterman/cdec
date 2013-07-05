@@ -50,6 +50,7 @@ public:
 			UNITTEST_ASSERT(s == w);
 		}
 
+		dbutil->CloseConn();
 	}
 	void testSimpleConn()
 	{

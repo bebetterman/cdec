@@ -9,7 +9,7 @@ Connection::Connection(stringx dburl, stringx uname, stringx pwd)
 {
 	m_driver = get_driver_instance();
 	std::string sddburl = Strx2SqlStr(dburl);
-	std::cout << sddburl << std::endl;
+	//std::cout << sddburl << std::endl;
 	m_impl = m_driver->connect(sddburl,Strx2SqlStr(uname),Strx2SqlStr(pwd));
 }
 
@@ -17,7 +17,7 @@ Connection::Connection(stringx dburl, stringx uname, stringx pwd, stringx databa
 {
 	m_driver = get_driver_instance();
 	std::string sddburl = Strx2SqlStr(dburl);
-	std::cout << sddburl << std::endl;
+	//std::cout << sddburl << std::endl;
 	m_impl = m_driver->connect(sddburl,Strx2SqlStr(uname),Strx2SqlStr(pwd));
 	m_impl->setSchema(Strx2SqlStr(database));
 }
