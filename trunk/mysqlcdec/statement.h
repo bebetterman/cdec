@@ -22,11 +22,11 @@ public:
 
 public:
 
-#if 1
-	bool execute(stringx sql);
-	int executeUpdate(stringx sql);
-	ref<ResultSet> executeQuery(stringx sql);
-#endif
+
+    bool execute(stringx sql);
+    int executeUpdate(stringx sql);
+    ref<ResultSet> executeQuery(stringx sql);
+
 
 protected:
 	sql::Statement *m_impl;

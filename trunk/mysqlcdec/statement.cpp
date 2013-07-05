@@ -27,7 +27,6 @@ Statement::~Statement()
 	}
 }
 
-#if 1
 bool Statement::execute(stringx sql)
 {
 	//convert stringx to SQLString
@@ -41,7 +40,7 @@ int Statement::executeUpdate(stringx sql)
 	sql::SQLString sqlStr = Strx2SqlStr(sql); 
 	return m_impl->executeUpdate(sqlStr);
 }
-#endif
+
 
 
 ref<ResultSet> Statement::executeQuery(stringx sql)

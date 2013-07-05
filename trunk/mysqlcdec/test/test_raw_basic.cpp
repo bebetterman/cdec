@@ -81,15 +81,15 @@ public:
             delete stmt;
             delete con;
 
-        }
-        catch (sql::SQLException &e)
-        {
-            std::cout << "# ERR: SQLException in " << __FILE__;
-            std::cout << "(" << __FUNCTION__ << ") on line i"            << __LINE__ << std::endl;
-            std::cout << "# ERR: " << e.what();
-            std::cout << " (MySQL error code: " << e.getErrorCode();
-            std::cout << ", SQLState: " << e.getSQLState() << " )" << std::endl;
-        }
+		}
+		catch (sql::SQLException &e)
+		{
+			std::cout << "# ERR: SQLException in " << __FILE__;
+			std::cout << "(" << __FUNCTION__ << ") on line i"            << __LINE__ << std::endl;
+			std::cout << "# ERR: " << e.what();
+			std::cout << " (MySQL error code: " << e.getErrorCode();
+			std::cout << ", SQLState: " << e.getSQLState() << " )" << std::endl;
+		}
 
 		std::cout << std::endl;
 	}
