@@ -68,12 +68,11 @@ public:
 			con->setSchema("sxm");
 
 			stmt = con->createStatement();
-			res = stmt->executeQuery("SELECT * from stu");
+			std::string sql = "Welcome to Connector/C++";
+			res = stmt->executeQuery("SELECT 'Welcome to Connector/C++' AS _message");
 			while (res->next()) {
-				std::cout << "id = ";
-				std::cout << res->getString(1) << std::endl;
-				std::cout << "name = ";
-				std::cout << res->getString("name") << std::endl;
+				std::string mess = res->getString("_message");
+				UNITTEST_ASSERT(sql == mess);
 			}
 			delete res;
 			delete stmt;

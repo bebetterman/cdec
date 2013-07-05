@@ -4,11 +4,6 @@ using namespace  cdec;
 // -------------------------------------------------------------------------- //
 // Connection
 // -------------------------------------------------------------------------- //
-Connection::Connection(stringx dburl, stringx uname, stringx pwd, stringx database)
-{
-	Connection(dburl, uname, pwd);
-	m_impl->setSchema(Strx2SqlStr(database));
-}
 
 Connection::Connection(stringx dburl, stringx uname, stringx pwd)
 {
@@ -16,6 +11,15 @@ Connection::Connection(stringx dburl, stringx uname, stringx pwd)
 	std::string sddburl = Strx2SqlStr(dburl);
 	std::cout << sddburl << std::endl;
 	m_impl = m_driver->connect(sddburl,Strx2SqlStr(uname),Strx2SqlStr(pwd));
+}
+
+Connection::Connection(stringx dburl, stringx uname, stringx pwd, stringx database)
+{
+	m_driver = get_driver_instance();
+	std::string sddburl = Strx2SqlStr(dburl);
+	std::cout << sddburl << std::endl;
+	m_impl = m_driver->connect(sddburl,Strx2SqlStr(uname),Strx2SqlStr(pwd));
+	m_impl->setSchema(Strx2SqlStr(database));
 }
 
 void Connection::Close()
