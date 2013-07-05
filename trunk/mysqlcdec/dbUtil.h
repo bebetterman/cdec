@@ -4,7 +4,7 @@ using namespace  cdec;
 
 //--------------------------------------------
 /*convert sql::SQLString to cdec::stringx*/
-stringx SqlStr2Strx(sql::SQLString sqlStr, ref<Encoding>	encode = Encoding::get_UTF8());
+stringx SqlStr2Strx(sql::SQLString sqlStr, ref<Encoding> encode = Encoding::get_UTF8());
 /*convert cdec::stringx to sql::SQLString*/
 sql::SQLString Strx2SqlStr(stringx strx, ref<Encoding> encode = Encoding::get_UTF8());
 
@@ -12,7 +12,6 @@ sql::SQLString Strx2SqlStr(stringx strx, ref<Encoding> encode = Encoding::get_UT
 class DbUtil: public Object
 {
 	DECLARE_REF_CLASS(DbUtil)
-
 protected:
 	stringx m_dburl;
 	stringx m_uname;

@@ -3,7 +3,7 @@ using namespace  cdec;
 
 
 /*convert sql::SQLString to cdec::stringx*/
-stringx SqlStr2Strx(sql::SQLString sqlStr, ref<Encoding>	encode)
+stringx SqlStr2Strx(sql::SQLString sqlStr, ref<Encoding> encode)
 {
 	return encode->ToUnicode(sqlStr.asStdString());
 }
@@ -11,8 +11,8 @@ stringx SqlStr2Strx(sql::SQLString sqlStr, ref<Encoding>	encode)
 /*convert cdec::stringx to sql::SQLString*/
 sql::SQLString Strx2SqlStr(stringx strx, ref<Encoding> encode)
 {
-	std::string stdSql = encode->FromUnicode(strx);
-	return sql::SQLString(stdSql);
+    std::string stdSql = encode->FromUnicode(strx);
+    return sql::SQLString(stdSql);
 }
 
 // -------------------------------------------------------------------------- //
@@ -50,55 +50,63 @@ ref<Connection> DbUtil::Conn()
 }
 bool DbUtil::Execute(stringx sql)
 {
-	bool retCode = false;
-	try
-	{
-		sql::Statement * stmt = m_conn->m_impl->createStatement();
-		retCode = stmt->execute(Strx2SqlStr(sql));
-		delete stmt;
-	} catch (sql::SQLException &e) {
-		std::cout << "# ERR: SQLException in " << __FILE__;
-		std::cout << "  on line " << __LINE__ << std::endl;
-		std::cout << "# ERR: " << e.what();
-		std::cout << " (MySQL error code: " << e.getErrorCode();
-		std::cout << ", SQLState: " << e.getSQLState() << " )" << std::endl;
-	}
-	return retCode;
+    bool retCode = false;
+    try
+    {
+        sql::Statement *stmt = m_conn->m_impl->createStatement();
+        retCode = stmt->execute(Strx2SqlStr(sql));
+        delete stmt;
+    }
+    catch (sql::SQLException &e)
+    {
+        std::cout << "# ERR: SQLException in " << __FILE__;
+        std::cout << "  on line " << __LINE__ << std::endl;
+        std::cout << "# ERR: " << e.what();
+        std::cout << " (MySQL error code: " << e.getErrorCode();
+        std::cout << ", SQLState: " << e.getSQLState() << " )" << std::endl;
+    }
+    return retCode;
 }
 int DbUtil::ExecuteUpdate(stringx sql)
 {
-	int rowNum = 0;
-	try
-	{
-		sql::Statement * stmt = m_conn->m_impl->createStatement();
-		rowNum = stmt->executeUpdate(Strx2SqlStr(sql));
-		delete stmt;
-	} catch (sql::SQLException &e) {
-		std::cout << "# ERR: SQLException in " << __FILE__;
-		std::cout << "  on line " << __LINE__ << std::endl;
-		std::cout << "# ERR: " << e.what();
-		std::cout << " (MySQL error code: " << e.getErrorCode();
-		std::cout << ", SQLState: " << e.getSQLState() << " )" << std::endl;
-	}
-	return rowNum;
+    int rowNum = 0;
+    try
+    {
+        sql::Statement *stmt = m_conn->m_impl->createStatement();
+        rowNum = stmt->executeUpdate(Strx2SqlStr(sql));
+        stmt->close();
+        delete stmt;
+    }
+    catch (sql::SQLException &e)
+    {
+        std::cout << "# ERR: SQLException in " << __FILE__;
+        std::cout << "  on line " << __LINE__ << std::endl;
+        std::cout << "# ERR: " << e.what();
+        std::cout << " (MySQL error code: " << e.getErrorCode();
+        std::cout << ", SQLState: " << e.getSQLState() << " )" << std::endl;
+    }
+    return rowNum;
 }
 
 ref<ResultSet> DbUtil::ExecuteQuery(stringx sql)
 {
-	sql::ResultSet * res;
-	try
-	{
-		sql::Statement * stmt = m_conn->m_impl->createStatement();
-		res = stmt->executeQuery(Strx2SqlStr(sql));
-		delete stmt;
-	} catch (sql::SQLException &e) {
-		std::cout << "# ERR: SQLException in " << __FILE__;
-		std::cout << "  on line " << __LINE__ << std::endl;
-		std::cout << "# ERR: " << e.what();
-		std::cout << " (MySQL error code: " << e.getErrorCode();
-		std::cout << ", SQLState: " << e.getSQLState() << " )" << std::endl;
-	}
-	return gc_new<ResultSet>(res);
+    sql::ResultSet *res;
+    try
+    {
+        sql::Statement *stmt = m_conn->m_impl->createStatement();
+        res = stmt->executeQuery(Strx2SqlStr(sql));
+        stmt->close();
+        delete stmt;
+    }
+    catch (sql::SQLException &e)
+    {
+        std::cout << "# ERR: SQLException in " << __FILE__;
+        std::cout << "  on line " << __LINE__ << std::endl;
+        std::cout << "# ERR: " << e.what();
+        std::cout << " (MySQL error code: " << e.getErrorCode();
+        std::cout << ", SQLState: " << e.getSQLState() << " )" << std::endl;
+    }
+    return gc_new<ResultSet>(res);
 }
 void DbUtil::CloseConn()
 {

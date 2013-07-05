@@ -90,5 +90,8 @@
     <ClCompile Include="test\test_connection_ly.cpp">
       <Filter>test</Filter>
     </ClCompile>
+    <ClCompile Include="test\test_operate_Ning.cpp">
+      <Filter>test</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

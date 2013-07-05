@@ -24,11 +24,14 @@ Connection::Connection(stringx dburl, stringx uname, stringx pwd, stringx databa
 
 void Connection::Close()
 {
-	try
-	{
-		m_impl->close();
-		delete m_impl;
-	} catch (sql::SQLException &e) {
+    try
+    {
+        m_impl->close();
+        delete m_impl;
+    }
+    catch (sql::SQLException &e)
+    {
+
 		std::cout << "# ERR: SQLException in " << __FILE__;
 		std::cout << "  on line " << __LINE__ << std::endl;
 		std::cout << "# ERR: " << e.what();
@@ -39,15 +42,38 @@ void Connection::Close()
 
 ref<Statement> Connection::CreateStatement()
 {
-	sql::Statement *stmt = m_impl->createStatement();
-	ref<Statement> s = gc_new<Statement>(stmt);
-	return s;
+    sql::Statement *stmt = NULL;
+    try
+    {
+        stmt = m_impl->createStatement();
+    }
+    catch (sql::SQLException &e)
+    {
+        std::cout << "# ERR: SQLException in " << __FILE__;
+        std::cout << "  on line " << __LINE__ << std::endl;
+        std::cout << "# ERR: " << e.what();
+        std::cout << " (MySQL error code: " << e.getErrorCode();
+        std::cout << ", SQLState: " << e.getSQLState() << " )" << std::endl;
+    }
+    return  gc_new<Statement>(stmt);
 }
 ref<PrepareStatement> Connection::prepareStatement(stringx sql)
 {
-	ref<Encoding>	 encode = Encoding::get_UTF8();
-	std::string stdSql = encode->FromUnicode(sql);
-	sql::PreparedStatement *  sprstmt = m_impl->prepareStatement(stdSql);
-	ref<PrepareStatement> prstmt = gc_new<PrepareStatement>(sprstmt);
-	return prstmt;
+    ref<Encoding>	 encode = Encoding::get_UTF8();
+    std::string stdSql = encode->FromUnicode(sql);
+    sql::PreparedStatement *sprstmt = NULL;
+    try
+    {
+        sprstmt = m_impl->prepareStatement(stdSql);
+
+    }
+    catch (sql::SQLException &e)
+    {
+        std::cout << "# ERR: SQLException in " << __FILE__;
+        std::cout << "  on line " << __LINE__ << std::endl;
+        std::cout << "# ERR: " << e.what();
+        std::cout << " (MySQL error code: " << e.getErrorCode();
+        std::cout << ", SQLState: " << e.getSQLState() << " )" << std::endl;
+    }
+    return gc_new<PrepareStatement>(sprstmt);
 }

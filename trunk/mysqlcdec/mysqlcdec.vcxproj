@@ -114,6 +114,7 @@
     </ClCompile>
     <ClCompile Include="test\testenv.cpp" />
     <ClCompile Include="test\test_connection_ly.cpp" />
+    <ClCompile Include="test\test_operate_Ning.cpp" />
     <ClCompile Include="test\test_raw_basic.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
