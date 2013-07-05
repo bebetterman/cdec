@@ -82,6 +82,24 @@ int DbUtil::ExecuteUpdate(stringx sql)
 	}
 	return rowNum;
 }
+
+ref<ResultSet> DbUtil::ExecuteQuery(stringx sql)
+{
+	sql::ResultSet * res;
+	try
+	{
+		sql::Statement * stmt = m_conn->m_impl->createStatement();
+		res = stmt->executeQuery(Strx2SqlStr(sql));
+		delete stmt;
+	} catch (sql::SQLException &e) {
+		std::cout << "# ERR: SQLException in " << __FILE__;
+		std::cout << "  on line " << __LINE__ << std::endl;
+		std::cout << "# ERR: " << e.what();
+		std::cout << " (MySQL error code: " << e.getErrorCode();
+		std::cout << ", SQLState: " << e.getSQLState() << " )" << std::endl;
+	}
+	return gc_new<ResultSet>(res);
+}
 void DbUtil::CloseConn()
 {
 	m_conn->Close();

@@ -14,7 +14,7 @@ class TestRawBasic : public UnitTestSuite
 {
 	UNITTEST_SUITE(TestRawBasic)
 		UNITTEST_METHOD(testSimpleConn)
-		UNITTEST_METHOD(testPrepareStatement)
+		UNITTEST_METHOD(testDbUtil)
 		
 
 	UNITTEST_SUITE_END()
@@ -22,7 +22,7 @@ public:
 	void setUp()
 	{
 	}
-	void testPrepareStatement()
+	void testDbUtil()
 	{
 		stringx confPath=TestEnv::get_sample_path(__X("dbconfig.xml"));
 		ref<DbUtil> dbutil = gc_new<DbUtil>(confPath);
@@ -31,6 +31,14 @@ public:
 		dbutil->Execute(__X("create table stu(idd int(4),name varchar(20),primary key(idd))"));
 		dbutil->Execute(__X("delete from stu"));
 		dbutil->Execute(__X("insert into stu values(1,'test')"));
+		ref<ResultSet> resu = dbutil->ExecuteQuery(__X("select * from stu"));
+		UNITTEST_ASSERT(resu->RowsCount() == 1);
+		while(resu->Next())
+		{
+			stringx s = __X("test");
+			stringx w =  resu->getString(2);
+			UNITTEST_ASSERT(s == w);
+		}
 		ref<PrepareStatement> prstmt  = dbutil->GetConn()->prepareStatement(__X("select * from stu where idd=?"));
 		prstmt->SetInt(1,1);
 		ref<ResultSet> res = prstmt->ExecuteQuery();
@@ -41,6 +49,7 @@ public:
 			stringx w =  res->getString(2);
 			UNITTEST_ASSERT(s == w);
 		}
+
 	}
 	void testSimpleConn()
 	{
