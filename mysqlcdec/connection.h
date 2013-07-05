@@ -1,7 +1,7 @@
 #pragma once
 #include "stdafx.h"
-
 using namespace  cdec;
+
 class Connection : public Object
 {
 	_CDEC_SHARED_CLASS(Connection)

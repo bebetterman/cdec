@@ -9,8 +9,7 @@ ResultSet::ResultSet()
 	m_impl = NULL;
 }
 
-ResultSet::ResultSet(sql::ResultSet *res)
-	:m_impl(res)
+ResultSet::ResultSet(sql::ResultSet *res):m_impl(res)
 {
 	
 }
