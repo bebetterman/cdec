@@ -56,11 +56,12 @@ public:
 	{
 		std::cout << std::endl;
 
-		try {
-			sql::Driver *driver;
-			sql::Connection *con;
-			sql::Statement *stmt;
-			sql::ResultSet *res;
+        try
+        {
+            sql::Driver *driver;
+            sql::Connection *con;
+            sql::Statement *stmt;
+            sql::ResultSet *res;
 
 			/* Create a connection */
 			driver = get_driver_instance();
@@ -68,24 +69,27 @@ public:
 			/* Connect to the MySQL test database */
 			con->setSchema("sxm");
 
-			stmt = con->createStatement();
-			std::string sql = "Welcome to Connector/C++";
-			res = stmt->executeQuery("SELECT 'Welcome to Connector/C++' AS _message");
-			while (res->next()) {
-				std::string mess = res->getString("_message");
-				UNITTEST_ASSERT(sql == mess);
-			}
-			delete res;
-			delete stmt;
-			delete con;
+            stmt = con->createStatement();
+            std::string sql = "Welcome to Connector/C++";
+            res = stmt->executeQuery("SELECT 'Welcome to Connector/C++' AS _message");
+            while (res->next())
+            {
+                std::string mess = res->getString("_message");
+                UNITTEST_ASSERT(sql == mess);
+            }
+            delete res;
+            delete stmt;
+            delete con;
 
-		} catch (sql::SQLException &e) {
-			std::cout << "# ERR: SQLException in " << __FILE__;
-			std::cout << "(" << __FUNCTION__ << ") on line i"            << __LINE__ << std::endl;
-			std::cout << "# ERR: " << e.what();
-			std::cout << " (MySQL error code: " << e.getErrorCode();
-			std::cout << ", SQLState: " << e.getSQLState() << " )" << std::endl;
-		}
+        }
+        catch (sql::SQLException &e)
+        {
+            std::cout << "# ERR: SQLException in " << __FILE__;
+            std::cout << "(" << __FUNCTION__ << ") on line i"            << __LINE__ << std::endl;
+            std::cout << "# ERR: " << e.what();
+            std::cout << " (MySQL error code: " << e.getErrorCode();
+            std::cout << ", SQLState: " << e.getSQLState() << " )" << std::endl;
+        }
 
 		std::cout << std::endl;
 	}
