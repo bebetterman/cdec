@@ -36,20 +36,20 @@ public:
 		while(resu->Next())
 		{
 			stringx s = __X("test");
-			stringx w =  resu->getString(2);
+			stringx w =  resu->GetString(2);
 			UNITTEST_ASSERT(s == w);
 		}
-		ref<PrepareStatement> prstmt  = dbutil->GetConn()->prepareStatement(__X("select * from stu where idd=?"));
+		ref<PrepareStatement> prstmt  = dbutil->GetConn()->CreatePrepareStatement(__X("select * from stu where idd=?"));
 		prstmt->SetInt(1,1);
 		ref<ResultSet> res = prstmt->ExecuteQuery();
 		UNITTEST_ASSERT(res->RowsCount() == 1);
 		while(res->Next())
 		{
 			stringx s = __X("test");
-			stringx w =  res->getString(2);
+			stringx w =  res->GetString(2);
 			UNITTEST_ASSERT(s == w);
 		}
-		prstmt = dbutil->GetConn()->prepareStatement(__X("insert into stu values(? ,?)"));
+		prstmt = dbutil->GetConn()->CreatePrepareStatement(__X("insert into stu values(? ,?)"));
 		for( int i=2; i<=10; i++)
 		{	
 			prstmt->SetInt(1,i);

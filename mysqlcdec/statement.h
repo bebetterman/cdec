@@ -23,9 +23,9 @@ public:
 public:
 
 
-    bool execute(stringx sql);
-    int executeUpdate(stringx sql);
-    ref<ResultSet> executeQuery(stringx sql);
+    bool Execute(stringx sql);
+    int ExecuteUpdate(stringx sql);
+    ref<ResultSet> ExecuteQuery(stringx sql);
 
 
 protected:
