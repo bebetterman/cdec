@@ -38,7 +38,7 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <LinkIncremental>true</LinkIncremental>
+    <LinkIncremental>false</LinkIncremental>
     <OutDir>..\product\win32d\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -55,6 +55,7 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(OutDir)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>cdeccore.lib;cdecegg.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -92,11 +93,21 @@
     <ClInclude Include="..\import-win\mysqlconn-1.1.3\include\fake_boost.h" />
     <ClInclude Include="..\import-win\mysqlconn-1.1.3\include\mysql_connection.h" />
     <ClInclude Include="..\import-win\mysqlconn-1.1.3\include\mysql_driver.h" />
+    <ClInclude Include="connection.h" />
+    <ClInclude Include="dbUtil.h" />
+    <ClInclude Include="prepareStatement.h" />
+    <ClInclude Include="resultset.h" />
+    <ClInclude Include="statement.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="test\testenv.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="connection.cpp" />
+    <ClCompile Include="dbUtil.cpp" />
     <ClCompile Include="mysqlcdec.cpp" />
+    <ClCompile Include="prepareStatement.cpp" />
+    <ClCompile Include="resultset.cpp" />
+    <ClCompile Include="statement.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>

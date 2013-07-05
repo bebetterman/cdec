@@ -14,9 +14,10 @@ public:
 	~ResultSet();
 	
 	//---------db operator-----------------------------
-	bool next();
+	bool Next();
 	stringx getString(UINT32 columIndex) const;
 	stringx getString(stringx columLabel) const;
+	UINT64 RowsCount();
 
 protected:
 	//ref<Encoding>	 encode;

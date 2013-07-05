@@ -67,6 +67,11 @@
     <ClInclude Include="test\testenv.h">
       <Filter>test</Filter>
     </ClInclude>
+    <ClInclude Include="dbUtil.h" />
+    <ClInclude Include="prepareStatement.h" />
+    <ClInclude Include="resultset.h" />
+    <ClInclude Include="statement.h" />
+    <ClInclude Include="connection.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="mysqlcdec.cpp" />
@@ -77,5 +82,10 @@
     <ClCompile Include="test\test_raw_basic.cpp">
       <Filter>test</Filter>
     </ClCompile>
+    <ClCompile Include="dbUtil.cpp" />
+    <ClCompile Include="prepareStatement.cpp" />
+    <ClCompile Include="resultset.cpp" />
+    <ClCompile Include="statement.cpp" />
+    <ClCompile Include="connection.cpp" />
   </ItemGroup>
 </Project>
