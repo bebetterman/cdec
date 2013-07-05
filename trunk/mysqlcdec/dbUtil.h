@@ -12,19 +12,7 @@ stringx SqlStr2Strx(sql::SQLString sqlStr, ref<Encoding>	encode = Encoding::get_
 
 /*convert cdec::stringx to sql::SQLString*/
 sql::SQLString Strx2SqlStr(stringx strx, ref<Encoding> encode = Encoding::get_UTF8());
-class Connection : public Object
-{
-	_CDEC_SHARED_CLASS(Connection)
-private:
-	sql::Driver * m_driver;
-	sql::Connection *  m_impl;
-public:
-	Connection(stringx dburl,stringx uname,stringx pwd,stringx database);
-	ref<Statement> CreateStatement();
-	ref<PrepareStatement> prepareStatement(stringx sql);
-	void Close();
-	friend class DbUtil;
-};
+
 
 class DbUtil: public Object
 {
