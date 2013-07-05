@@ -31,6 +31,7 @@ public:
 		stringx name = __X("root");
 		stringx pwd = __X("openstack");
 		stringx db = __X("test");
+		stringx table = __X("testXXX");
 
 		//connect test database;
 		ref<Connection> conn = gc_new<Connection>(url, name, pwd);
@@ -39,12 +40,12 @@ public:
 		ref<Statement> stmt = conn->CreateStatement();
 		
 		UNITTEST_ASSERT(0 == stmt->execute(__X("USE ") + db));
-		UNITTEST_ASSERT(0 == stmt->execute(__X("DROP TABLE IF EXISTS testXXX")));
-		UNITTEST_ASSERT(0 == stmt->execute(__X("CREATE TABLE testXXX(\
+		UNITTEST_ASSERT(0 == stmt->execute(__X("DROP TABLE IF EXISTS ") + table));
+		UNITTEST_ASSERT(0 == stmt->execute(__X("CREATE TABLE ") + table + __X("(\
 			id CHAR(16), \
 			name CHAR(16)\
 			)")));
-		Console::WriteLine(__X("#\t testXXX table created"));
+		Console::WriteLine(__X("#\t ") + table + __X(" table created"));
 		
 		/* Populate the test table with data */
 		UINT64 EXAMPLE_NUM_TEST_ROWS = 5;
@@ -53,15 +54,15 @@ public:
 		for (int i = 0; i < EXAMPLE_NUM_TEST_ROWS; ++i)
 		{
 			stringx sql = __X("");
-			sql.Append(__X("INSERT INTO testXXX(id, name) VALUES ("));
+			sql.Append(__X("INSERT INTO ") + table + __X("(id, name) VALUES ("));
 			sql.Append(Converter::ToString(EXAMPLE_NUM_TEST_START + i));
 			sql.Append(__X(", 'name"));
 			sql.Append(Converter::ToString(i));
 			sql.Append(__X("');"));
 			UNITTEST_ASSERT(0 ==stmt->execute(sql));
 		}
-		Console::WriteLine(__X("#\t Insert datas to testXXX table successfully!"));
-		stringx sql = __X("select * from testXXX");
+		Console::WriteLine(__X("#\t Insert datas to ") + table + __X(" successfully!"));
+		stringx sql = __X("select * from ") + table;
 		ref<ResultSet> res = stmt->executeQuery(sql);
 		UNITTEST_ASSERT(res->RowsCount() == EXAMPLE_NUM_TEST_ROWS);
 		int row = 0;
