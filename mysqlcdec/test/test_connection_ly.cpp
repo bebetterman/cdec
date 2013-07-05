@@ -72,6 +72,7 @@ public:
 			UNITTEST_ASSERT(res->getString(2) == (__X("name") + Converter::ToString(row)));
 			++row;
 		}
+		UNITTEST_ASSERT(0 == stmt->execute(__X("DROP TABLE IF EXISTS ") + table));
 		conn->Close();
 		Console::WriteLine(__X("#\t -------------- End connector/C++ connction usage unit test -----------"));
 	}
