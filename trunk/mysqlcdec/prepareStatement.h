@@ -16,5 +16,4 @@ public:
 	ref<ResultSet> ExecuteQuery();
 	void SetString(UINT index, stringx value);
 	void SetInt(UINT index, INT value);
-	
 };

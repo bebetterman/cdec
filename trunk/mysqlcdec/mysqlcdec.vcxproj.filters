@@ -96,5 +96,8 @@
     <ClCompile Include="test\test_chp__mysql.cpp">
       <Filter>test</Filter>
     </ClCompile>
+    <ClCompile Include="test\test_chp_c--_mysql.cpp">
+      <Filter>test</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
