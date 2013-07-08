@@ -76,6 +76,15 @@
     <Filter Include="cdec\common\test">
       <UniqueIdentifier>{2ef43af7-e6e6-49c3-8306-d701010fde56}</UniqueIdentifier>
     </Filter>
+    <Filter Include="cdec\json">
+      <UniqueIdentifier>{a94824ef-96f5-4d7e-a363-053c8bf2439d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cdec\json\export">
+      <UniqueIdentifier>{eda8b118-59f1-4444-b6b2-cb9433b1f5f0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cdec\json\test">
+      <UniqueIdentifier>{ac6abb3b-bdbc-4ec9-9ea4-dd03d380b49b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="cdeccore.cpp">
@@ -210,6 +219,12 @@
     <ClCompile Include="io\test\test_io_mapping.cpp">
       <Filter>cdec\io\test</Filter>
     </ClCompile>
+    <ClCompile Include="json\jsonparser.cpp">
+      <Filter>cdec\json</Filter>
+    </ClCompile>
+    <ClCompile Include="json\test\test_json_parser.cpp">
+      <Filter>cdec\json\test</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -322,6 +337,9 @@
     </ClInclude>
     <ClInclude Include="..\include\cdeccore\io\mapping.h">
       <Filter>cdec\io\export</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\cdeccore\json\jsondom.h">
+      <Filter>cdec\json\export</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

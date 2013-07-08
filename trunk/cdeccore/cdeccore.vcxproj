@@ -168,6 +168,7 @@
     <ClInclude Include="..\include\cdeccore\io\stream.h" />
     <ClInclude Include="..\include\cdeccore\io\textreader.h" />
     <ClInclude Include="..\include\cdeccore\io\textwriter.h" />
+    <ClInclude Include="..\include\cdeccore\json\jsondom.h" />
     <ClInclude Include="..\include\cdeccore\text\encoding.h" />
     <ClInclude Include="..\include\cdeccore\threading\criticalsection.h" />
     <ClInclude Include="..\include\cdeccore\xmlce\xmldom.h" />
@@ -215,6 +216,8 @@
     <ClCompile Include="io\test\test_io_textrw.cpp" />
     <ClCompile Include="io\textreader.cpp" />
     <ClCompile Include="io\textwriter.cpp" />
+    <ClCompile Include="json\jsonparser.cpp" />
+    <ClCompile Include="json\test\test_json_parser.cpp" />
     <ClCompile Include="text\codeconv.cpp" />
     <ClCompile Include="text\encoding.cpp" />
     <ClCompile Include="text\test\test_text_encoding.cpp" />
