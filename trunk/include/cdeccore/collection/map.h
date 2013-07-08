@@ -51,6 +51,15 @@ public:
 		return it != m_impl.end() ? it->second : m_nil;
 	}
 	
+	// Similar to Get, but exception raised when specified key not found
+	_V&		at(const _K& key)
+	{
+		iterator_type it = m_impl.find(key);
+		if (it == m_impl.end())
+			cdec_throw(Exception(EC_KeyNotFound));
+		return it->second;
+	}
+
 	// If specified key exists, parameter Val is set the value, and returns true
 	// Otherwise, returns false, and the value of parameter Val is a default Value
 	// This method does not modify the collection in any case
@@ -97,6 +106,12 @@ public:
 		return gc_new<key_value_enum>(m_impl.begin(), m_impl.end());
 	}
 
+	ref<IEnumerable<KeyValuePair> > Enum()
+	{
+		ref<IEnumerator<KeyValuePair> > e = GetEnumerator();
+		return gc_new<Enumerable<KeyValuePair> >(e);
+	}
+
 	ref<IEnumerable<KeyValuePair> > EnumRange(const _K& first, const _K& last)
 	{
 		iterator_type itf = m_impl.lower_bound(first);
@@ -132,6 +147,13 @@ public:
 		ref<IEnumerator<_V> > e = gc_new<value_enum>(itf, itl);
 		return gc_new<Enumerable<_V> >(e);
 	}
+};
+
+//---------------------------------------------------------------------------//
+
+template<class _K, class _V>
+class SortedMapVR: public SortedMapVV<_K, ref<_V> >
+{
 };
 
 //---------------------------------------------------------------------------//
