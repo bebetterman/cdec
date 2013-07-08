@@ -113,6 +113,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="test\testenv.cpp" />
+    <ClCompile Include="test\test_chp_c--_mysql.cpp" />
     <ClCompile Include="test\test_chp__mysql.cpp" />
     <ClCompile Include="test\test_connection_ly.cpp" />
     <ClCompile Include="test\test_operate_Ning.cpp" />

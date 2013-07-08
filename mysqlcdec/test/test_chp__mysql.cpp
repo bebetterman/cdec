@@ -119,7 +119,7 @@ public:
             sql::ResultSet *rset;
             UNITTEST_ASSERT(!statement->execute("update staff set name = 'test' where id = 3"));
 
-            rset =  statement->executeQuery("select * from staff where id= 3 ");
+            rset =  statement->executeQuery("select * from staff where id = 3 ");
 			while(rset->next())
 			{
 				 string w=rset->getString(2);
