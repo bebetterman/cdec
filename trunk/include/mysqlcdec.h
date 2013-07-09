@@ -6,10 +6,10 @@
 	#include "../import-win/mysqlconn-1.1.3/include/fake_boost.h"
 	#include "../import-win/mysqlconn-1.1.3/include/mysql_connection.h"
 	#include "../import-win/mysqlconn-1.1.3/include/mysql_driver.h"
-	#include "cppconn/resultset.h"
-	#include "cppconn/exception.h"
-	#include "cppconn/statement.h"
-	#include "cppconn/prepared_statement.h"
+	#include "../import-win/mysqlconn-1.1.3/include/cppconn/resultset.h"
+	#include "../import-win/mysqlconn-1.1.3/include/cppconn/exception.h"
+	#include "../import-win/mysqlconn-1.1.3/include/cppconn/statement.h"
+	#include "../import-win/mysqlconn-1.1.3/include/cppconn/prepared_statement.h"
 
 #else
 	#include <mysql_connection.h>
