@@ -1,4 +1,5 @@
 #pragma once
+#include <cctype>
 
 CDEC_NS_BEGIN
 // -------------------------------------------------------------------------- //
@@ -6,7 +7,12 @@ CDEC_NS_BEGIN
 enum JsonExceptionCode
 {
 	EC_JSON_ST = MAKE_EX_CODE(ECNS_JSON, 0),
-	EC_IO_ExpectContent,			// Except content
+	EC_ExpectContent,			// Except content
+	EC_UnexpectedSymbol,
+	EC_ExpectSymbol,
+	EC_Expect,
+	EC_Unexpected,
+	EC_EmptyArg,
 };
 
 struct JsonException: Exception
@@ -16,6 +22,7 @@ struct JsonException: Exception
 
 	JsonException(int code, int pos, stringx message): Exception(code), Position(pos), Message(message)
 	{
+
 	}
 };
 
@@ -48,7 +55,12 @@ public:
 	ref<JsonNodeList>		NodeList;		// List
 
 public:
-	JsonNode(): NodeType(JSN_None) {}
+	JsonNode(): NodeType(JSN_None), IntValue(0), DblValue(0.0), 
+		Name(__X("")) , TextValue(__X(""))
+	{
+		NodeDict = gc_new<JsonNodeDictionary>();
+		NodeList = gc_new<JsonNodeList>();
+	}
 };
 
 class CDECCOREEXPORT JsonDom: public Object
@@ -58,6 +70,8 @@ class CDECCOREEXPORT JsonDom: public Object
 public:
 	ref<JsonNode>	Root;
 
+public:
+	JsonDom():Root(gc_new<JsonNode>()){}
 public:
 	void	Load(stringx text);
 };
