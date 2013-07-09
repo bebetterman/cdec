@@ -67,11 +67,12 @@
     <ClInclude Include="test\testenv.h">
       <Filter>test</Filter>
     </ClInclude>
-    <ClInclude Include="dbUtil.h" />
-    <ClInclude Include="prepareStatement.h" />
-    <ClInclude Include="resultset.h" />
-    <ClInclude Include="statement.h" />
-    <ClInclude Include="connection.h" />
+    <ClInclude Include="..\include\mysqlcdec\connection.h" />
+    <ClInclude Include="..\include\mysqlcdec\dbUtil.h" />
+    <ClInclude Include="..\include\mysqlcdec\prepareStatement.h" />
+    <ClInclude Include="..\include\mysqlcdec\resultset.h" />
+    <ClInclude Include="..\include\mysqlcdec\statement.h" />
+    <ClInclude Include="..\include\mysqlcdec.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="mysqlcdec.cpp" />

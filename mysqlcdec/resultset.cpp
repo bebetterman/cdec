@@ -1,6 +1,6 @@
 #pragma once
 #include "stdafx.h"
-#include "resultset.h"
+
 
 //CDEC_NS_BEGIN
 //---------------------------------------------
