@@ -40,7 +40,8 @@ class TestCdecEssString: public UnitTestSuite
 		UNITTEST_METHOD(testStringTrim)
 		UNITTEST_METHOD(teststringxSplit)
 		UNITTEST_METHOD(testSubstring)
-		UNITTEST_METHOD(testStartsWith);
+		UNITTEST_METHOD(testStartsWith)
+		UNITTEST_METHOD(testToUpper)
 		UNITTEST_METHOD(testEnumString)
 	UNITTEST_SUITE_END()
 
@@ -216,6 +217,13 @@ public:
 		UNITTEST_ASSERT(a.EndsWith(__X("")));
 		UNITTEST_ASSERT(a.EndsWith(NULL));
 		UNITTEST_ASSERT(!a.EndsWith(__X("cdec")));
+	}
+
+	void testToUpper()
+	{
+		stringx a = __X("6-14-12 Akasaka, Minato-ku, Tokyo");
+		UNITTEST_ASSERT(a.ToUpper() == __X("6-14-12 AKASAKA, MINATO-KU, TOKYO"));
+		UNITTEST_ASSERT(a.ToLower() == __X("6-14-12 akasaka, minato-ku, tokyo"));
 	}
 
 	void testEnumString()

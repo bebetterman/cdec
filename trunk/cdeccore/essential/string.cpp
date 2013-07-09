@@ -43,6 +43,54 @@ bool stringx::EndsWith(stringx subs)
 	return wstrcmp16(m_pContent->Content() + index, subs.m_pContent->Content()) == 0;
 }
 
+stringx stringx::ToUpper()
+{
+	size_t len = Length();
+	stringx result;
+	if (len == 0)
+		return result;
+
+	StringContent* pct = StringContent::CreateRawInstance(len);
+	WCHAR* pt = pct->Content();
+	const WCHAR* ps = c_str();
+	for (size_t i = 0; i < len; ++i)
+	{
+		WCHAR ch = *ps++;
+		if (ch >= 'a' && ch <= 'z')
+			ch -= 32;
+		*pt++ = ch;
+	}
+	pct->WriteTerminatorChar();
+
+	result._Assign(pct);
+	pct->Release();
+	return result;
+}
+
+stringx stringx::ToLower()
+{
+	size_t len = Length();
+	stringx result;
+	if (len == 0)
+		return result;
+
+	StringContent* pct = StringContent::CreateRawInstance(len);
+	WCHAR* pt = pct->Content();
+	const WCHAR* ps = c_str();
+	for (size_t i = 0; i < len; ++i)
+	{
+		WCHAR ch = *ps++;
+		if (ch >= 'A' && ch <= 'Z')
+			ch += 32;
+		*pt++ = ch;
+	}
+	pct->WriteTerminatorChar();
+
+	result._Assign(pct);
+	pct->Release();
+	return result;
+}
+
 stringx& stringx::Append(const stringx& s)
 {
 	if (s == NULL)

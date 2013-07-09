@@ -119,6 +119,9 @@ public:
 		return stringx(c_str() + pos, len);
 	}
 
+	stringx	ToLower();
+	stringx ToUpper();
+
 	int		IndexOf(WCHAR ch, int pos = 0);
 	int		IndexOfAny(ref<ArrayV<WCHAR> > chs, int pos = 0);
 	int		IndexOfAny(const WCHAR chs[], int cch, int pos = 0);
