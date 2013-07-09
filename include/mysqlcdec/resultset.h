@@ -4,8 +4,19 @@
 
 //CDEC_NS_BEGIN
 
+// -------------------------------------------------------------------------- //
+// Used in this project only 
+// -------------------------------------------------------------------------- //
+#ifdef RESULTSET_EXPORTS
+#define RESULTSETEXPORT DECLSPEC_EXPORT
+#else
+#define RESULTSETEXPORT DECLSPEC_IMPORT
+#endif
+
+#define RESULTSET_API(type)	EXTERN_C RESULTSETEXPORT type __stdcall
+
 //-----------------------------------------------------
-class ResultSet : public Object
+class  RESULTSETEXPORT ResultSet : public Object
 {
 	DECLARE_REF_CLASS(ResultSet)
 public:

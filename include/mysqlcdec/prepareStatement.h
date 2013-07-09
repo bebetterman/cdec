@@ -3,7 +3,18 @@
 using namespace  cdec;
 
 
-class PrepareStatement: public Object
+// -------------------------------------------------------------------------- //
+// Used in this project only 
+// -------------------------------------------------------------------------- //
+#ifdef PREPARESTATEMENT_EXPORTS
+#define PREPARESTATEMENTEXPORT DECLSPEC_EXPORT
+#else
+#define PREPARESTATEMENTEXPORT DECLSPEC_IMPORT
+#endif
+
+#define PREPARESTATEMENT_API(type)	EXTERN_C PREPARESTATEMENTEXPORT type __stdcall
+
+class  PREPARESTATEMENTEXPORT PrepareStatement: public Object
 {
 	DECLARE_REF_CLASS(PrepareStatement)
 private:

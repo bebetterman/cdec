@@ -2,6 +2,7 @@
 //   - stringx
 
 #pragma once
+#include <cctype>
 
 CDEC_NS_BEGIN
 

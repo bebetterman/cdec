@@ -13,7 +13,7 @@ static char THIS_FILE[] = __FILE__;
 class TestJsonParser : public UnitTestSuite
 {
 	UNITTEST_SUITE(TestJsonParser)
-		UNITTEST_METHOD(testStringValue)
+		UNITTEST_METHOD(TestStringValue)
 		UNITTEST_METHOD(TestIntValue)
 		UNITTEST_METHOD(TestBooleanValue)
 		UNITTEST_METHOD(TestNoneValue)
@@ -27,7 +27,7 @@ public:
 	{
 	}
 
-	void testStringValue()
+	void TestStringValue()
 	{
 		stringx s = __X("\"abc\"");
 		ref<JsonDom> dom = gc_new<JsonDom>();
