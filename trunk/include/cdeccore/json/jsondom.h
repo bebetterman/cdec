@@ -8,7 +8,7 @@ enum JsonExceptionCode
 {
 	EC_JSON_ST = MAKE_EX_CODE(ECNS_JSON, 0),
 	EC_ExpectContent,			// Except content
-	EC_UnexpectedSymbol,
+	EC_UnexpectedSymbol,		// UnExcept symbol
 	EC_ExpectSymbol,
 	EC_Expect,
 	EC_Unexpected,
