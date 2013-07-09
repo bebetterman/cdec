@@ -50,6 +50,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;MYSQLCDEC_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>../include/</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -93,11 +94,12 @@
     <ClInclude Include="..\import-win\mysqlconn-1.1.3\include\fake_boost.h" />
     <ClInclude Include="..\import-win\mysqlconn-1.1.3\include\mysql_connection.h" />
     <ClInclude Include="..\import-win\mysqlconn-1.1.3\include\mysql_driver.h" />
-    <ClInclude Include="connection.h" />
-    <ClInclude Include="dbUtil.h" />
-    <ClInclude Include="prepareStatement.h" />
-    <ClInclude Include="resultset.h" />
-    <ClInclude Include="statement.h" />
+    <ClInclude Include="..\include\mysqlcdec.h" />
+    <ClInclude Include="..\include\mysqlcdec\connection.h" />
+    <ClInclude Include="..\include\mysqlcdec\dbUtil.h" />
+    <ClInclude Include="..\include\mysqlcdec\prepareStatement.h" />
+    <ClInclude Include="..\include\mysqlcdec\resultset.h" />
+    <ClInclude Include="..\include\mysqlcdec\statement.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="test\testenv.h" />
   </ItemGroup>

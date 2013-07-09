@@ -4,22 +4,9 @@
 //
 
 #pragma once
-
-#include "../include/cdeccore.h"
-
-#include "../import-win/mysqlconn-1.1.3/include/fake_boost.h"
-#include "../import-win/mysqlconn-1.1.3/include/mysql_connection.h"
-#include "../import-win/mysqlconn-1.1.3/include/mysql_driver.h"
-
-#include "../import-win/mysqlconn-1.1.3/include/cppconn/resultset.h"
-#include "../import-win/mysqlconn-1.1.3/include/cppconn/exception.h"
-#include "../import-win/mysqlconn-1.1.3/include/cppconn/statement.h"
-#include "../import-win/mysqlconn-1.1.3/include/cppconn/prepared_statement.h"
+#include <cdeccore.h>
+#include <mysqlcdec.h>
 
 
 
-#include "statement.h"
-#include "resultset.h"
-#include "prepareStatement.h"
-#include "connection.h"
-#include "dbUtil.h"
+
