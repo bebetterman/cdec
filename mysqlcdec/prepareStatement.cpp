@@ -61,7 +61,7 @@ void PrepareStatement::SetString(UINT index, stringx value)
 	m_impl->setString(index,stdSql);
 }
 
-void PrepareStatement::SetInt(UINT index ,INT value)
+void PrepareStatement::SetInt(UINT index ,int value)
 {
 	m_impl->setInt(index,value);
 }
