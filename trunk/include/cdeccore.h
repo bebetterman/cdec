@@ -46,6 +46,7 @@
 
 #include "cdeccore/collection/vector.h"
 #include "cdeccore/collection/map.h"
+#include "cdeccore/collection/stack.h"
 
 // -------------------------------------------------------------------------- //
 // C-- Library - Text

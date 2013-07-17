@@ -25,6 +25,7 @@ enum JsonExceptionCode
 	EC_JSON_TypeError,			// Invalid node type
 	EC_JSON_MustHaveName,		// Must have a name
 	EC_JSON_MustNotHaveName,	// Must not have a name
+	EC_JSON_IncorrectRoot,		// Root expression must be a list
 };
 
 struct JsonException: Exception

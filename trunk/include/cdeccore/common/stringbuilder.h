@@ -4,7 +4,7 @@ CDEC_NS_BEGIN
 
 // -------------------------------------------------------------------------- //
 
-class CDECCOREEXPORT StringBuilder: public Object
+class StringBuilder: public Object
 {
 	DECLARE_REF_CLASS(StringBuilder)
 
@@ -24,9 +24,22 @@ public:
 	void Insert(int pos, WCHAR ch) { m_content.insert(m_content.begin() + pos, ch); }
 	void Insert(int pos, stringx s) { m_content.insert(pos, s.c_str(), s.Length()); }
 
+	void Remove(int pos, int len);
+
 	std::wstring16 ToStdString() { return m_content; }
 	stringx ToString() { return stringx(m_content); }
 };
+
+// -------------------------------------------------------------------------- //
+
+inline void StringBuilder::Remove(int pos, int len)
+{
+	if (pos < 0 || len < 0 || pos > Length() || pos + len > Length())
+		cdec_throw(Exception(EC_OutOfRange));
+
+	std::wstring16::iterator it = m_content.begin() + pos;
+	m_content.erase(it, it + len);
+}
 
 // -------------------------------------------------------------------------- //
 
