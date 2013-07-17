@@ -1,9 +1,5 @@
 #include "stdafx.h"
 
-//--------------DEBUG DEFINE--------------------
-#define DEBUG_TRUE 1
-#define DEBUG_FALSE 0
-
 CDEC_NS_BEGIN
 // -------------------------------------------------------------------------- //
 
@@ -18,7 +14,7 @@ protected:
 	{
 		pos = SeekNextNotSpace(text, pos);
 		if (pos < 0)
-			throw new JsonException(EC_ExpectContent, pos, __X("Expect content"));
+			cdec_throw(JsonException(EC_JSON_ExpectContent, pos));
 
 		WCHAR ch = text[pos];
 		if (ch == '{')
@@ -34,7 +30,7 @@ protected:
 		else if (ch == 'N' || ch == 'n')
 			return ParseInnerTextNoneValue(node, text, pos);
 		else
-			throw new JsonException(EC_UnexpectedSymbol, pos, __X("Unexpected symbol"));
+			cdec_throw(JsonException(EC_JSON_UnexpectedSymbol, pos));
 	}
 
 	int ParseInnerTextStringValue(ref<JsonNode> node, stringx text, int pos)
@@ -70,7 +66,6 @@ protected:
 		return pos;
 	}
 
-
 	int ParseInnerTextDictionary(ref<JsonNode> node, stringx text, int pos)
 	{
 		ASSERT(text[pos] == '{');
@@ -84,21 +79,21 @@ protected:
 		{
 			pos = SeekNextNotSpace(text, pos);
 			if (pos < 0)
-				throw new JsonException(EC_Expect, pos, __X("Expect end of dictionary node"));
+				cdec_throw(JsonException(EC_JSON_ExpectEndDictionry, pos));
 
 			WCHAR ch = text[pos];
 			if (ch == '\"')
 			{
 				if (flag == 2)
-					throw new JsonException(EC_ExpectSymbol, pos, __X("Expect , symbol"));
+					cdec_throw(JsonException(EC_JSON_ExpectComma, pos));
 
 				stringx key = ParseStringValueToken(text, pos);
 				if (key.Length() == 0)
-					throw new JsonException(EC_EmptyArg, pos, __X("Empty key"));
+					cdec_throw(JsonException(EC_JSON_EmptyKey, pos));
 
 				pos = SeekNextNotSpace(text, pos);
 				if (pos < 0 || text[pos] != ':')
-					throw new JsonException(EC_Expect, pos, __X("Expect :"));
+					cdec_throw(JsonException(EC_JSON_ExpectColon, pos));
 
 				ref<JsonNode> subnode = gc_new<JsonNode>();
 				subnode->Name = key;
@@ -114,19 +109,19 @@ protected:
 			else if (ch == ',')
 			{
 				if (flag != 2)
-					throw new JsonException(EC_UnexpectedSymbol, pos, __X("Unexpected , symbol"));
+					cdec_throw(JsonException(EC_JSON_UnexpectedComma, pos));
 				++pos;
 				flag = 1;
 			}
 			else if (ch == '}')
 			{
 				if (flag == 1)
-					throw new JsonException(EC_UnexpectedSymbol, pos, __X("Unexpected } symbol"));
+					cdec_throw(JsonException(EC_JSON_UnexpectedRCB, pos));
 				++pos;
 				break;
 			}
 			else
-				throw new JsonException(EC_UnexpectedSymbol, pos, __X("Unexpected symbol"));
+				cdec_throw(JsonException(EC_JSON_UnexpectedSymbol, pos));
 		}
 		return pos;
 	}
@@ -144,27 +139,27 @@ protected:
 		{
 			pos = SeekNextNotSpace(text, pos);
 			if (pos < 0)
-				throw new JsonException(EC_Expect, pos, __X("Expect end of dictionary node"));
+				cdec_throw(JsonException(EC_JSON_ExpectEndList, pos));
 
 			WCHAR ch = text[pos];
 			if (ch == ']')
 			{
 				if (flag == 1)
-					throw new JsonException(EC_UnexpectedSymbol, pos, __X("Unexpected ] symbol"));
+					cdec_throw(JsonException(EC_JSON_UnexpectedRSB, pos));
 				++pos;
 				break;
 			}
 			else if (ch == ',')
 			{
 				if (flag != 2)
-					throw new JsonException(EC_UnexpectedSymbol, pos, __X("Unexpected , symbol"));
+					cdec_throw(JsonException(EC_JSON_UnexpectedComma, pos));
 				++pos;
 				flag = 1;
 			}
 			else
 			{
 				if (flag == 2)
-					throw new JsonException(EC_ExpectSymbol, pos, __X("Expect , symbol"));
+					cdec_throw(JsonException(EC_JSON_ExpectComma, pos));
 
 				ref<JsonNode> subnode = gc_new<JsonNode>();
 				node->NodeList->Add(subnode);
@@ -231,7 +226,7 @@ protected:
 			else
 				sb->Append(ch);
 		}
-		throw new JsonException(EC_Expect, pos, __X("Expect end of value"));
+		cdec_throw(JsonException(EC_JSON_ExpectEndValue, pos));
 	}
 	
 	bool ParseNumberValueToken(stringx text, int& pos, int& ivalue, double& fvalue)
@@ -300,7 +295,7 @@ protected:
 		else if (token == __X("false"))
 			return false;
 		else 
-			throw new JsonException(EC_Unexpected, pos, __X("Unexpected value token"));
+			cdec_throw(JsonException(EC_JSON_UnexpectedValueToken, pos));
 	}
 
 	void ParseNoneValueToken(stringx text, int& pos)
@@ -317,7 +312,7 @@ protected:
 		stringx token = text.Substring(pos, endpos - pos).ToLower();
 		pos = endpos;
 		if (token != __X("null"))
-			throw new JsonException(EC_Unexpected, pos, __X("Unexpected null token"));
+			cdec_throw(JsonException(EC_JSON_UnexpectedNullToken, pos));
 	}
 
 	int SeekNextNotSpace(stringx text, int pos)
@@ -352,7 +347,7 @@ void JsonTextParser::Parse(stringx text)
 	{
 		endp = SeekNextNotSpace(text, endp);
 		if (endp >= 0)
-			throw new JsonException(EC_Unexpected, endp, __X("Unexpected content"));
+			cdec_throw(JsonException(EC_JSON_UnexpectedContent, endp));
 	}	
 }
 

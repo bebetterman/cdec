@@ -225,6 +225,9 @@
     <ClCompile Include="json\test\test_json_parser.cpp">
       <Filter>cdec\json\test</Filter>
     </ClCompile>
+    <ClCompile Include="json\jsonwriter.cpp">
+      <Filter>cdec\json</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -339,6 +342,9 @@
       <Filter>cdec\io\export</Filter>
     </ClInclude>
     <ClInclude Include="..\include\cdeccore\json\jsondom.h">
+      <Filter>cdec\json\export</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\cdeccore\json\jsonwriter.h">
       <Filter>cdec\json\export</Filter>
     </ClInclude>
   </ItemGroup>
