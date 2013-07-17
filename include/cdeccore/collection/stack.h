@@ -23,14 +23,14 @@ public:
 
 	value_type Pop()
 	{
-		value_type value = m_vecBuffer.back();
-		m_vecBuffer.pop_back();
+		value_type value = base_type::m_vecBuffer.back();
+		base_type::m_vecBuffer.pop_back();
 		return value;
 	}
 
 	value_type& Peek()
 	{
-		return Last();
+		return base_type::Last();
 	}
 };
 
