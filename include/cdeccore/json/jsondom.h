@@ -55,11 +55,8 @@ public:
 	ref<JsonNodeList>		NodeList;		// List
 
 public:
-	JsonNode(): NodeType(JSN_None), IntValue(0), DblValue(0.0), 
-		Name(__X("")) , TextValue(__X(""))
+	JsonNode(): NodeType(JSN_None), IntValue(0), DblValue(0.0)
 	{
-		NodeDict = gc_new<JsonNodeDictionary>();
-		NodeList = gc_new<JsonNodeList>();
 	}
 };
 

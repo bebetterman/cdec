@@ -113,7 +113,7 @@ public:
 		dom->Load(s);
 		UNITTEST_ASSERT(dom->Root->NodeType == JSN_NodeList && dom->Root->NodeList->Count() == 1);
 		ref<JsonNode> node = dom->Root->NodeList->at(0);
-		UNITTEST_ASSERT(node->NodeType == JSN_String && node->Name == __X("") && node->TextValue == __X("a"));
+		UNITTEST_ASSERT(node->NodeType == JSN_String && node->Name == NULL && node->TextValue == __X("a"));
 
 		s = __X(" [ \"a\" , \"\" ] ");
 		dom->Load(s);
