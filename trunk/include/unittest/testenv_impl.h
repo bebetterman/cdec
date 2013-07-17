@@ -231,10 +231,10 @@ public:																	\
 
 #ifdef _WIN32
 #define UNITTEST_METHOD_EXCEPTION(name)									\
-		AddCase(#name, (Addr)&ThisType:: ## name, fException)
+		AddCase(#name, (Addr)&ThisType:: ## name, fException);
 #else // linux
 #define UNITTEST_METHOD_EXCEPTION(name)									\
-		AddCase(#name, (Addr)&ThisType:: name, fException)
+		AddCase(#name, (Addr)&ThisType:: name, fException);
 #endif
 
 #define UNITTEST_SUITE_END()											\

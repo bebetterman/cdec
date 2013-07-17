@@ -33,6 +33,15 @@ class TestJsonWriter : public UnitTestSuite
 
 		UNITTEST_METHOD(TestComplextSample)
 
+		UNITTEST_METHOD_EXCEPTION(ErrorRootNodeHasName)
+		UNITTEST_METHOD_EXCEPTION(ErrorListChildHasName)
+		UNITTEST_METHOD_EXCEPTION(ErrorDictionaryChildWithoutName)
+		UNITTEST_METHOD_EXCEPTION(ErrorDictionaryNotClosed)
+		UNITTEST_METHOD_EXCEPTION(ErrorCloseNonexistDictionary)
+		UNITTEST_METHOD_EXCEPTION(ErrorCloseNonexistList)
+		UNITTEST_METHOD_EXCEPTION(ErrorCloseDictionaryByList)
+		UNITTEST_METHOD_EXCEPTION(ErrorCloseListByDictionary)
+
 	UNITTEST_SUITE_END()
 
 public:
@@ -492,6 +501,65 @@ public:
 
 		stringx t = wr->Complete();
 		UNITTEST_ASSERT(s == t);
+	}
+
+	void ErrorRootNodeHasName()
+	{
+		// A root value node should not have a name
+		ref<JsonWriter> wr = gc_new<JsonWriter>();
+		wr->WriteString(__X("name"), __X("abc"));
+	}
+
+	void ErrorListChildHasName()
+	{
+		ref<JsonWriter> wr = gc_new<JsonWriter>();
+		wr->BeginList(NULL);
+		wr->WriteString(__X("name"), __X("abc"));
+	}
+
+	void ErrorDictionaryChildWithoutName()
+	{
+		ref<JsonWriter> wr = gc_new<JsonWriter>();
+		wr->BeginDictionary(NULL);
+		wr->WriteString(NULL, __X("abc"));
+	}
+
+	void ErrorDictionaryNotClosed()
+	{
+		// A dictionary is not closed before completing
+		ref<JsonWriter> wr = gc_new<JsonWriter>();
+		wr->BeginDictionary(NULL);
+		wr->Complete();
+	}
+	
+	void ErrorCloseNonexistDictionary()
+	{
+		ref<JsonWriter> wr = gc_new<JsonWriter>();
+		wr->BeginDictionary(NULL);
+		wr->EndDictionary();
+		wr->EndDictionary();
+	}
+	
+	void ErrorCloseNonexistList()
+	{
+		ref<JsonWriter> wr = gc_new<JsonWriter>();
+		wr->BeginList(NULL);
+		wr->EndList();
+		wr->EndList();
+	}
+	
+	void ErrorCloseDictionaryByList()
+	{
+		ref<JsonWriter> wr = gc_new<JsonWriter>();
+		wr->BeginDictionary(NULL);
+		wr->EndList();
+	}
+
+	void ErrorCloseListByDictionary()
+	{
+		ref<JsonWriter> wr = gc_new<JsonWriter>();
+		wr->BeginList(NULL);
+		wr->EndDictionary();
 	}
 
 	void tearDown()
