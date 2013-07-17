@@ -89,4 +89,57 @@ void JsonExpressFormater::WriteCollectionBody(ref<JsonExpress> expr, bool fKey, 
 }
 
 // -------------------------------------------------------------------------- //
+
+void JsonWriter::Reset()
+{
+	m_expr = JsonExpress::CreateMain();
+	m_stack = gc_new< Stack<JsonExpress> >();
+	m_stack->Push(m_expr);
+}
+
+void JsonWriter::BeginDictionary(stringx name)
+{
+	ref<JsonExpress> expr = gc_new<JsonExpress>(JSN_Dictionary);
+	m_expr->AddChild(name, expr);
+	m_expr = expr;
+	m_stack->Push(expr);
+}
+
+void JsonWriter::EndDictionary()
+{
+	if (m_stack->Count() < 2 || m_expr->NodeType != JSN_Dictionary)
+		cdec_throw(JsonException(EC_JSON_NoMatchedDictionary, 0));
+	m_stack->Pop();
+	m_expr = m_stack->Peek();
+}
+
+void JsonWriter::BeginList(stringx name)
+{
+	ref<JsonExpress> expr = gc_new<JsonExpress>(JSN_NodeList);
+	m_expr->AddChild(name, expr);
+	m_expr = expr;
+	m_stack->Push(expr);	
+}
+
+void JsonWriter::EndList()
+{
+	if (m_stack->Count() < 2 || m_expr->NodeType != JSN_NodeList)
+		cdec_throw(JsonException(EC_JSON_NoMatchedList, 0));
+	m_stack->Pop();
+	m_expr = m_stack->Peek();			
+}
+
+stringx JsonWriter::Complete()
+{
+	if (m_stack->Count() != 1)
+		cdec_throw(JsonException(EC_JSON_NodeUnclosed, 0));
+
+	ASSERT(m_stack->Peek() == m_expr);
+	ref<JsonExpressFormater> jsf = gc_new<JsonExpressFormater>();
+	jsf->IndentChars = IndentChars;
+	jsf->NewLineChars = NewLineChars;
+	return jsf->Format(m_expr);
+}
+
+// -------------------------------------------------------------------------- //
 CDEC_NS_END

@@ -70,7 +70,7 @@ protected:
 };
 
 // -------------------------------------------------------------------------- //
-/*
+
 class CDECCOREEXPORT JsonWriter: public Object
 {
 	DECLARE_REF_CLASS(JsonWriter)
@@ -80,76 +80,26 @@ public:
 	stringx		NewLineChars;
 
 protected:
-	ref<JsonExpress>	m_expr;
-	Stack<Expression.JsonExpress> m_stack;
+	ref<JsonExpress>			m_expr;
+	ref<Stack<JsonExpress> >	m_stack;
 
-	public JsonWriter()
-	{
-		Reset();
-	}
+public:
+	JsonWriter() { Reset(); }
+	
+	void Reset();
 
-	public void Reset()
-	{
-		m_expr = Expression.JsonExpress.CreateMain();
-		m_stack = new Stack<Expression.JsonExpress>();
-		m_stack.Push(m_expr);
-	}
+	void WriteString(stringx name, stringx value) { m_expr->AddChild(name, gc_new<JsonExpress>(value)); }
+	void WriteInt(stringx name, int value) { m_expr->AddChild(name, gc_new<JsonExpress>(value)); }
 
-	public void WriteString(string name, string value)
-	{
-		m_expr.AddChild(name, new Expression.JsonExpress(value));
-	}
+	void BeginDictionary(stringx name);
+	void EndDictionary();
 
-	public void WriteInt(string name, int value)
-	{
-		m_expr.AddChild(name, new Expression.JsonExpress(value));
-	}
+	void BeginList(stringx name);
+	void EndList();
 
-	public void BeginDictionary(string name)
-	{
-		Expression.JsonExpress expr = new Expression.JsonExpress(JsonNodeType.Dictionary);
-		m_expr.AddChild(name, expr);
-		m_expr = expr;
-		m_stack.Push(expr);
-	}
+	stringx Complete();
+};
 
-	public void EndDictionary()
-	{
-		if (m_stack.Count < 2 || m_expr.NodeType != JsonNodeType.Dictionary)
-			throw new JsonException(0, "No matched dictionary node");
-		m_stack.Pop();
-		m_expr = m_stack.Peek();
-	}
-
-	public void BeginList(string name)
-	{
-		Expression.JsonExpress expr = new Expression.JsonExpress(JsonNodeType.NodeList);
-		m_expr.AddChild(name, expr);
-		m_expr = expr;
-		m_stack.Push(expr);	
-	}
-
-	public void EndList()
-	{
-		if (m_stack.Count < 2 || m_expr.NodeType != JsonNodeType.NodeList)
-			throw new JsonException(0, "No matched list node");
-		m_stack.Pop();
-		m_expr = m_stack.Peek();			
-	}
-
-	public string Complete()
-	{
-		if (m_stack.Count != 1)
-			throw new JsonException(0, "Not all nodes closed");
-
-		Debug.Assert(m_stack.Peek() == m_expr);
-		Expression.JsonExpressFormater jsf = new Expression.JsonExpressFormater();
-		jsf.IndentChars = IndentChars;
-		jsf.NewLineChars = NewLineChars;
-		return jsf.Format(m_expr);
-	}
-}
-*/
 /*
 	public class JE
 	{

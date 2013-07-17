@@ -26,6 +26,9 @@ enum JsonExceptionCode
 	EC_JSON_MustHaveName,		// Must have a name
 	EC_JSON_MustNotHaveName,	// Must not have a name
 	EC_JSON_IncorrectRoot,		// Root expression must be a list
+	EC_JSON_NoMatchedDictionary,// No matched dictionary node
+	EC_JSON_NoMatchedList,		// No matched list node
+	EC_JSON_NodeUnclosed,		// Not all nodes closed
 };
 
 struct JsonException: Exception
