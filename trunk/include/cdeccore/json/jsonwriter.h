@@ -100,202 +100,207 @@ public:
 	stringx Complete();
 };
 
-/*
-	public class JE
+// -------------------------------------------------------------------------- //
+namespace json_express {
+
+// Note: JE is not a Cdec class
+class JE
+{
+public:
+	struct Node
 	{
-		public class Node
+		stringx				Key;
+		ref<JsonExpress>	Expr;
+
+		Node(stringx key, ref<JsonExpress> expr)
 		{
-			public stringx Key;
-			public JsonExpress Expr;
-
-			internal Node(stringx key, JsonExpress expr)
-			{
-				Key = key;
-				Expr = expr;
-			}
-
-			internal Node(stringx key, JsonNodeType vt)
-			{
-				Key = key;
-				Expr = new JsonExpress(vt);
-			}
-
-			internal Node(stringx key, stringx value)
-			{
-				Key = key;
-				Expr = new JsonExpress(value);
-			}
-
-			internal Node(stringx key, int value)
-			{
-				Key = key;
-				Expr = new JsonExpress(value);
-			}
+			Key = key;
+			Expr = expr;
 		}
 
-		public class BNode
+		Node(stringx key, JsonNodeType vt)
 		{
-			public stringx Key;
-			public JsonExpress Expr;
-
-			internal BNode(stringx key, JsonNodeType type)
-			{
-				Key = key;
-				Expr = new JsonExpress(type);
-			}
+			Key = key;
+			Expr = gc_new<JsonExpress>(vt);
 		}
 
-		public class ENode
+		Node(stringx key, stringx value)
 		{
-			public JsonNodeType NodeType;
-
-			internal ENode(JsonNodeType type)
-			{
-				NodeType = type;
-			}
+			Key = key;
+			Expr = gc_new<JsonExpress>(value);
 		}
 
-		Stack<JsonExpress> m_stack;
-
-		internal JE(JsonExpress expr)
+		Node(stringx key, int value)
 		{
-			m_stack = new Stack<JsonExpress>();
-			m_stack.Push(expr);
+			Key = key;
+			Expr = gc_new<JsonExpress>(value);
 		}
+	};
 
-		public static JE New()
+	struct BNode
+	{
+		stringx				Key;
+		ref<JsonExpress>	Expr;
+
+		BNode(stringx key, JsonNodeType type)
 		{
-			return ListExpr();
+			Key = key;
+			Expr = gc_new<JsonExpress>(type);
 		}
+	};
 
-		public static JE ListExpr()
+	struct ENode
+	{
+		JsonNodeType		NodeType;
+
+		ENode(JsonNodeType type)
 		{
-			JsonExpress expr = new JsonExpress(JSN_NodeList);
-			return new JE(expr);
+			NodeType = type;
 		}
+	};
+	
+	ref< Stack<JsonExpress> >	m_stack;
 
-		public static JE DictExpr()
-		{
-			JsonExpress expr = new JsonExpress(JSN_Dictionary);
-			return new JE(expr);
-		}
-
-		public static Node Pair(stringx key, stringx value)
-		{
-			return new Node(key, value);
-		}
-
-		public static Node Pair(stringx key, int value)
-		{
-			return new Node(key, value);
-		}
-
-		public static Node Pair(stringx key, JE sub)
-		{
-			JsonExpress expr = sub.FinalExpress();
-			return new Node(key, expr);
-		}
-
-		public static BNode Dict()
-		{
-			return new BNode(NULL, JSN_Dictionary);
-		}
-
-		public static BNode Dict(stringx key)
-		{
-			return new BNode(key, JSN_Dictionary);
-		}
-
-		public static BNode List()
-		{
-			return new BNode(NULL, JSN_NodeList);
-		}
-
-		public static BNode List(stringx key)
-		{
-			return new BNode(key, JSN_NodeList);
-		}
-
-		public static ENode EDict()
-		{
-			return new ENode(JSN_Dictionary);
-		}
-
-		public static ENode EList()
-		{
-			return new ENode(JSN_NodeList);
-		}
-
-		void AddItem(stringx key, JsonExpress expr)
-		{
-			m_stack.Peek().AddChild(key, expr);
-		}
-
-		public static JE operator +(JE e, Node node)
-		{
-			e.AddItem(node.Key, node.Expr);
-			return e;
-		}
-
-		public static JE operator +(JE e, BNode node)
-		{
-			e.AddItem(node.Key, node.Expr);
-			e.m_stack.Push(node.Expr);
-			return e;
-		}
-
-		public static JE operator +(JE e, ENode node)
-		{
-			if (e.m_stack.Count < 2)
-				throw new JsonException(0, "No collection to be closed");
-			if (node.NodeType != e.m_stack.Peek().NodeType)
-				throw new JsonException(0, "Incorrect closing collection type");
-
-			e.m_stack.Pop();
-			return e;
-		}
-
-		public static JE operator +(JE e, stringx value)
-		{
-			e.AddItem(NULL, new JsonExpress(value));
-			return e;
-		}
-
-		public static JE operator +(JE e, int value)
-		{
-			e.AddItem(NULL, new JsonExpress(value));
-			return e;
-		}
-
-		internal JsonExpress FinalExpress()
-		{
-			if (m_stack.Count != 1)
-				throw new JsonException(0, "Not all nodes closed");
-			return m_stack.Peek();
-		}
-
-		public static JE operator +(JE e, JE sub)
-		{
-			JsonExpress expr = sub.FinalExpress();
-			e.AddItem(NULL, expr);		
-			return e;
-		}
-
-		public stringx Complete()
-		{
-			JsonExpress expr = FinalExpress();
-			JsonExpressFormater jsf = new JsonExpressFormater();
-			return jsf.Format(expr);
-		}
-
-		public stringx Complete(JsonExpressFormater jsf)
-		{
-			JsonExpress expr = FinalExpress();
-			return jsf.Format(expr);
-		}
+	JE(ref<JsonExpress> expr)
+	{
+		m_stack = gc_new< Stack<JsonExpress> >();
+		m_stack->Push(expr);
 	}
 
-	*/
+	static JE New()
+	{
+		return ListExpr();
+	}
+
+	static JE ListExpr()
+	{
+		ref<JsonExpress> expr = gc_new<JsonExpress>(JSN_NodeList);
+		return JE(expr);
+	}
+
+	static JE DictExpr()
+	{
+		ref<JsonExpress> expr = gc_new<JsonExpress>(JSN_Dictionary);
+		return JE(expr);
+	}
+
+	static Node Pair(stringx key, stringx value)
+	{
+		return Node(key, value);
+	}
+
+	static Node Pair(stringx key, int value)
+	{
+		return Node(key, value);
+	}
+
+	static Node Pair(stringx key, JE sub)
+	{
+		ref<JsonExpress> expr = sub.FinalExpress();
+		return Node(key, expr);
+	}
+
+	static BNode Dict()
+	{
+		return BNode(NULL, JSN_Dictionary);
+	}
+
+	static BNode Dict(stringx key)
+	{
+		return BNode(key, JSN_Dictionary);
+	}
+
+	static BNode List()
+	{
+		return BNode(NULL, JSN_NodeList);
+	}
+
+	static BNode List(stringx key)
+	{
+		return BNode(key, JSN_NodeList);
+	}
+
+	static ENode EDict()
+	{
+		return ENode(JSN_Dictionary);
+	}
+
+	static ENode EList()
+	{
+		return ENode(JSN_NodeList);
+	}
+
+	JE& operator +(Node node)
+	{
+		AddItem(node.Key, node.Expr);
+		return *this;
+	}
+
+	JE& operator +(BNode node)
+	{
+		AddItem(node.Key, node.Expr);
+		m_stack->Push(node.Expr);
+		return *this;
+	}
+
+	JE& operator +(ENode node)
+	{
+		if (m_stack->Count() < 2)
+			cdec_throw(JsonException(EC_JSON_NoMatchedCollection, 0));
+		if (node.NodeType != m_stack->Peek()->NodeType)
+			cdec_throw(JsonException(EC_JSON_WrongCollectionType, 0));
+
+		m_stack->Pop();
+		return *this;
+	}
+
+	JE& operator +(stringx value)
+	{
+		AddItem(NULL, gc_new<JsonExpress>(value));
+		return *this;
+	}
+
+	JE& operator +(int value)
+	{
+		AddItem(NULL, gc_new<JsonExpress>(value));
+		return *this;
+	}
+
+	JE& operator +(JE sub)
+	{
+		ref<JsonExpress> expr = sub.FinalExpress();
+		AddItem(NULL, expr);		
+		return *this;
+	}
+
+	stringx Complete()
+	{
+		ref<JsonExpress> expr = FinalExpress();
+		ref<JsonExpressFormater> jsf = gc_new<JsonExpressFormater>();
+		return jsf->Format(expr);
+	}
+
+	stringx Complete(ref<JsonExpressFormater> jsf)
+	{
+		ref<JsonExpress> expr = FinalExpress();
+		return jsf->Format(expr);
+	}
+
+protected:
+	void AddItem(stringx key, ref<JsonExpress> expr)
+	{
+		m_stack->Peek()->AddChild(key, expr);
+	}
+
+	ref<JsonExpress> FinalExpress()
+	{
+		if (m_stack->Count() != 1)
+			cdec_throw(JsonException(EC_JSON_NodeUnclosed, 0));
+		return m_stack->Peek();
+	}
+};
+
+}
 
 // -------------------------------------------------------------------------- //
 

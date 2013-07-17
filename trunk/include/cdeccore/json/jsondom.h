@@ -28,6 +28,8 @@ enum JsonExceptionCode
 	EC_JSON_IncorrectRoot,		// Root expression must be a list
 	EC_JSON_NoMatchedDictionary,// No matched dictionary node
 	EC_JSON_NoMatchedList,		// No matched list node
+	EC_JSON_NoMatchedCollection,
+	EC_JSON_WrongCollectionType,
 	EC_JSON_NodeUnclosed,		// Not all nodes closed
 };
 
