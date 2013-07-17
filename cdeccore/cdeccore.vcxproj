@@ -148,6 +148,7 @@
     <ClInclude Include="..\include\cdeccore.h" />
     <ClInclude Include="..\include\cdeccore\collection\array.h" />
     <ClInclude Include="..\include\cdeccore\collection\map.h" />
+    <ClInclude Include="..\include\cdeccore\collection\stack.h" />
     <ClInclude Include="..\include\cdeccore\collection\vector.h" />
     <ClInclude Include="..\include\cdeccore\common\bitconverter.h" />
     <ClInclude Include="..\include\cdeccore\common\console.h" />
@@ -189,6 +190,7 @@
     <ClCompile Include="cdeccore.cpp" />
     <ClCompile Include="collection\test\test_coll_array.cpp" />
     <ClCompile Include="collection\test\test_coll_map.cpp" />
+    <ClCompile Include="collection\test\test_coll_stack.cpp" />
     <ClCompile Include="collection\test\test_coll_vector.cpp" />
     <ClCompile Include="common\console.cpp" />
     <ClCompile Include="common\converter.cpp" />
@@ -220,6 +222,7 @@
     <ClCompile Include="json\jsonparser.cpp" />
     <ClCompile Include="json\jsonwriter.cpp" />
     <ClCompile Include="json\test\test_json_parser.cpp" />
+    <ClCompile Include="json\test\test_json_writer.cpp" />
     <ClCompile Include="text\codeconv.cpp" />
     <ClCompile Include="text\encoding.cpp" />
     <ClCompile Include="text\test\test_text_encoding.cpp" />
