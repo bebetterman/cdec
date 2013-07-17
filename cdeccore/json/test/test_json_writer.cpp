@@ -10,6 +10,8 @@ char THIS_FILE[] = __FILE__;
 #if ENABLE_TEST
 // -------------------------------------------------------------------------- //
 
+using namespace cdec::json_express;
+
 class TestJsonWriter : public UnitTestSuite
 {
 	UNITTEST_SUITE(TestJsonWriter)
@@ -41,6 +43,10 @@ class TestJsonWriter : public UnitTestSuite
 		UNITTEST_METHOD_EXCEPTION(ErrorCloseNonexistList)
 		UNITTEST_METHOD_EXCEPTION(ErrorCloseDictionaryByList)
 		UNITTEST_METHOD_EXCEPTION(ErrorCloseListByDictionary)
+
+		UNITTEST_METHOD(TestJsonWriteExpression)
+		UNITTEST_METHOD(TestJsonWriteExpressionFormat)
+		UNITTEST_METHOD(TestJsonWriteExpressionNested)
 
 	UNITTEST_SUITE_END()
 
@@ -560,6 +566,109 @@ public:
 		ref<JsonWriter> wr = gc_new<JsonWriter>();
 		wr->BeginList(NULL);
 		wr->EndDictionary();
+	}
+
+	void TestJsonWriteExpression()
+	{
+		JE expr = JE::New() +
+			JE::Dict() +
+				JE::Pair(__X("name"), __X("abc")) +
+				JE::Pair(__X("value"), 123) +
+			JE::EDict();
+		UNITTEST_ASSERT(expr.Complete() == __X("{\"name\":\"abc\",\"value\":123}"));
+
+		expr = JE::New() +
+			JE::List() +
+				__X("abc") +
+				123 +
+			JE::EList();
+		UNITTEST_ASSERT(expr.Complete() == __X("[\"abc\",123]"));
+
+		expr = JE::New() +
+			JE::Dict() +
+				JE::Pair(__X("result"), __X("ok")) +
+				JE::List(__X("items")) +
+					JE::Dict() +
+						JE::Pair(__X("name"), __X("abc")) +
+						JE::Pair(__X("value"), 123) +
+					JE::EDict() +
+					JE::Dict() +
+						JE::Pair(__X("name"), __X("def")) +
+						JE::Pair(__X("value"), 456) +
+					JE::EDict() +
+				JE::EList() +
+				JE::List(__X("weight")) + 
+					__X("nil") +
+					180 +
+				JE::EList() +
+			JE::EDict();
+		stringx s = stringx() +
+			__X("{") +
+				__X("\"result\":\"ok\",") +
+				__X("\"items\":[") +
+					__X("{\"name\":\"abc\",\"value\":123},") +
+					__X("{\"name\":\"def\",\"value\":456}") +
+				__X("],") +
+				__X("\"weight\":[\"nil\",180]") +
+			__X("}");
+		stringx t = expr.Complete();
+		UNITTEST_ASSERT(s == t);
+	}
+
+	void TestJsonWriteExpressionFormat()
+	{
+		JE expr = JE::New() +
+			JE::Dict() +
+				JE::Pair(__X("name"), __X("abc")) +
+				JE::Pair(__X("value"), 123) +
+			JE::EDict();
+		ref<JsonExpressFormater> jsf = gc_new<JsonExpressFormater>();
+		jsf->IndentChars = __X(" ");
+		jsf->NewLineChars = __X("\n");
+		UNITTEST_ASSERT(expr.Complete(jsf) == __X("{\n \"name\":\"abc\",\n \"value\":123\n}"));
+	}
+
+	void TestJsonWriteExpressionNested()
+	{
+		// A dictionary sub-expression
+		JE sub = JE::DictExpr() +
+			JE::Pair(__X("name"), __X("abc")) +
+			JE::Pair(__X("value"), 123);
+		JE expr = JE::New() + sub;
+		UNITTEST_ASSERT(expr.Complete() == __X("{\"name\":\"abc\",\"value\":123}"));
+
+		// A dictionary sub-expression under a list
+		expr = JE::New() + 1 + sub + 2;
+		UNITTEST_ASSERT(expr.Complete() == __X("1,{\"name\":\"abc\",\"value\":123},2"));
+
+		// A dictionary sub-expression under a dictionary
+		expr = JE::New() +
+			JE::Dict() +
+				JE::Pair(__X("result"), __X("ok")) +
+				JE::Pair(__X("body"), sub) +
+				JE::Pair(__X("extra"), 0) +
+			JE::EDict();
+		UNITTEST_ASSERT(expr.Complete() == __X("{\"result\":\"ok\",\"body\":{\"name\":\"abc\",\"value\":123},\"extra\":0}"));
+
+		// A list sub-expression
+		sub = JE::ListExpr() +
+			__X("abc") +
+			123;
+		expr = JE::New() + sub;
+		UNITTEST_ASSERT(expr.Complete() == __X("[\"abc\",123]"));
+
+		// A list sub-expression under a list
+		expr = JE::New() + 1 + sub + 2;
+		UNITTEST_ASSERT(expr.Complete() == __X("1,[\"abc\",123],2"));
+
+		// A list sub-expression under a dictionary
+		expr = JE::New() +
+			JE::Dict() +
+				JE::Pair(__X("result"), __X("ok")) +
+				JE::Pair(__X("body"), sub) +
+				JE::Pair(__X("extra"), 0) +
+			JE::EDict();
+		UNITTEST_ASSERT(expr.Complete() == __X("{\"result\":\"ok\",\"body\":[\"abc\",123],\"extra\":0}"));
 	}
 
 	void tearDown()
