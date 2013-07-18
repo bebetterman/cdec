@@ -83,18 +83,23 @@ class HTTPSERVEXPORT HandlerContext: public Object
 public:
 	enum Method
 	{
-		HTTP_GET, HTTP_POST
+		HTTP_NONE, HTTP_GET, HTTP_POST
 	};
 
 	typedef std::map<stringx, stringx> StringPairMap;
 	typedef StringPairMap::value_type Value;
 
+	typedef std::map<stringx, std::string>	PostMap;
+
 protected:
 	MHD_Connection*	m_conn;
+	MHD_PostProcessor *m_postprocessor;
+
 	Method	m_method;
 	stringx	m_url;
-	StringPairMap m_getArgs;
-	StringPairMap m_postArgs;
+
+	StringPairMap	m_getArgs;
+	PostMap			m_postArgs;
 
 public:
 	int SendResponse(UINT statusCode, const void* message, UINT length, bool fConstance);
@@ -121,7 +126,9 @@ public:
 	inline stringx GetUrl() { return m_url; }
 	inline Method GetMethod() { return m_method; }
 	inline const StringPairMap& GetArgs() { return m_getArgs; }
-	inline const StringPairMap& PostArgs() { return m_postArgs; }
+	inline const PostMap& PostArgs() { return m_postArgs; }
+
+	void Dispose();
 
 	friend class Server;
 };
@@ -169,23 +176,6 @@ public:
 	}
 
 	ref<IRequestHandler> Dispatch(stringx url);
-};
-
-// -------------------------------------------------------------------------- //
-// Internal
-// -------------------------------------------------------------------------- //
-
-enum HttpMethod
-{
-	HTTPMETHOD_GET,
-	HTTPMETHOD_POST,
-};
-
-struct ConnContext
-{
-	int	Method;
-	MHD_PostProcessor *PostProcessor;
-	std::map<std::string, std::string> KeyValueMap;
 };
 
 // -------------------------------------------------------------------------- //
