@@ -26,6 +26,16 @@ int HandlerContext::SendResponse(UINT statusCode, const void* message, UINT leng
 	return ret;
 }
 
+void HandlerContext::Dispose()
+{
+	m_conn = NULL;
+	m_postprocessor = NULL;
+	m_method = HTTP_NONE;
+	m_url = NULL;
+	m_getArgs.clear();
+	m_postArgs.clear();
+}
+
 // -------------------------------------------------------------------------- //
 // DefaultUrlDispatcher
 // -------------------------------------------------------------------------- //
@@ -102,7 +112,7 @@ int Server::OnParseGetArgs(void *cls, enum MHD_ValueKind kind, const char *key, 
 int Server::OnPostDataIterator(void *cls, enum MHD_ValueKind kind, const char *key, const char *filename, const char *content_type, const char *transfer_encoding, const char *data, uint64_t off, size_t size)
 {
 	ASSERT(kind == MHD_POSTDATA_KIND);
-	ConnContext* conctx = (ConnContext*)cls;
+	HandlerContext* ctx = (HandlerContext*)cls;
 	HttpCdecDebugLog("[POST ITERATOR]");
 	HttpCdecDebugFormat("Key=%s\n", key);
 	if (filename != NULL)
@@ -115,17 +125,20 @@ int Server::OnPostDataIterator(void *cls, enum MHD_ValueKind kind, const char *k
 	std::string newvalue = std::string(data, size);
 	HttpCdecDebugFormat("Value=%s\n", newvalue.c_str());
 
-	std::map<std::string, std::string>& map = conctx->KeyValueMap;
-	if (map.find(key) != map.end())
+	ref<Encoding> e = Encoding::get_UTF8();
+	stringx key_s = e->ToUnicode(key);
+
+	HandlerContext::PostMap& map = ctx->m_postArgs;
+	if (map.find(key_s) != map.end())
 	{
-		std::string& value = map[key];
+		std::string& value = map[key_s];
 		ASSERT(off == value.size());
 		value += newvalue;
 	}
 	else
 	{
 		ASSERT(off == 0);
-		map.insert(std::map<std::string, std::string>::value_type(key, newvalue));
+		map.insert(HandlerContext::PostMap::value_type(key_s, newvalue));
 	}
 
 	return MHD_YES;
@@ -138,53 +151,53 @@ int Server::OnRequestHandler(void* hdctx, MHD_Connection* connection, const char
 	if (*reqctx == NULL)
 	{
 		ASSERT(upload_data == NULL && *upload_data_size == 0);
-		ConnContext* conctx = new ConnContext();
+		ref<HandlerContext> ctx = gc_new<HandlerContext>();
+		ctx->m_conn = connection;
+		ctx->m_url = Encoding::get_UTF8()->ToUnicode(url);
+
 		if (strcmp(method, MHD_HTTP_METHOD_GET) == 0)
 		{
-			conctx->Method = HTTPMETHOD_GET;
-			conctx->PostProcessor = NULL;
+			ctx->m_method = HandlerContext::HTTP_GET;
+			ctx->m_postprocessor = NULL;
 		}
 		else if (strcmp(method, MHD_HTTP_METHOD_POST) == 0)
 		{
-			conctx->Method = HTTPMETHOD_POST;
-			conctx->PostProcessor = MHD_create_post_processor(connection, 1024, OnPostDataIterator, conctx);
+			ctx->m_method = HandlerContext::HTTP_POST;
+			ctx->m_postprocessor = MHD_create_post_processor(connection, 1024, OnPostDataIterator, ctx.__GetPointer());
 		}
 		else
 			return MHD_NO;
 
 		// The first time only the headers are valid, do not respond in the first round.
-		*reqctx = conctx;
+		*reqctx = ctx.__GetPointer();
+		ctx->AddRef();	// interop: hold the cdec object
 		return MHD_YES;
 	}
 	else
 	{
-		ref<HandlerContext> ctx = gc_new<HandlerContext>();
-		ctx->m_conn = connection;
-		ctx->m_url = Encoding::get_UTF8()->ToUnicode(url);
+		HandlerContext* ctx = (HandlerContext*)(*reqctx);
 
 		// Parse GET arguments
-		MHD_get_connection_values(connection, MHD_GET_ARGUMENT_KIND, OnParseGetArgs, ctx.__GetPointer());
+		MHD_get_connection_values(connection, MHD_GET_ARGUMENT_KIND, OnParseGetArgs, ctx);
 
 		// Parse headers
 		// MHD_get_connection_values(connection, MHD_HEADER_KIND, &print_out_key, NULL);
 
 		ref<IRequestHandler> handler = server->m_dispatcher->Dispatch(ctx->m_url);
 
-		ConnContext* conctx = (ConnContext*)(*reqctx);
-		if (conctx->Method == HTTPMETHOD_GET)
+		if (ctx->m_method == HandlerContext::HTTP_GET)
 		{
 			ASSERT(strcmp(method, MHD_HTTP_METHOD_GET) == 0);
 			ASSERT(*upload_data_size == 0);
-			ctx->m_method = HandlerContext::HTTP_GET;
 
 			// Do not call "*reqctx = NULL;" because a request completed callback would be called instead
 			return handler->Handle(ctx);
 		}
-		else if (conctx->Method == HTTPMETHOD_POST)
+		else if (ctx->m_method == HandlerContext::HTTP_POST)
 		{
 			if (*upload_data_size != 0)
 			{
-				MHD_post_process (conctx->PostProcessor, upload_data, *upload_data_size);
+				MHD_post_process (ctx->m_postprocessor, upload_data, *upload_data_size);
 				*upload_data_size = 0;
           
 				return MHD_YES;
@@ -192,7 +205,6 @@ int Server::OnRequestHandler(void* hdctx, MHD_Connection* connection, const char
 			else
 			{
 				HttpCdecDebugLog("[POST COMPLETE]");
-				ctx->m_method = HandlerContext::HTTP_POST;
 
 				// Do not call "*reqctx = NULL;" because a request completed callback would be called instead
 				return handler->Handle(ctx);
@@ -206,21 +218,21 @@ int Server::OnRequestHandler(void* hdctx, MHD_Connection* connection, const char
 void Server::OnRequestCompleted(void *cls, struct MHD_Connection *connection, void **con_cls, enum MHD_RequestTerminationCode toe)
 {
 	Server* server = (Server*)cls;
-	ConnContext* conctx = (ConnContext*)*con_cls;
+	HandlerContext* ctx = (HandlerContext*)*con_cls;
 
-	if (conctx->PostProcessor != NULL)
+	if (ctx->m_postprocessor != NULL)
 	{
 		puts("[POST REQUEST COMPLETED]");
-		ASSERT(conctx->Method == HTTPMETHOD_POST);
-		MHD_destroy_post_processor(conctx->PostProcessor);
-		conctx->KeyValueMap.clear();
+		ASSERT(ctx->m_method == HandlerContext::HTTP_POST);
+		MHD_destroy_post_processor(ctx->m_postprocessor);
 	}
 	else
 	{
-		ASSERT(conctx->Method != HTTPMETHOD_POST);
+		ASSERT(ctx->m_method != HandlerContext::HTTP_POST);
 	}
 
-	delete conctx;
+	ctx->Dispose();
+	ctx->Release();		// interop: release the object held
 	*con_cls = NULL;   
 }
 
