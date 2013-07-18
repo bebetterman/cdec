@@ -59,22 +59,24 @@ class MyPostHandler: public IRequestHandler
 public:
 	int Handle(ref<HandlerContext> ctx)
 	{
+		ref<Encoding> e = Encoding::get_UTF8();
+
 		ASSERT(ctx->GetMethod() == HandlerContext::HTTP_POST);
 		ref<StringBuilder> sb = gc_new<StringBuilder>();
 		sb->Append(__X("<html><body>\n<p>POST</p>\n"));
 		sb->Append(__X("<p>URL=") + ctx->GetUrl() + __X("</p>\n"));
 		sb->Append(__X("<ul>\n"));
-		/*
-		const HandlerContext::StringPairMap& args = ctx->PostArgs();
-		foreach_it (HandlerContext::StringPairMap::const_iterator, it, args.begin(), args.end())
+		
+		const HandlerContext::PostMap& args = ctx->PostArgs();
+		foreach_it (HandlerContext::PostMap::const_iterator, it, args.begin(), args.end())
 		{
 			sb->Append(__X("<li>"));
 			sb->Append(it->first);
 			sb->Append('=');
-			sb->Append(it->second != NULL ? it->second : __X("(null)"));
+			sb->Append(e->ToUnicode(it->second));
 			sb->Append(__X("</li>\n"));
 		}
-		*/
+		
 		sb->Append(__X("</ul>\n</body></html>\n"));
 
 		return ctx->SendResponse(MHD_HTTP_OK, sb);
