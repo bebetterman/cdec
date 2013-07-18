@@ -15,6 +15,10 @@ public:
 	typedef typename base_type::trait_type	trait_type;
 	typedef typename base_type::impl_type	impl_type;
 
+protected:
+	using base_type::m_vecBuffer;
+	using base_type::Last;
+
 public:
 	void Push(value_type value)
 	{
@@ -23,16 +27,18 @@ public:
 
 	value_type Pop()
 	{
-		value_type value = base_type::m_vecBuffer.back();
-		base_type::m_vecBuffer.pop_back();
+		value_type value = m_vecBuffer.back();
+		m_vecBuffer.pop_back();
 		return value;
 	}
 
 	value_type& Peek()
 	{
-		return base_type::Last();
+		return Last();
 	}
 };
+
+
 
 template<class _Ty>
 class Stack: public StackV<ref<_Ty> >
