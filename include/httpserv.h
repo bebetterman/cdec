@@ -43,6 +43,33 @@ typedef UINT64 uint64_t;
 
 #define HTTPSERV_API(type)	EXTERN_C HTTPSERVEXPORT type __stdcall
 
+// Set the DEBUG_HTTPCDEC macro to enable debugging
+#define DEBUG_HTTPCDEC
+
+#ifdef DEBUG_HTTPCDEC
+
+#define HTTPCDEC_DEBUG_ONLY(x)	(x)
+
+inline void HttpCdecDebugLog(PCSTR s) { puts(s); }
+
+inline void HttpCdecDebugFormat(PCSTR fmt, ...)
+{
+	va_list args;
+	va_start(args, fmt);
+	vprintf(fmt, args);
+	va_end(args);
+}
+
+#else
+
+#define HTTPCDEC_DEBUG_ONLY(x)	(0)
+
+inline void HttpCdecDebugLog(PCSTR) {}
+
+inline void HttpCdecDebugFormat(PCSTR fmt, ...) {}
+
+#endif
+
 CDEC_NS_BEGIN
 
 // -------------------------------------------------------------------------- //
@@ -59,14 +86,15 @@ public:
 		HTTP_GET, HTTP_POST
 	};
 
-	typedef std::map<stringx, stringx> Values;
-	typedef Values::value_type Value;
+	typedef std::map<stringx, stringx> StringPairMap;
+	typedef StringPairMap::value_type Value;
 
 protected:
 	MHD_Connection*	m_conn;
 	Method	m_method;
 	stringx	m_url;
-	Values m_args;
+	StringPairMap m_getArgs;
+	StringPairMap m_postArgs;
 
 public:
 	int SendResponse(UINT statusCode, const void* message, UINT length, bool fConstance);
@@ -91,8 +119,9 @@ public:
 	}
 
 	inline stringx GetUrl() { return m_url; }
-	inline const Values& GetArgs() { return m_args; }
-	stringx GetArg(stringx key);
+	inline Method GetMethod() { return m_method; }
+	inline const StringPairMap& GetArgs() { return m_getArgs; }
+	inline const StringPairMap& PostArgs() { return m_postArgs; }
 
 	friend class Server;
 };
@@ -143,6 +172,23 @@ public:
 };
 
 // -------------------------------------------------------------------------- //
+// Internal
+// -------------------------------------------------------------------------- //
+
+enum HttpMethod
+{
+	HTTPMETHOD_GET,
+	HTTPMETHOD_POST,
+};
+
+struct ConnContext
+{
+	int	Method;
+	MHD_PostProcessor *PostProcessor;
+	std::map<std::string, std::string> KeyValueMap;
+};
+
+// -------------------------------------------------------------------------- //
 // Server
 // -------------------------------------------------------------------------- //
 
@@ -159,9 +205,11 @@ public:
 	Server(ref<IUrlDispatcher> dispatcher);
 	void	Start(UINT port);
 
-protected:
-	static int ahc_echo(void* cls, MHD_Connection* connection, const char* url, const char* method, const char* version, const char* upload_data, size_t* upload_data_size,	void** ptr);
-	static int parse_get_args(void *cls, enum MHD_ValueKind kind, const char *key, const char *value);
+protected:	// Callback functions
+	static int OnRequestHandler(void* cls, MHD_Connection* connection, const char* url, const char* method, const char* version, const char* upload_data, size_t* upload_data_size,	void** ptr);
+	static int OnParseGetArgs(void *cls, enum MHD_ValueKind kind, const char *key, const char *value);
+	static int OnPostDataIterator(void *cls, enum MHD_ValueKind kind, const char *key, const char *filename, const char *content_type, const char *transfer_encoding, const char *data, uint64_t off, size_t size);
+	static void OnRequestCompleted(void *cls, struct MHD_Connection *connection, void **con_cls, enum MHD_RequestTerminationCode toe);
 };
 
 // -------------------------------------------------------------------------- //
