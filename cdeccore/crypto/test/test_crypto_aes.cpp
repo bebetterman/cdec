@@ -48,7 +48,9 @@ public:
 
 	void testAesCbc128()
 	{
-		PCWSTR ssc[] = {
+		PCWSTR _key = __X("000102030405060708090a0b0c0d0e0f");
+		PCWSTR _iv = __X("101112131415161718191a1b1c1d1e1f");
+		PCWSTR _ssc[] = {
 			__X("954f64f2e4e86e9eee82d20216684899a93b9ddb22e8ab104c61e728831d6d5a"),
 			__X("1f51afc19343249ef3b4495be12dc4f3e0b296f5c91be273a66c1216a66da5fd"),
 			__X("24dbfbf2953d5862f57436198ada0a437e92bdee860d80b1c4014a69edecddc6"),
@@ -58,6 +60,24 @@ public:
 			__X("25a3aaa6cf1106801b9b39e71f97b3158e2d3c30da82ba212f577600bf6ca857"),
 			__X("43cb511f061f33fe87a86476ec74d74297b4262a64dde1c95003f3d8c3d7aff2")
 		};
+
+		ref<AES> aes = gc_new<AES>();
+		aes->SetMode(Cipher_CBC);
+		ref<ByteArray> key = Converter::FromHexString(_key, 32);
+		aes->SetKey(key);
+		ref<ByteArray> iv = Converter::FromHexString(_iv, 32);
+		aes->SetIV(iv);
+
+		ref<ByteArray> src = gc_new<ByteArray>(256);
+		for (int i = 0; i < 256; ++i)
+			src->at(i) = (BYTE)i;
+
+		ref<ByteArray> dest = gc_new<ByteArray>(256);
+		ref<ICryptoTransform> e = aes->CreateEncryptor();
+		e->Transform(src, 0, dest, 0, 256);
+		
+		for (int i = 0; i < 256 / 32; ++i)
+			UNITTEST_ASSERT(Converter::ToHexString(dest, i * 32, 32) == _ssc[i]);
 	}
 
 	void tearDown()

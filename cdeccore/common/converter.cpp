@@ -14,6 +14,18 @@ void ConverterToHexStringL(const BYTE* bytes, UINT length, std::wstring16& s)
 	}
 }
 
+stringx	ConverterToHexString(ref<ByteArray> bytes, UINT offset, UINT length)
+{
+	if (offset > bytes->Count() || offset + length > bytes->Count())
+		cdec_throw(Exception(EC_OutOfRange));
+	
+	std::wstring16 s;
+	pin_ptr<BYTE> pinBytes = bytes->GetBuffer();
+	ConverterToHexStringL(pinBytes.ptr() + offset, length, s);
+
+	return stringx(s);
+}
+
 UINT ConverterFromHexStringL(PCWSTR str, UINT cch, BYTE* bytes, UINT capacity)
 {
 	if ((cch & 1) != 0)
@@ -28,26 +40,14 @@ UINT ConverterFromHexStringL(PCWSTR str, UINT cch, BYTE* bytes, UINT capacity)
 	return cch >> 1;
 }
 
-stringx	ConverterToHexString(ref<ByteArray> bytes, UINT offset, UINT length)
-{
-	if (offset > bytes->Count() || offset + length > bytes->Count())
-		cdec_throw(Exception(EC_OutOfRange));
-	
-	std::wstring16 s;
-	pin_ptr<BYTE> pinBytes = bytes->GetBuffer();
-	ConverterToHexStringL(pinBytes.ptr() + offset, length, s);
-
-	return stringx(s);
-}
-
-UINT ConverterFromHexString(stringx str, ref<ByteArray> bytes, UINT offset)
+UINT ConverterFromHexStringA(PCWSTR str, UINT cch, ref<ByteArray> bytes, UINT offset)
 {
 	UINT count = bytes->Count();
 	if (offset > count)
 		cdec_throw(Exception(EC_OutOfRange));
 
 	pin_ptr<BYTE> pinBytes = bytes->GetBuffer();
-	return ConverterFromHexStringL(str.c_str(), str.Length(), pinBytes.ptr() + offset, count - offset);
+	return ConverterFromHexStringL(str, cch, pinBytes.ptr() + offset, count - offset);
 }
 
 // -------------------------------------------------------------------------- //

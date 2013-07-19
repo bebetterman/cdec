@@ -11,10 +11,10 @@ template<class _Ty> class ArrayV;
 typedef ArrayV<BYTE> ByteArray;
 
 CDECCOREEXPORT void		ConverterToHexStringL(const BYTE* bytes, UINT length, std::wstring16& s);
-CDECCOREEXPORT UINT		ConverterFromHexStringL(PCWSTR str, UINT cch, BYTE* bytes, UINT capacity);
-
 CDECCOREEXPORT stringx	ConverterToHexString(ref<ByteArray> bytes, UINT offset, UINT length);
-CDECCOREEXPORT UINT		ConverterFromHexString(stringx str, ref<ByteArray> bytes, UINT offset);
+
+CDECCOREEXPORT UINT		ConverterFromHexStringL(PCWSTR str, UINT cch, BYTE* bytes, UINT capacity);
+CDECCOREEXPORT UINT		ConverterFromHexStringA(PCWSTR str, UINT cch, ref<ByteArray> bytes, UINT offset);
 
 // -------------------------------------------------------------------------- //
 
@@ -47,8 +47,9 @@ public:
 	static stringx	ToHexString(ref<ByteArray> bytes);
 
 	static UINT		FromHexString(PCWSTR str, UINT cch, BYTE* bytes, UINT length) { return ConverterFromHexStringL(str, cch, bytes, length); }
-	static UINT		FromHexString(stringx str, ref<ByteArray> bytes, UINT offset) { return ConverterFromHexString(str, bytes, offset); }
+	static UINT		FromHexString(stringx str, ref<ByteArray> bytes, UINT offset) { return ConverterFromHexStringA(str.c_str(), str.Length(), bytes, offset); }
 	static ref<ByteArray>	FromHexString(stringx str);
+	static ref<ByteArray>	FromHexString(PCWSTR str, UINT cch);
 
 protected:
 	template<typename T>
@@ -86,11 +87,15 @@ inline stringx Converter::ToHexString(ref<ByteArray> bytes)
 
 inline ref<ByteArray> Converter::FromHexString(stringx str)
 {
-	UINT cch = str.Length();
+	return FromHexString(str.c_str(), str.Length());
+}
+
+inline ref<ByteArray> Converter::FromHexString(PCWSTR str, UINT cch)
+{
 	if ((cch & 1) != 0)
 		cdec_throw(Exception(EC_InvalidArg));
 	ref<ByteArray> r = gc_new<ByteArray>(cch >> 1);
-	ConverterFromHexString(str, r, 0);
+	ConverterFromHexStringA(str, cch, r, 0);
 	return r;
 }
 

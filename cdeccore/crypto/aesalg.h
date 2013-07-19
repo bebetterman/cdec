@@ -73,12 +73,20 @@ public:
 
 	void Transform(const BYTE* src, BYTE* dest, int length)
 	{
+		if ((length & 0xF) != 0)
+			cdec_throw(CryptoException(EC_CRYPT_DataNotAligned));
 		return (this->*m_e)(src, dest, length);
 	}
 
 protected:
 	void	f_EncodeECB(const BYTE* src, BYTE* dest, int length);
 	void	f_DecodeECB(const BYTE* src, BYTE* dest, int length);
+
+	void	f_EncodeCBC(const BYTE* src, BYTE* dest, int length);
+	void	f_DecodeCBC(const BYTE* src, BYTE* dest, int length);
+
+	static void	XOR16(BYTE* dest, const BYTE* src);
+	static void COPY16(BYTE* dest, const BYTE* src);
 };
 
 // -------------------------------------------------------------------------- //
