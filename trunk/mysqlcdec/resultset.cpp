@@ -16,7 +16,7 @@ ResultSet::ResultSet(sql::ResultSet *res):m_impl(res)
 
 ResultSet::~ResultSet()
 {
-	if (m_impl != NULL && m_impl->isClosed())
+	if (m_impl != NULL && !m_impl->isClosed())
 	{
 		m_impl->close();
 		m_impl = NULL;
@@ -36,7 +36,7 @@ stringx ResultSet::GetString(UINT32 columIndex) const
 	//convert sql::SQLString to stringx
 	return SqlStr2Strx(sqlStr);
 }
-UINT64 ResultSet::RowsCount() 
+int ResultSet::RowsCount() 
 {
 	return m_impl->rowsCount();
 }
@@ -48,5 +48,21 @@ stringx ResultSet::GetString(stringx columLabel) const
 	return SqlStr2Strx(sqlStr);
 }
 
+int ResultSet::GetInt(UINT32 columIndex) const
+{
+
+	int sqlInt = m_impl->getInt(columIndex);
+
+	//convert sql::SQLString to stringx
+	return sqlInt;
+}
+
+int ResultSet::GetInt(stringx columLabel) const
+{
+
+	int sqlInt = m_impl->getInt(Strx2SqlStr(columLabel));
+
+	return sqlInt;
+}
 //---------------------------------------------
 //CDEC_NS_BEGIN
