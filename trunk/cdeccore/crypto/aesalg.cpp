@@ -231,6 +231,8 @@ AesTransform::AesTransform(CAesAlg* alg, CipherMode mode, ref<ByteArray> iv, boo
 
 	if (mode == Cipher_ECB)
 		m_e = fEncoder ? &AesTransform::f_EncodeECB : &AesTransform::f_DecodeECB;
+	else if (mode == Cipher_CBC)
+		m_e = fEncoder ? &AesTransform::f_EncodeCBC : &AesTransform::f_DecodeCBC;
 }
 
 AesTransform::~AesTransform()
@@ -241,20 +243,44 @@ AesTransform::~AesTransform()
 
 void AesTransform::f_EncodeECB(const BYTE* src, BYTE* dest, int length)
 {
-	if ((length & 0xF) != 0)
-		cdec_throw(CryptoException(EC_CRYPT_DataNotAligned));
-
 	for (int off = 0; off < length; off += 16)
 		m_alg->Aes_Encode32((UINT32*)(dest + off), (UINT32*)(src + off));
 }
 
 void AesTransform::f_DecodeECB(const BYTE* src, BYTE* dest, int length)
 {
-	if ((length & 0xF) != 0)
-		cdec_throw(CryptoException(EC_CRYPT_DataNotAligned));
-
 	for (int off = 0; off < length; off += 16)
 		m_alg->Aes_Decode32((UINT32*)(dest + off), (UINT32*)(src + off));
+}
+
+inline void AesTransform::XOR16(BYTE* dest, const BYTE* src)
+{
+	UINT64 *pd = (UINT64*)dest;
+	const UINT64 *ps = (const UINT64*)src;
+	pd[0] ^= ps[0];
+	pd[1] ^= ps[1];
+}
+
+inline void AesTransform::COPY16(BYTE* dest, const BYTE* src)
+{
+	UINT64 *pd = (UINT64*)dest;
+	const UINT64 *ps = (const UINT64*)src;
+	pd[0] = ps[0];
+	pd[1] = ps[1];
+}
+
+void AesTransform::f_EncodeCBC(const BYTE* src, BYTE* dest, int length)
+{
+	for (int off = 0; off < length; off += 16)
+	{
+		XOR16(m_iv, src + off);
+		m_alg->Aes_Encode32((UINT32*)(dest + off), (UINT32*)m_iv);
+		COPY16(m_iv, dest + off);
+	}
+}
+
+void AesTransform::f_DecodeCBC(const BYTE* src, BYTE* dest, int length)
+{
 }
 
 // -------------------------------------------------------------------------- //
@@ -312,13 +338,13 @@ static CAesAlg* CreateAesAlg(ref<ByteArray> key)
 ref<ICryptoTransform> AES::CreateEncryptor()
 {
 	CAesAlg* p = CreateAesAlg(m_key);
-	return gc_new<AesTransform>(p, m_mode, ref<ByteArray>(NULL), true);
+	return gc_new<AesTransform>(p, m_mode, m_iv, true);
 }
 
 ref<ICryptoTransform> AES::CreateDecryptor()
 {
 	CAesAlg* p = CreateAesAlg(m_key);
-	return gc_new<AesTransform>(p, m_mode, ref<ByteArray>(NULL), false);
+	return gc_new<AesTransform>(p, m_mode, m_iv, false);
 }
 
 // -------------------------------------------------------------------------- //
