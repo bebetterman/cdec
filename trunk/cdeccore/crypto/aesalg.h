@@ -55,35 +55,30 @@ private:
 // Cdec implementation
 // -------------------------------------------------------------------------- //
 
-class AesBaseTransform: public ICryptoTransform
+class AesTransform: public ICryptoTransform
 {
-	DECLARE_REF_CLASS(AesBaseTransform)
+	DECLARE_REF_CLASS(AesTransform)
 
 protected:
-	CAesAlg*			m_alg;
+	CAesAlg*	m_alg;
 	CipherMode	m_mode;
+	BYTE		m_iv[16];
+
+	typedef void (AesTransform::* f_Encoder)(const BYTE* src, BYTE* dest, int length);
+	f_Encoder	m_e;
 
 public:
-	AesBaseTransform(CAesAlg* alg, CipherMode mode);
-	~AesBaseTransform();
-};
+	AesTransform(CAesAlg* alg, CipherMode mode, ref<ByteArray> iv, bool fEncoder);
+	~AesTransform();
 
-class AesEncryptorTransform: public AesBaseTransform
-{
-	DECLARE_REF_CLASS(AesEncryptorTransform)
+	void Transform(const BYTE* src, BYTE* dest, int length)
+	{
+		return (this->*m_e)(src, dest, length);
+	}
 
-public:
-	AesEncryptorTransform(CAesAlg* alg, CipherMode mode): AesBaseTransform(alg, mode) {}
-	void Transform(const BYTE* src, BYTE* dest, int length);
-};
-
-class AesDecryptorTransform: public AesBaseTransform
-{
-	DECLARE_REF_CLASS(AesDecryptorTransform)
-
-public:
-	AesDecryptorTransform(CAesAlg* alg, CipherMode mode): AesBaseTransform(alg, mode) {}
-	void Transform(const BYTE* src, BYTE* dest, int length);
+protected:
+	void	f_EncodeECB(const BYTE* src, BYTE* dest, int length);
+	void	f_DecodeECB(const BYTE* src, BYTE* dest, int length);
 };
 
 // -------------------------------------------------------------------------- //

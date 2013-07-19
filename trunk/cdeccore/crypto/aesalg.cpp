@@ -217,19 +217,29 @@ void CAesAlg::_AesDecode32(UInt32 *dest, const UInt32 *src, const UInt32 *w, uns
 
 // -------------------------------------------------------------------------- //
 
-AesBaseTransform::AesBaseTransform(CAesAlg* alg, CipherMode mode)
+AesTransform::AesTransform(CAesAlg* alg, CipherMode mode, ref<ByteArray> iv, bool fEncoder)
 {
 	m_alg = alg;
 	m_mode = mode;
+
+	if (mode != Cipher_ECB)
+	{
+		if (iv == NULL)
+			cdec_throw(CryptoException(EC_CRYPT_InvalidIVSize));
+		memcpy(m_iv, iv->GetBuffer().ptr(), 16);
+	}
+
+	if (mode == Cipher_ECB)
+		m_e = fEncoder ? &AesTransform::f_EncodeECB : &AesTransform::f_DecodeECB;
 }
 
-AesBaseTransform::~AesBaseTransform()
+AesTransform::~AesTransform()
 {
 	delete m_alg;
 	m_alg = NULL;
 }
 
-void AesEncryptorTransform::Transform(const BYTE* src, BYTE* dest, int length)
+void AesTransform::f_EncodeECB(const BYTE* src, BYTE* dest, int length)
 {
 	if ((length & 0xF) != 0)
 		cdec_throw(CryptoException(EC_CRYPT_DataNotAligned));
@@ -238,7 +248,7 @@ void AesEncryptorTransform::Transform(const BYTE* src, BYTE* dest, int length)
 		m_alg->Aes_Encode32((UINT32*)(dest + off), (UINT32*)(src + off));
 }
 
-void AesDecryptorTransform::Transform(const BYTE* src, BYTE* dest, int length)
+void AesTransform::f_DecodeECB(const BYTE* src, BYTE* dest, int length)
 {
 	if ((length & 0xF) != 0)
 		cdec_throw(CryptoException(EC_CRYPT_DataNotAligned));
@@ -302,13 +312,13 @@ static CAesAlg* CreateAesAlg(ref<ByteArray> key)
 ref<ICryptoTransform> AES::CreateEncryptor()
 {
 	CAesAlg* p = CreateAesAlg(m_key);
-	return gc_new<AesEncryptorTransform>(p, m_mode);
+	return gc_new<AesTransform>(p, m_mode, ref<ByteArray>(NULL), true);
 }
 
 ref<ICryptoTransform> AES::CreateDecryptor()
 {
 	CAesAlg* p = CreateAesAlg(m_key);
-	return gc_new<AesDecryptorTransform>(p, m_mode);
+	return gc_new<AesTransform>(p, m_mode, ref<ByteArray>(NULL), false);
 }
 
 // -------------------------------------------------------------------------- //
