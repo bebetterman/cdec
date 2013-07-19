@@ -281,6 +281,12 @@ void AesTransform::f_EncodeCBC(const BYTE* src, BYTE* dest, int length)
 
 void AesTransform::f_DecodeCBC(const BYTE* src, BYTE* dest, int length)
 {
+	for (int off = 0; off < length; off += 16)
+	{
+		m_alg->Aes_Decode32((UINT32*)(dest + off), (UINT32*)(src + off));
+		XOR16(dest + off, m_iv);
+		COPY16(m_iv, src + off);
+	}
 }
 
 // -------------------------------------------------------------------------- //
