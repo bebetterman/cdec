@@ -29,7 +29,9 @@ public:
 	bool Next();
 	stringx GetString(UINT32 columIndex) const;
 	stringx GetString(stringx columLabel) const;
-	UINT64 RowsCount();
+	int GetInt(UINT32 columIndex) const;
+	int GetInt(stringx columLabel) const;
+	int RowsCount();
 
 protected:
 	//ref<Encoding>	 encode;
