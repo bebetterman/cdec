@@ -78,6 +78,13 @@ public:
 		
 		for (int i = 0; i < 256 / 32; ++i)
 			UNITTEST_ASSERT(Converter::ToHexString(dest, i * 32, 32) == _ssc[i]);
+
+		ref<ByteArray> rev = gc_new<ByteArray>(256);
+		ref<ICryptoTransform> d = aes->CreateDecryptor();
+		d->Transform(dest, 0, rev, 0, 256);
+
+		for (int i = 0; i < 256; ++i)
+			UNITTEST_ASSERT(rev->at(i) == i);
 	}
 
 	void tearDown()
