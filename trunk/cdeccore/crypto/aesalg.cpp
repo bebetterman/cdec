@@ -1,14 +1,17 @@
-/* -------------------------------------------------------------------------
+// -------------------------------------------------------------------------- //
 //	文件名		：	AesAlg.cpp
 //	创建者		：	Zhang Fan
 //	创建时间	：	2010-4-28 21:51:55
 //	功能描述	：	
 //
-// -----------------------------------------------------------------------*/
+// -------------------------------------------------------------------------- //
 
 #include "stdafx.h"
 #include "aesalg.h"
 // #include "CpuArch.h"
+
+CDEC_NS_BEGIN
+// -------------------------------------------------------------------------- //
 
 #define xtime(x) ((((x) << 1) ^ (((x) & 0x80) != 0 ? 0x1B : 0)) & 0xFF)
 #define Ui32(a0, a1, a2, a3) ((UInt32)(a0) | ((UInt32)(a1) << 8) | ((UInt32)(a2) << 16) | ((UInt32)(a3) << 24))
@@ -213,45 +216,100 @@ void CAesAlg::_AesDecode32(UInt32 *dest, const UInt32 *src, const UInt32 *w, uns
 }
 
 // -------------------------------------------------------------------------- //
-CDEC_NS_BEGIN
 
-void* AesCreateCtx(const BYTE* key, int cbKey)
+AesBaseTransform::AesBaseTransform(CAesAlg* alg, CipherMode mode)
 {
-	if (cbKey != 16 && cbKey != 24 && cbKey != 32)
-		cdec_throw(Exception(EC_InvalidArg));
-
-	CAesAlg* pAes = new CAesAlg();
-	pAes->SetKey(key, cbKey);
-	return pAes;
+	m_alg = alg;
+	m_mode = mode;
 }
 
-void AesDeleteCtx(void* ctx)
+AesBaseTransform::~AesBaseTransform()
 {
-	if (ctx != NULL)
-		delete (CAesAlg*)ctx;
+	delete m_alg;
+	m_alg = NULL;
 }
 
-int AesEncode(void* ctx, const BYTE* src, BYTE* dest, int length)
+void AesEncryptorTransform::Transform(const BYTE* src, BYTE* dest, int length)
 {
 	if ((length & 0xF) != 0)
-		cdec_throw(Exception(EC_InvalidArg));
+		cdec_throw(CryptoException(EC_CRYPT_DataNotAligned));
 
-	CAesAlg* pAes = (CAesAlg*)ctx;
 	for (int off = 0; off < length; off += 16)
-		pAes->Aes_Encode32((UINT32*)(dest + off), (UINT32*)(src + off));
-	return length;
+		m_alg->Aes_Encode32((UINT32*)(dest + off), (UINT32*)(src + off));
 }
 
-int AesDecode(void* ctx, const BYTE* src, BYTE* dest, int length)
+void AesDecryptorTransform::Transform(const BYTE* src, BYTE* dest, int length)
 {
 	if ((length & 0xF) != 0)
-		cdec_throw(Exception(EC_InvalidArg));
+		cdec_throw(CryptoException(EC_CRYPT_DataNotAligned));
 
-	CAesAlg* pAes = (CAesAlg*)ctx;
 	for (int off = 0; off < length; off += 16)
-		pAes->Aes_Decode32((UINT32*)(dest + off), (UINT32*)(src + off));
-	return length;
+		m_alg->Aes_Decode32((UINT32*)(dest + off), (UINT32*)(src + off));
 }
 
-CDEC_NS_END
 // -------------------------------------------------------------------------- //
+
+void AES::SetKey(ref<ByteArray> key)
+{
+	int len = key->Count();
+	if (len == 16 || len == 24 || len == 32)
+		m_key = key;
+	else
+		cdec_throw(CryptoException(EC_CRYPT_InvalidKeySize));
+}
+
+void AES::SetKey(const BYTE* key, int size)
+{
+	ref<ByteArray> key_a = gc_new<ByteArray>(key, size);
+	SetKey(key_a);
+}
+
+void AES::SetIV(ref<ByteArray> iv)
+{
+	if (iv->Count() == 16)
+		m_iv = iv;
+	else
+		cdec_throw(CryptoException(EC_CRYPT_InvalidIVSize));
+}
+
+void AES::SetIV(const BYTE* iv, int size)
+{
+	ref<ByteArray> iv_a = gc_new<ByteArray>(iv, size);
+	SetIV(iv_a);
+}
+
+void AES::SetMode(CipherMode mode)
+{
+	switch (mode)
+	{
+	case Cipher_ECB:
+	case Cipher_CBC:
+		m_mode = mode;
+		break;
+	default:
+		cdec_throw(CryptoException(EC_CRYPT_InvalidCipherMode));
+	}
+}
+
+static CAesAlg* CreateAesAlg(ref<ByteArray> key)
+{
+	CAesAlg* p = new CAesAlg();
+	pin_ptr<BYTE> pinKey = key->GetBuffer();
+	p->SetKey(pinKey.ptr(), key->Count());
+	return p;
+}
+
+ref<ICryptoTransform> AES::CreateEncryptor()
+{
+	CAesAlg* p = CreateAesAlg(m_key);
+	return gc_new<AesEncryptorTransform>(p, m_mode);
+}
+
+ref<ICryptoTransform> AES::CreateDecryptor()
+{
+	CAesAlg* p = CreateAesAlg(m_key);
+	return gc_new<AesDecryptorTransform>(p, m_mode);
+}
+
+// -------------------------------------------------------------------------- //
+CDEC_NS_END

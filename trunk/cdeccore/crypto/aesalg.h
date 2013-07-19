@@ -1,12 +1,15 @@
-/* -------------------------------------------------------------------------
+// -------------------------------------------------------------------------- //
 //	文件名		：	AesAlg.h
 //	创建者		：	Zhang Fan
 //	创建时间	：	2010-4-28 21:51:00
 //	功能描述	：	Aes算法
 //
-// -----------------------------------------------------------------------*/
+// -------------------------------------------------------------------------- //
 
 #pragma once
+
+CDEC_NS_BEGIN
+// -------------------------------------------------------------------------- //
 
 typedef unsigned char Byte;
 typedef unsigned int UInt32;
@@ -20,7 +23,7 @@ typedef struct
 	UInt32		rkey[(14 + 1) * 4];
 } AesCTX;
 
-// -------------------------------------------------------------------------
+// -------------------------------------------------------------------------- //
 
 class CAesAlg
 {
@@ -47,4 +50,41 @@ private:
 	void _AesEncode32(UInt32 *dest, const UInt32 *src, const UInt32 *w, unsigned numRounds2);
 	void _AesDecode32(UInt32 *dest, const UInt32 *src, const UInt32 *w, unsigned numRounds2);
 };
-//--------------------------------------------------------------------------
+
+// -------------------------------------------------------------------------- //
+// Cdec implementation
+// -------------------------------------------------------------------------- //
+
+class AesBaseTransform: public ICryptoTransform
+{
+	DECLARE_REF_CLASS(AesBaseTransform)
+
+protected:
+	CAesAlg*			m_alg;
+	CipherMode	m_mode;
+
+public:
+	AesBaseTransform(CAesAlg* alg, CipherMode mode);
+	~AesBaseTransform();
+};
+
+class AesEncryptorTransform: public AesBaseTransform
+{
+	DECLARE_REF_CLASS(AesEncryptorTransform)
+
+public:
+	AesEncryptorTransform(CAesAlg* alg, CipherMode mode): AesBaseTransform(alg, mode) {}
+	void Transform(const BYTE* src, BYTE* dest, int length);
+};
+
+class AesDecryptorTransform: public AesBaseTransform
+{
+	DECLARE_REF_CLASS(AesDecryptorTransform)
+
+public:
+	AesDecryptorTransform(CAesAlg* alg, CipherMode mode): AesBaseTransform(alg, mode) {}
+	void Transform(const BYTE* src, BYTE* dest, int length);
+};
+
+// -------------------------------------------------------------------------- //
+CDEC_NS_END

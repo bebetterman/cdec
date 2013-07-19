@@ -11,6 +11,7 @@ enum
 	// Namespaces
 	ECNS_General = 0,				// General exceptions
 	ECNS_IO,						// IO exceptions
+	ECNS_CRYPT,						// Crypto exceptions
 	ECNS_XML,						// XML exceptions
 	ECNS_JSON,						// Json exceptions
 	ECNS_App = 0x4000,				// Application specified exceptions
