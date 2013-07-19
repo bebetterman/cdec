@@ -74,9 +74,24 @@ public:
 		return ToUnicode(pinChar.ptr(), cch);
 	}
 
+	stringx			GetString(const BYTE* data, size_t len) { return ToUnicode((const char*)data, len); }
+	stringx			GetString(ref<ByteArray> data, int off, int len)
+	{
+		pin_ptr<BYTE> pin = data->GetBuffer();
+		return ToUnicode((const char*)(pin.ptr() + off), len);
+	}
+	stringx			GetString(ref<ByteArray> data) { return GetString(data, 0, data->Count()); }
+
 	std::string		FromUnicode(PCWSTR p, UINT cch);
 	std::string		FromUnicode(const std::wstring16& s) { return FromUnicode(s.data(), s.size());	}
+	std::string		FromUnicode(stringx s, int off, int len)
+	{
+		return FromUnicode(s.c_str() + off, len);
+	}
 	std::string		FromUnicode(stringx s) { return FromUnicode(s.c_str(), s.Length());	}
+
+	ref<ByteArray>	GetBytes(stringx s, int off, int len);
+	ref<ByteArray>	GetBytes(stringx s) { return GetBytes(s, 0, s.Length()); }
 
 	static ref<Encoding> get_Default();
 	static ref<Encoding> get_Unicode() { return gc_new<Encoding>(UTF16); }

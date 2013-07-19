@@ -277,6 +277,12 @@ std::string Encoding::FromUnicode(PCWSTR p, UINT cch)
 	return ss;
 }
 
+ref<ByteArray> Encoding::GetBytes(stringx s, int off, int len)
+{
+	std::string t = FromUnicode(s, off, len);
+	return gc_new<ByteArray>((const BYTE*)t.c_str(), t.size());
+}
+
 bool Encoding::IsDBCSLeading(BYTE ch)
 {
 	ASSERT(_cp != 0 && get_Class() == DBCS);
@@ -326,7 +332,7 @@ std::string Encoding::EncodeUtf8Char(WCHAR ch)
 	{
 		// Standalone, U-00000000 - U-0000007F: 0xxxxxxx
 		ASSERT(ch < 0x80);
-		s.append(1, ch);
+		s.append(1, (char)ch);
 	}
 	return s;
 }
