@@ -11,6 +11,8 @@ using namespace cdec;
 
 const char MESSAGE_404_NOT_FOUND[] = "404 File not found";
 
+const char MESSAGE_EXPECT_POST[] = "POST method expected";
+
 class NotFoundHandler: public IRequestHandler
 {
 	DECLARE_REF_CLASS(NotFoundHandler)
@@ -61,7 +63,9 @@ public:
 	{
 		ref<Encoding> e = Encoding::get_UTF8();
 
-		ASSERT(ctx->GetMethod() == HandlerContext::HTTP_POST);
+		if (ctx->GetMethod() != HandlerContext::HTTP_POST)
+			return ctx->SendResponse(MHD_HTTP_OK, MESSAGE_EXPECT_POST, sizeof(MESSAGE_EXPECT_POST), true);
+
 		ref<StringBuilder> sb = gc_new<StringBuilder>();
 		sb->Append(__X("<html><body>\n<p>POST</p>\n"));
 		sb->Append(__X("<p>URL=") + ctx->GetUrl() + __X("</p>\n"));
