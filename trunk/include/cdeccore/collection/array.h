@@ -74,6 +74,23 @@ public:
 		for (int i = 0; i < count; ++i)
 			*pt++ = *ps++;
 	}
+
+	void	MemoryCopyFrom(int offT, const _Ty* ps, int count)
+	{
+		if (offT < 0 || count < 0 || offT + count > Count())
+			cdec_throw(Exception(EC_OutOfRange));
+		_Ty* pt = m_buffer + offT;
+		memcpy(pt, ps, count * sizeof(_Ty));
+	}
+
+	void	MemoryCopyFrom(int offT, ref<ArrayV<_Ty> > s, int offS, int count)
+	{
+		if (offT < 0 || offS < 0 || count < 0 || offT + count > Count() || offS + count > s->Count())
+			cdec_throw(Exception(EC_OutOfRange));
+		_Ty* pt = m_buffer + offT;
+		_Ty* ps = s->m_buffer + offS;
+		memcpy(pt, ps, count * sizeof(_Ty));
+	}
 };
 
 // -------------------------------------------------------------------------- //
