@@ -30,6 +30,7 @@ enum
 	EC_AccessDenied,				// E_ACCESSDENIED, General access denied error
 
 	// Additional general errors
+	EC_NullObject,					// Object is null
 	EC_OutOfRange,					// Index out of range
 	EC_OutOfBuffer,					// Data out of buffer
 	EC_Overflow,					// Math operation overflow
