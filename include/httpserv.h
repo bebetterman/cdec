@@ -90,6 +90,7 @@ public:
 	typedef StringPairMap::value_type Value;
 
 	typedef std::map<stringx, std::string>	PostMap;
+	typedef std::vector<BYTE>				PostRaw;
 
 protected:
 	MHD_Connection*	m_conn;
@@ -100,6 +101,7 @@ protected:
 
 	StringPairMap	m_getArgs;
 	PostMap			m_postArgs;
+	PostRaw			m_postRaw;
 
 public:
 	int SendResponse(UINT statusCode, const void* message, UINT length, bool fConstance);
@@ -127,6 +129,7 @@ public:
 	inline Method GetMethod() { return m_method; }
 	inline const StringPairMap& GetArgs() { return m_getArgs; }
 	inline const PostMap& PostArgs() { return m_postArgs; }
+	inline ref<ByteArray> PostData() { return gc_new<ByteArray>(&m_postRaw[0], m_postRaw.size()); }
 
 	void Dispose();
 
