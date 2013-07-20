@@ -53,37 +53,37 @@ void FileWrapper::Close()
 	}
 }
 
-UINT FileWrapper::Read(void* buffer, UINT cbToRead)
+int FileWrapper::Read(void* buffer, int cbToRead)
 {
 	ASSERT(m_fd != -1 && buffer != NULL);
-	size_t cbRead = read(m_fd, buffer, cbToRead);
+	int cbRead = read(m_fd, buffer, cbToRead);
 	if (cbRead == -1)
 		cdec_throw_stdc_lasterr(IOException);
 	return cbRead;
 }
 
-UINT FileWrapper::AtomRead(void* buffer, UINT cbToRead,UINT64 pos)
+int FileWrapper::AtomRead(INT64 pos, void* buffer, int cbToRead)
 {
 	ASSERT(m_fd != -1 && buffer != NULL);
-	size_t cbRead = pread(m_fd, buffer, cbToRead, pos);
+	int cbRead = pread(m_fd, buffer, cbToRead, pos);
 	if (cbRead == -1)
 		cdec_throw_stdc_lasterr(IOException);
 	return cbRead;
 }
 
-UINT FileWrapper::Write(const void* buffer, DWORD cbToWrite)
+int FileWrapper::Write(const void* buffer, int cbToWrite)
 {
 	ASSERT(m_fd != -1 && buffer != NULL);
-	size_t cbWritten = write(m_fd, buffer, cbToWrite);
+	int cbWritten = write(m_fd, buffer, cbToWrite);
 	if (cbWritten == -1)
 		cdec_throw_stdc_lasterr(IOException);
 	return cbWritten;
 }
 
-UINT FileWrapper::AtomWrite(const void* buffer, DWORD cbToWrite, UINT64 pos)
+int FileWrapper::AtomWrite(INT64 pos, const void* buffer, int cbToWrite)
 {
 	ASSERT(m_fd != -1 && buffer != NULL);
-	size_t cbWritten = pwrite(m_fd, buffer, cbToWrite, pos);
+	int cbWritten = pwrite(m_fd, buffer, cbToWrite, pos);
 	if (cbWritten == -1)
 		cdec_throw_stdc_lasterr(IOException);
 	return cbWritten;

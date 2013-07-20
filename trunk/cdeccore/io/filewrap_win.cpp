@@ -28,34 +28,32 @@ void FileWrapper::Close()
 	}
 }
 
-UINT FileWrapper::Read(PVOID buffer, UINT cbToRead)
+int FileWrapper::Read(PVOID buffer, int cbToRead)
 {
 	ASSERT(IsOpen() && buffer != NULL);
-	UINT cbRead = 0;
+	int cbRead = 0;
 	if (!::ReadFile(m_hFile, buffer, cbToRead, (DWORD*)&cbRead, NULL))
 		cdec_throw_win32_lasterr(IOException);
 	return cbRead;
 }
 
-UINT FileWrapper::Write(LPCVOID buffer, DWORD cbToWrite)
+int FileWrapper::Write(LPCVOID buffer, int cbToWrite)
 {
 	ASSERT(IsOpen() && buffer != NULL);
-	UINT cbWritten = 0;
+	int cbWritten = 0;
 	if (!::WriteFile(m_hFile, buffer, cbToWrite, (DWORD*)&cbWritten, NULL))
 		cdec_throw_win32_lasterr(IOException);
 	return cbWritten;
 }
 
-UINT FileWrapper::AtomRead(void* buffer, UINT cbToRead,UINT64 pos)
+int FileWrapper::AtomRead(INT64 pos, void* buffer, int cbToRead)
 {
-	cdec_throw_win32_lasterr(IOException);// Not supported yet
-	return -1;
+	cdec_throw(Exception(EC_OperationUnsupported));
 }
 
-UINT FileWrapper::AtomWrite(const void* buffer, DWORD cbToWrite, UINT64 pos)
+int FileWrapper::AtomWrite(INT64, const void* buffer, int cbToWrite)
 {
-	cdec_throw_win32_lasterr(IOException);// Not supported yet
-	return -1;
+	cdec_throw(Exception(EC_OperationUnsupported));
 }
 
 INT64 FileWrapper::Seek(INT64 offset, SeekOrigin origin)

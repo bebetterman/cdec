@@ -36,17 +36,17 @@ protected:
 	virtual ~Stream() {}
 
 public:
-	virtual UINT __stdcall Read(void* buffer, UINT cb) = 0;
-	virtual UINT __stdcall Read(ref<ArrayV<BYTE> > buffer, size_t cbToRead, size_t offset) = 0;
-	virtual UINT __stdcall Write(const void* buffer, UINT cb) = 0;
-	virtual UINT __stdcall Write(ref<ArrayV<BYTE> > buffer, size_t cbToWrite, size_t offset) = 0;
-	virtual INT64 __stdcall Seek(INT64 pos, SeekPosition cp = Stream::SeekBegin) = 0;
-	virtual void __stdcall SetLength(INT64 length) = 0;
-	virtual INT64 __stdcall Length() = 0;
-	virtual void __stdcall Close() = 0;
+	virtual int		Read(void* buffer, int count) = 0;
+	virtual int		Read2(ref<ByteArray> buffer, int offset, int count) = 0;
+	virtual int		Write(const void* buffer, int count) = 0;
+	virtual int		Write2(ref<ByteArray> buffer, int offset, int count) = 0;
+	virtual INT64	Seek(INT64 pos, SeekPosition cp = Stream::SeekBegin) = 0;
+	virtual void	SetLength(INT64 length) = 0;
+	virtual INT64	Length() = 0;
+	virtual void	Close() = 0;
 
-	virtual UINT __stdcall AtomRead(void* buffer, UINT cb,UINT64 pos) = 0;
-	virtual UINT __stdcall AtomWrite(const void* buffer, UINT cb,UINT64 pos) = 0;
+	virtual int		AtomRead(INT64 pos, void* buffer, int count) = 0;
+	virtual int		AtomWrite(INT64 pos, const void* buffer, int count) = 0;
 
 	INT64 Pos() { return Seek(0, SeekCurrent); }
 };
@@ -67,7 +67,7 @@ public:
 	};
 
 protected:
-	FileWrapper*		m_pFile;
+	FileWrapper*	m_pFile;
 
 public:
 	FileStream(stringx filename, AccessMode accs, bool fCreate): m_pFile(NULL)
@@ -80,20 +80,20 @@ public:
 		Open(filename, accs, share, fCreate);
 	}
 
-	UINT __stdcall Read(void* pv, UINT cb);
-	UINT __stdcall Read(ref<ArrayV<BYTE> > ByteArray, size_t cbToRead, size_t offset);
-	UINT __stdcall Write(const void* pv, UINT cb);
-	UINT __stdcall Write(ref<ArrayV<BYTE> > ByteArray, size_t cbToWrite, size_t offset);
-	INT64 __stdcall Seek(INT64 pos, SeekPosition cp = Stream::SeekBegin);
-	void __stdcall SetLength(INT64 length);
-	INT64 __stdcall Length();
+	int		Read(void* pv, int count);
+	int		Read2(ref<ByteArray> buffer, int offset, int count);
+	int		Write(const void* pv, int count);
+	int		Write2(ref<ByteArray> buffer, int offset, int count);
+	INT64	Seek(INT64 pos, SeekPosition cp = Stream::SeekBegin);
+	void	SetLength(INT64 length);
+	INT64	Length();
 
-	void __stdcall Close();
+	void	Close();
 
-	UINT __stdcall AtomRead(void* buffer, UINT cb,UINT64 pos);
-	UINT __stdcall AtomWrite(const void* buffer, UINT cb,UINT64 pos);
+	int		AtomRead(INT64 pos, void* buffer, int count);
+	int		AtomWrite(INT64 pos, const void* buffer, int count);
 	 
-	FileWrapper* __stdcall __Inner() { return m_pFile; }
+	FileWrapper* __Inner() { return m_pFile; }
 
 protected:
 	~FileStream() { Close(); }

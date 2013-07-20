@@ -17,7 +17,7 @@ void FileStream::Open(stringx filename, AccessMode access, ShareMode share, bool
 	m_pFile->Open(filename.c_str(), (FileWrapper::AccessMode)access, (FileWrapper::ShareMode)share, fCreate);
 }
 
-void __stdcall FileStream::Close()
+void FileStream::Close()
 {
 	if (m_pFile != NULL)
 	{
@@ -26,51 +26,50 @@ void __stdcall FileStream::Close()
 	}
 }
 
-UINT FileStream::Read(void* buffer, UINT cbToRead)
+int FileStream::Read(void* buffer, int count)
 {
 	if (!m_pFile->IsOpen())
 		cdec_throw(IOException(EC_IO_NotOpened));
-	return m_pFile->Read(buffer, cbToRead);
+	return m_pFile->Read(buffer, count);
 }
 
-UINT FileStream::AtomRead(void* buffer, UINT cbToRead,UINT64 pos)
+int FileStream::AtomRead(INT64 pos, void* buffer, int count)
 {
 	if (!m_pFile->IsOpen())
 		cdec_throw(IOException(EC_IO_NotOpened));
-	return m_pFile->AtomRead(buffer, cbToRead,pos);
+	return m_pFile->AtomRead(pos, buffer, count);
 }
 
-
-UINT FileStream::Read(ref<ArrayV<BYTE> > buffer, size_t cbToRead, size_t offset)
+int FileStream::Read2(ref<ByteArray> buffer, int offset, int count)
 {
-	if (offset + cbToRead > buffer->Count())
+	if (CheckOutOfRange(offset, count, buffer->Count()))
 		cdec_throw(IOException(EC_OutOfRange));
 
-	pin_ptr<BYTE> pinBuf = buffer->GetBuffer();
-	return Read(pinBuf.ptr() + offset, cbToRead);
+	pin_ptr<BYTE> pinBuffer = buffer->GetBuffer();
+	return Read(pinBuffer.ptr() + offset, count);
 }
 
-UINT FileStream::Write(const void* buffer, UINT cbToWrite)
+int FileStream::Write(const void* buffer, int count)
 {
 	if (!m_pFile->IsOpen())
 		cdec_throw(IOException(EC_IO_NotOpened));
-	return m_pFile->Write(buffer, cbToWrite);
+	return m_pFile->Write(buffer, count);
 }
 
-UINT FileStream::AtomWrite(const void* buffer, UINT cbToWrite,UINT64 pos)
+int FileStream::AtomWrite(INT64 pos, const void* buffer, int count)
 {
 	if (!m_pFile->IsOpen())
 		cdec_throw(IOException(EC_IO_NotOpened));
-	return m_pFile->AtomWrite(buffer, cbToWrite,pos);
+	return m_pFile->AtomWrite(pos, buffer, count);
 }
 
-UINT FileStream::Write(ref<ArrayV<BYTE> > buffer, size_t cbToWrite, size_t offset)
+int FileStream::Write2(ref<ByteArray> buffer, int offset, int count)
 {
-	if (offset + cbToWrite > buffer->Count())
+	if (CheckOutOfRange(offset, count, buffer->Count()))
 		cdec_throw(IOException(EC_OutOfRange));
 
-	pin_ptr<BYTE> pinBuf = buffer->GetBuffer();
-	return Write(pinBuf.ptr() + offset, cbToWrite);
+	pin_ptr<BYTE> pinBuffer = buffer->GetBuffer();
+	return Write(pinBuffer.ptr() + offset, count);
 }
 
 INT64 FileStream::Seek(INT64 pos, SeekPosition cp)
