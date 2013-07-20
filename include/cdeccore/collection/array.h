@@ -22,6 +22,7 @@ class ArrayV: public Object
 
 public:
 	typedef _Ty					value_type;
+	typedef ArrayV<_Ty>			this_type;
 	typedef GcCreation<_Ty>		gc_type;
 
 protected:
@@ -128,6 +129,15 @@ public:
 		_Ty* ps = m_buffer + offset;
 		for (int i = 0; i < count; ++i)		// Not optimized
 			*ps++ = value;		
+	}
+
+	ref<this_type>	GetRange(int offset, int count)
+	{
+		if (CheckOutOfRange(offset, count, m_count))
+			cdec_throw(Exception(EC_OutOfRange));
+
+		ref<this_type> r = gc_new<this_type>(m_buffer + offset, count);
+		return r;
 	}
 };
 
