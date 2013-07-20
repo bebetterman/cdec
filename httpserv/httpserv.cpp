@@ -155,6 +155,9 @@ int Server::OnRequestHandler(void* hdctx, MHD_Connection* connection, const char
 		ctx->m_conn = connection;
 		ctx->m_url = Encoding::get_UTF8()->ToUnicode(url);
 
+		ref<IRequestHandler> handler = server->m_dispatcher->Dispatch(ctx->m_url);
+		ctx->m_handler = handler;
+
 		if (strcmp(method, MHD_HTTP_METHOD_GET) == 0)
 		{
 			ctx->m_method = HandlerContext::HTTP_GET;
@@ -164,8 +167,10 @@ int Server::OnRequestHandler(void* hdctx, MHD_Connection* connection, const char
 		{
 			ctx->m_method = HandlerContext::HTTP_POST;
 			// Hotfix: Non-form post
-			// ctx->m_postprocessor = MHD_create_post_processor(connection, 1024, OnPostDataIterator, ctx.__GetPointer());
+			ctx->m_keepPostData = ctx->m_handler->KeepPostData();
 			ctx->m_postprocessor = NULL;
+			if (!ctx->m_keepPostData)
+				ctx->m_postprocessor = MHD_create_post_processor(connection, 1024, OnPostDataIterator, ctx.__GetPointer());
 		}
 		else
 			return MHD_NO;
@@ -185,28 +190,29 @@ int Server::OnRequestHandler(void* hdctx, MHD_Connection* connection, const char
 		// Parse headers
 		// MHD_get_connection_values(connection, MHD_HEADER_KIND, &print_out_key, NULL);
 
-		ref<IRequestHandler> handler = server->m_dispatcher->Dispatch(ctx->m_url);
-
 		if (ctx->m_method == HandlerContext::HTTP_GET)
 		{
 			ASSERT(strcmp(method, MHD_HTTP_METHOD_GET) == 0);
 			ASSERT(*upload_data_size == 0);
 
 			// Do not call "*reqctx = NULL;" because a request completed callback would be called instead
-			return handler->Handle(ctx);
+			return ctx->m_handler->Handle(ctx);
 		}
 		else if (ctx->m_method == HandlerContext::HTTP_POST)
 		{
 			if (*upload_data_size != 0)
 			{
 				// Hotfix: Non-form post
-				// MHD_post_process (ctx->m_postprocessor, upload_data, *upload_data_size);
+				if (ctx->m_keepPostData)
+				{
+					int oldSize = ctx->m_postRaw.size();
+					int trunkSize = *upload_data_size;
+					ctx->m_postRaw.resize(oldSize + trunkSize);
+					memcpy(&ctx->m_postRaw[oldSize], upload_data, trunkSize);
+				}
+				else
+					MHD_post_process (ctx->m_postprocessor, upload_data, *upload_data_size);
 
-				int oldSize = ctx->m_postRaw.size();
-				int trunkSize = *upload_data_size;
-				ctx->m_postRaw.resize(oldSize + trunkSize);
-				memcpy(&ctx->m_postRaw[oldSize], upload_data, trunkSize);
-          
 				*upload_data_size = 0;
 				return MHD_YES;
 			}
@@ -215,7 +221,7 @@ int Server::OnRequestHandler(void* hdctx, MHD_Connection* connection, const char
 				HttpCdecDebugLog("[POST COMPLETE]");
 
 				// Do not call "*reqctx = NULL;" because a request completed callback would be called instead
-				return handler->Handle(ctx);
+				return ctx->m_handler->Handle(ctx);
 			}
 		}
 		else

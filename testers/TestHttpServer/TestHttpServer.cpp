@@ -68,7 +68,6 @@ public:
 
 		ref<StringBuilder> sb = gc_new<StringBuilder>();
 		sb->Append(__X("<html><body>\n<p>POST</p>\n"));
-		/*
 		sb->Append(__X("<p>URL=") + ctx->GetUrl() + __X("</p>\n"));
 		sb->Append(__X("<ul>\n"));
 		
@@ -83,15 +82,32 @@ public:
 		}
 		
 		sb->Append(__X("</ul>\n</body></html>\n"));
-		*/
 
-		// Hotfix: Non-form post
-		sb->Append(__X("<p>"));
+		return ctx->SendResponse(MHD_HTTP_OK, sb);
+	}
+};
+
+class MyRawPostHandler: public IRequestHandler
+{
+	DECLARE_REF_CLASS(MyGetHandler)
+
+public:
+	int Handle(ref<HandlerContext> ctx)
+	{
+		ref<Encoding> e = Encoding::get_UTF8();
+
+		if (ctx->GetMethod() != HandlerContext::HTTP_POST)
+			return ctx->SendResponse(MHD_HTTP_OK, MESSAGE_EXPECT_POST, sizeof(MESSAGE_EXPECT_POST), true);
+
+		ref<StringBuilder> sb = gc_new<StringBuilder>();
+		sb->Append(__X("<html><body>\n<p>POST</p>\n<p>\n"));
 		sb->Append(Encoding::get_UTF8()->GetString(ctx->PostData()));
 		sb->Append(__X("</p>\n</body></html>\n"));
 
 		return ctx->SendResponse(MHD_HTTP_OK, sb);
 	}
+
+	bool KeepPostData() { return true; }
 };
 
 int main(int argc, const char* argv[])
@@ -102,6 +118,7 @@ int main(int argc, const char* argv[])
 	dispatcher->Add(__X("/hello"), gc_new<StaticHandler>("Hello Page"));
 	dispatcher->Add(__X("/get"), gc_new<MyGetHandler>());
 	dispatcher->Add(__X("/post"), gc_new<MyPostHandler>());
+	dispatcher->Add(__X("/rawpost"), gc_new<MyRawPostHandler>());
 
 	ref<Server> server = gc_new<Server>(dispatcher);
 	server->Start(6001);
