@@ -119,13 +119,16 @@ public:
 
 	void testToHexString()
 	{
+		// stringx	ToHexString(const BYTE* bytes, int length);
 		BYTE rs[] = { 0xBA, 0xBE, 3, 0x30 };
-		ref<ByteArray> r = gc_new<ByteArray>(rs, sizeof(rs));
+		UNITTEST_ASSERT(Converter::ToHexString(rs + 1, 2) == __X("be03"));
 
-		UNITTEST_ASSERT(Converter::ToHexString(r) == __X("babe0330"));
+		// stringx	ToHexString(ref<ByteArray> bytes, int offset, int length);
+		ref<ByteArray> r = gc_new<ByteArray>(rs, sizeof(rs));
 		UNITTEST_ASSERT(Converter::ToHexString(r, 1, 2) == __X("be03"));
 
-		
+		// stringx	ToHexString(ref<ByteArray> bytes);
+		UNITTEST_ASSERT(Converter::ToHexString(r) == __X("babe0330"));		
 	}
 
 	void tearDown()
