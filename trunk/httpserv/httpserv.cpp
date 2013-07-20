@@ -163,7 +163,9 @@ int Server::OnRequestHandler(void* hdctx, MHD_Connection* connection, const char
 		else if (strcmp(method, MHD_HTTP_METHOD_POST) == 0)
 		{
 			ctx->m_method = HandlerContext::HTTP_POST;
-			ctx->m_postprocessor = MHD_create_post_processor(connection, 1024, OnPostDataIterator, ctx.__GetPointer());
+			// Hotfix: Non-form post
+			// ctx->m_postprocessor = MHD_create_post_processor(connection, 1024, OnPostDataIterator, ctx.__GetPointer());
+			ctx->m_postprocessor = NULL;
 		}
 		else
 			return MHD_NO;
@@ -197,9 +199,15 @@ int Server::OnRequestHandler(void* hdctx, MHD_Connection* connection, const char
 		{
 			if (*upload_data_size != 0)
 			{
-				MHD_post_process (ctx->m_postprocessor, upload_data, *upload_data_size);
-				*upload_data_size = 0;
+				// Hotfix: Non-form post
+				// MHD_post_process (ctx->m_postprocessor, upload_data, *upload_data_size);
+
+				int oldSize = ctx->m_postRaw.size();
+				int trunkSize = *upload_data_size;
+				ctx->m_postRaw.resize(oldSize + trunkSize);
+				memcpy(&ctx->m_postRaw[oldSize], upload_data, trunkSize);
           
+				*upload_data_size = 0;
 				return MHD_YES;
 			}
 			else
@@ -220,15 +228,11 @@ void Server::OnRequestCompleted(void *cls, struct MHD_Connection *connection, vo
 	Server* server = (Server*)cls;
 	HandlerContext* ctx = (HandlerContext*)*con_cls;
 
-	if (ctx->m_postprocessor != NULL)
+	if (ctx->m_method == HandlerContext::HTTP_POST)
 	{
 		puts("[POST REQUEST COMPLETED]");
-		ASSERT(ctx->m_method == HandlerContext::HTTP_POST);
-		MHD_destroy_post_processor(ctx->m_postprocessor);
-	}
-	else
-	{
-		ASSERT(ctx->m_method != HandlerContext::HTTP_POST);
+		if (ctx->m_postprocessor != NULL)
+			MHD_destroy_post_processor(ctx->m_postprocessor);
 	}
 
 	ctx->Dispose();

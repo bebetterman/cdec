@@ -68,6 +68,7 @@ public:
 
 		ref<StringBuilder> sb = gc_new<StringBuilder>();
 		sb->Append(__X("<html><body>\n<p>POST</p>\n"));
+		/*
 		sb->Append(__X("<p>URL=") + ctx->GetUrl() + __X("</p>\n"));
 		sb->Append(__X("<ul>\n"));
 		
@@ -82,6 +83,12 @@ public:
 		}
 		
 		sb->Append(__X("</ul>\n</body></html>\n"));
+		*/
+
+		// Hotfix: Non-form post
+		sb->Append(__X("<p>"));
+		sb->Append(Encoding::get_UTF8()->GetString(ctx->PostData()));
+		sb->Append(__X("</p>\n</body></html>\n"));
 
 		return ctx->SendResponse(MHD_HTTP_OK, sb);
 	}
