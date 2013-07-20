@@ -17,10 +17,12 @@ class TestTextStream: public UnitTestSuite
 		UNITTEST_METHOD(testOpenStream)
 	//	UNITTEST_METHOD_EXCEPTION(testOpenFailed)		// TODO pure virtual function call
 		UNITTEST_METHOD(testReadStream)
+		UNITTEST_METHOD(testReadStreamToBytes)
 		UNITTEST_METHOD(testAtomReadStream)
-		UNITTEST_METHOD(testAtomWriteStream)
 		UNITTEST_METHOD(testSeekStream)
 		UNITTEST_METHOD(testWriteStream)
+		UNITTEST_METHOD(testWriteStreamFromBytes)
+		UNITTEST_METHOD(testAtomWriteStream)
 		UNITTEST_METHOD(testSetEnd)
 	UNITTEST_SUITE_END()
 
@@ -79,6 +81,25 @@ public:
 		UNITTEST_ASSERT(pStrm->Pos() == pStrm->Length());
 	}
 
+	void testReadStreamToBytes()
+	{
+		stringx sampleFile = TestEnv::get_sample_path(__X("txtr_samp_1.txt"));
+		ref<FileStream> pStrm = gc_new<FileStream>(sampleFile, FileStream::AccessRead, false);
+		INT64 length = pStrm->Length();
+		UNITTEST_ASSERT(pStrm->Pos() == 0);
+
+		ref<ByteArray> buffer = gc_new<ByteArray>(8);
+		int bufferSize = buffer->Count();
+		while (length > 0)
+		{
+			UINT cbRead = pStrm->Read2(buffer, 0, bufferSize);
+			UNITTEST_ASSERT((length < bufferSize ? length : bufferSize) == cbRead);
+			length -= cbRead;
+		}
+		UNITTEST_ASSERT(length == 0);
+		UNITTEST_ASSERT(pStrm->Pos() == pStrm->Length());
+	}
+
 	void testAtomReadStream()
 	{
 #ifndef X_OS_WINDOWS
@@ -92,50 +113,12 @@ public:
 		char c[] = {'H','e','l','l','o'};
 		for( int i=4 ; i>=0;i--)
 		{
-			int len = pStrm->AtomRead(&buf, cbBuf, i);
+			int len = pStrm->AtomRead(i, &buf, cbBuf);
 			UNITTEST_ASSERT(len==cbBuf);
 			//printf("buf=%c\n",*(BYTE *)buf);
 			//printf("c=%c\n",c[i]);
 			UNITTEST_ASSERT(*(BYTE *)buf==c[i]);
 		}
-#endif
-	}
-
-	void testAtomWriteStream()
-	{
-#ifndef X_OS_WINDOWS
-		stringx sampleFile = TestEnv::get_sample_path(__X("txtw_samp_AtomWrite.txt"));
-		File::Delete(sampleFile);
-		ref<FileStream> pStrm = gc_new<FileStream>(sampleFile, FileStream::AccessWrite, true);
-		UNITTEST_ASSERT(pStrm->Length() == 0);
-		const char text[] = "This is a sample.\0";
-		const int len = sizeof(text) / sizeof(text[0]) - 1;
-		pStrm->SetLength(len*4096);
-		for( int i = 0 ; i < len ; i++ )
-		{
-			UNITTEST_ASSERT(pStrm->AtomWrite(text, len,i*4096) == len);
-		}
-		UNITTEST_ASSERT(pStrm->Length() == len*4096);
-		pStrm->Close();
-		// 重新打开文件检查
-		char text2[len];
-		pStrm = gc_new<FileStream>(sampleFile, FileStream::AccessRead, false);
-		UNITTEST_ASSERT(pStrm->Length() == len*4096);
-		for( int i = 0 ; i < len ; i++ )
-		{
-			//pStrm->Seek(i*4096);
-			//int readlen = pStrm->Read(text2, len);
-			int readlen = pStrm->AtomRead(text2, len,i*4096);
-			UNITTEST_ASSERT(readlen == len);
-			//printf("\n@@@%s@@@\n",text2);
-			UNITTEST_ASSERT(memcmp(text, text2, len) == 0);
-			
-		}
-
-		pStrm->Close();
-
-		UNITTEST_ASSERT(File::Exists(sampleFile));
-		UNITTEST_ASSERT(File::Delete(sampleFile));
 #endif
 	}
 
@@ -192,6 +175,78 @@ public:
 
 		UNITTEST_ASSERT(File::Exists(sampleFile));
 		UNITTEST_ASSERT(File::Delete(sampleFile));
+	}
+
+	void testWriteStreamFromBytes()
+	{
+		stringx sampleFile = TestEnv::get_sample_path(__X("txtw_samp.txt"));
+		File::Delete(sampleFile);
+		ref<FileStream> pStrm = gc_new<FileStream>(sampleFile, FileStream::AccessWrite, true);
+		UNITTEST_ASSERT(pStrm->Length() == 0);
+
+		const char text[] = "This is a sample.\r\n";
+		const int len = sizeof(text) - 1;
+		ref<ByteArray> text_binary = gc_new<ByteArray>((const BYTE*)text, len);
+
+		UNITTEST_ASSERT(pStrm->Write2(text_binary, 0, len) == len);
+		UNITTEST_ASSERT(pStrm->Length() == len);
+
+		pStrm->Seek(5, Stream::SeekBegin);
+		UNITTEST_ASSERT(pStrm->Write2(text_binary, 0, len) == len);
+		UNITTEST_ASSERT(pStrm->Length() == len + 5);
+
+		pStrm->Close();
+
+		// 重新打开文件检查
+		char text2[len];
+		pStrm = gc_new<FileStream>(sampleFile, FileStream::AccessReadWrite, false);
+		UNITTEST_ASSERT(pStrm->Length() == len + 5);
+		pStrm->Seek(5, Stream::SeekBegin);
+		UNITTEST_ASSERT(pStrm->Read(text2, len) == len);
+		UNITTEST_ASSERT(memcmp(text, text2, len) == 0);
+
+		pStrm->Close();
+
+		UNITTEST_ASSERT(File::Exists(sampleFile));
+		UNITTEST_ASSERT(File::Delete(sampleFile));
+	}
+
+	void testAtomWriteStream()
+	{
+#ifndef X_OS_WINDOWS
+		stringx sampleFile = TestEnv::get_sample_path(__X("txtw_samp_AtomWrite.txt"));
+		File::Delete(sampleFile);
+		ref<FileStream> pStrm = gc_new<FileStream>(sampleFile, FileStream::AccessWrite, true);
+		UNITTEST_ASSERT(pStrm->Length() == 0);
+		const char text[] = "This is a sample.\0";
+		const int len = sizeof(text) / sizeof(text[0]) - 1;
+		pStrm->SetLength(len*4096);
+		for( int i = 0 ; i < len ; i++ )
+		{
+			UNITTEST_ASSERT(pStrm->AtomWrite(i*4096, text, len) == len);
+		}
+		UNITTEST_ASSERT(pStrm->Length() == len*4096);
+		pStrm->Close();
+		// 重新打开文件检查
+		char text2[len];
+		pStrm = gc_new<FileStream>(sampleFile, FileStream::AccessRead, false);
+		UNITTEST_ASSERT(pStrm->Length() == len*4096);
+		for( int i = 0 ; i < len ; i++ )
+		{
+			//pStrm->Seek(i*4096);
+			//int readlen = pStrm->Read(text2, len);
+			int readlen = pStrm->AtomRead(i*4096, text2, len);
+			UNITTEST_ASSERT(readlen == len);
+			//printf("\n@@@%s@@@\n",text2);
+			UNITTEST_ASSERT(memcmp(text, text2, len) == 0);
+			
+		}
+
+		pStrm->Close();
+
+		UNITTEST_ASSERT(File::Exists(sampleFile));
+		UNITTEST_ASSERT(File::Delete(sampleFile));
+#endif
 	}
 
 	void testSetEnd()
