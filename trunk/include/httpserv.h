@@ -76,6 +76,8 @@ CDEC_NS_BEGIN
 // Hanlder Context
 // -------------------------------------------------------------------------- //
 
+interface IRequestHandler;
+
 class HTTPSERVEXPORT HandlerContext: public Object
 {
 	DECLARE_REF_CLASS(HandlerContext)
@@ -93,11 +95,15 @@ public:
 	typedef std::vector<BYTE>				PostRaw;
 
 protected:
-	MHD_Connection*	m_conn;
-	MHD_PostProcessor *m_postprocessor;
+	ref<IRequestHandler>	m_handler;
 
-	Method	m_method;
-	stringx	m_url;
+	MHD_Connection*		m_conn;
+	Method				m_method;
+	stringx				m_url;
+
+	MHD_PostProcessor*	m_postprocessor;
+
+	bool			m_keepPostData;
 
 	StringPairMap	m_getArgs;
 	PostMap			m_postArgs;
@@ -141,6 +147,9 @@ interface IRequestHandler: public Object
 	DECLARE_REF_CLASS(IRequestHandler)
 
 	virtual int Handle(ref<HandlerContext> ctx) = 0;
+
+	// Request handler config
+	virtual bool KeepPostData() { return false; }
 };
 
 interface IUrlDispatcher: public Object
