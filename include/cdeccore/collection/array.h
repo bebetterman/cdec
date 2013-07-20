@@ -10,6 +10,11 @@ CDEC_NS_BEGIN
 // Array for Value Types
 // -------------------------------------------------------------------------- //
 
+inline bool CheckOutOfRange(int offset, int length, int capacity)
+{
+	return offset < 0 || length < 0 || capacity - offset < length;
+}
+
 template<class _Ty>
 class ArrayV: public Object
 {
@@ -65,31 +70,64 @@ public:
 
 	void	Sort() { std::sort(m_buffer, m_buffer + m_count); }
 
+	void	CopyFrom(int offT, const _Ty* ps, int count)
+	{
+		if (CheckOutOfRange(offT, count, m_count))
+			cdec_throw(Exception(EC_OutOfRange));
+
+		_Ty* pt = m_buffer + offT;
+		for (int i = 0; i < count; ++i)
+			*pt++ = *ps++;
+	}
+
 	void	CopyFrom(int offT, ref<ArrayV<_Ty> > s, int offS, int count)
 	{
-		if (offT < 0 || offS < 0 || count < 0 || offT + count > Count() || offS + count > s->Count())
+		if (CheckOutOfRange(offT, count, m_count) || CheckOutOfRange(offS, count, s->Count()))
 			cdec_throw(Exception(EC_OutOfRange));
-		_Ty* pt = m_buffer + offT;
+
 		_Ty* ps = s->m_buffer + offS;
+		_Ty* pt = m_buffer + offT;
 		for (int i = 0; i < count; ++i)
 			*pt++ = *ps++;
 	}
 
 	void	MemoryCopyFrom(int offT, const _Ty* ps, int count)
 	{
-		if (offT < 0 || count < 0 || offT + count > Count())
+		if (CheckOutOfRange(offT, count, m_count))
 			cdec_throw(Exception(EC_OutOfRange));
+
 		_Ty* pt = m_buffer + offT;
 		memcpy(pt, ps, count * sizeof(_Ty));
 	}
 
 	void	MemoryCopyFrom(int offT, ref<ArrayV<_Ty> > s, int offS, int count)
 	{
-		if (offT < 0 || offS < 0 || count < 0 || offT + count > Count() || offS + count > s->Count())
+		if (CheckOutOfRange(offT, count, m_count) || CheckOutOfRange(offS, count, s->Count()))
 			cdec_throw(Exception(EC_OutOfRange));
+
 		_Ty* pt = m_buffer + offT;
 		_Ty* ps = s->m_buffer + offS;
 		memcpy(pt, ps, count * sizeof(_Ty));
+	}
+
+	void	Fill(const _Ty& value, int offset, int count)
+	{
+		if (CheckOutOfRange(offset, count, m_count))
+			cdec_throw(Exception(EC_OutOfRange));
+
+		_Ty* ps = m_buffer + offset;
+		for (int i = 0; i < count; ++i)
+			*ps++ = value;
+	}
+
+	void	MemoryFill(_Ty value, int offset, int count)
+	{
+		if (CheckOutOfRange(offset, count, m_count))
+			cdec_throw(Exception(EC_OutOfRange));
+
+		_Ty* ps = m_buffer + offset;
+		for (int i = 0; i < count; ++i)		// Not optimized
+			*ps++ = value;		
 	}
 };
 

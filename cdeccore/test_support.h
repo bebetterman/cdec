@@ -44,6 +44,15 @@ public:
 #endif
 		return pathSampleBase + fname;
 	}
+
+	static void AssertByteRangeEqual(const void* ps, const void* pt, int c)
+	{
+		UNITTEST_ASSERT(memcmp(ps, pt, c) == 0);
+	}
+
+	static void AssertByteRangeEqual(ref<ByteArray> s, int offS, const void* pt, int c);
+
+	static void AssertByteArrayEqual(ref<ByteArray> s, const void* pt, int ct);
 };
 
 // -------------------------------------------------------------------------- //

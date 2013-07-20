@@ -10,11 +10,11 @@ template<class _Ty> class ArrayV;
 
 typedef ArrayV<BYTE> ByteArray;
 
-CDECCOREEXPORT void		ConverterToHexStringL(const BYTE* bytes, UINT length, std::wstring16& s);
-CDECCOREEXPORT stringx	ConverterToHexString(ref<ByteArray> bytes, UINT offset, UINT length);
+CDECCOREEXPORT stringx	ConverterToHexStringL(const BYTE* bytes, int length);
+CDECCOREEXPORT stringx	ConverterToHexStringA(ref<ByteArray> bytes, int offset, int length);
 
-CDECCOREEXPORT UINT		ConverterFromHexStringL(PCWSTR str, UINT cch, BYTE* bytes, UINT capacity);
-CDECCOREEXPORT UINT		ConverterFromHexStringA(PCWSTR str, UINT cch, ref<ByteArray> bytes, UINT offset);
+CDECCOREEXPORT int		ConverterFromHexStringL(PCWSTR str, int cch, BYTE* bytes, int capacity);
+CDECCOREEXPORT int		ConverterFromHexStringA(PCWSTR str, int cch, ref<ByteArray> bytes, int offset);
 
 // -------------------------------------------------------------------------- //
 
@@ -41,15 +41,21 @@ public:
 	static stringx	ToString(INT64 value, UINT n = 10) { return FormatNumber<INT64>(value, n); }
 	static stringx	ToString(UINT64 value, UINT n = 10) { return FormatNumberPositive<UINT64>(value, n); }
 
-	static void		ToHexString(const BYTE* bytes, UINT length, std::wstring16& s) { ConverterToHexStringL(bytes, length, s); }
-	static stringx	ToHexString(const BYTE* bytes, UINT length);
-	static stringx	ToHexString(ref<ByteArray> bytes, UINT offset, UINT length) { return ConverterToHexString(bytes, offset, length); }
-	static stringx	ToHexString(ref<ByteArray> bytes);
+	static stringx	ToHexString(const BYTE* bytes, int length) { return ConverterToHexStringL(bytes, length); }
+	static stringx	ToHexString(ref<ByteArray> bytes, int offset, int length) { return ConverterToHexStringA(bytes, offset, length); }
+	static stringx	ToHexString(ref<ByteArray> bytes) { return ConverterToHexStringA(bytes, 0, bytes->Count()); }
 
-	static UINT		FromHexString(PCWSTR str, UINT cch, BYTE* bytes, UINT length) { return ConverterFromHexStringL(str, cch, bytes, length); }
-	static UINT		FromHexString(stringx str, ref<ByteArray> bytes, UINT offset) { return ConverterFromHexStringA(str.c_str(), str.Length(), bytes, offset); }
-	static ref<ByteArray>	FromHexString(stringx str);
+	static int		FromHexString(PCWSTR str, int cch, BYTE* bytes, int length) { return ConverterFromHexStringL(str, cch, bytes, length); }
+	static int		FromHexString(stringx str, int pos, int cch, BYTE* bytes, int length);
+	static int		FromHexString(stringx str, BYTE* bytes, int length) { return FromHexString(str.c_str(), str.Length(), bytes, length); }
+
+	static int		FromHexString(PCWSTR str, int cch, ref<ByteArray> bytes, int offset) { return ConverterFromHexStringA(str, cch, bytes, offset); }
+	static int		FromHexString(stringx str, int pos, int cch, ref<ByteArray> bytes, int offset);
+	static int		FromHexString(stringx str, ref<ByteArray> bytes, int offset) { return FromHexString(str.c_str(), str.Length(), bytes, offset); }
+
 	static ref<ByteArray>	FromHexString(PCWSTR str, UINT cch);
+	static ref<ByteArray>	FromHexString(stringx str, int pos, int cch);
+	static ref<ByteArray>	FromHexString(stringx str) { return FromHexString(str.c_str(), str.Length()); }
 
 protected:
 	template<typename T>
@@ -73,30 +79,32 @@ public:	// Internal usage
 
 // -------------------------------------------------------------------------- //
 
-inline stringx Converter::ToHexString(const BYTE* bytes, UINT length)
+inline int Converter::FromHexString(stringx str, int pos, int cch, BYTE* bytes, int length)
 {
-	std::wstring16 s;
-	ConverterToHexStringL(bytes, length, s);
-	return stringx(s);
+	if (CheckOutOfRange(pos, cch, str.Length()))
+		cdec_throw(Exception(EC_OutOfRange));
+	return ConverterFromHexStringL(str.c_str() + pos, cch, bytes, length);
 }
 
-inline stringx Converter::ToHexString(ref<ByteArray> bytes)
+inline int Converter::FromHexString(stringx str, int pos, int cch, ref<ByteArray> bytes, int offset)
 {
-	return ConverterToHexString(bytes, 0, bytes->Count());
-}
-
-inline ref<ByteArray> Converter::FromHexString(stringx str)
-{
-	return FromHexString(str.c_str(), str.Length());
+	if (CheckOutOfRange(pos, cch, str.Length()))
+		cdec_throw(Exception(EC_OutOfRange));
+	return ConverterFromHexStringA(str.c_str() + pos, cch, bytes, offset);
 }
 
 inline ref<ByteArray> Converter::FromHexString(PCWSTR str, UINT cch)
 {
-	if ((cch & 1) != 0)
-		cdec_throw(Exception(EC_InvalidArg));
 	ref<ByteArray> r = gc_new<ByteArray>(cch >> 1);
 	ConverterFromHexStringA(str, cch, r, 0);
 	return r;
+}
+
+inline ref<ByteArray> Converter::FromHexString(stringx str, int pos, int cch)
+{
+	if (CheckOutOfRange(pos, cch, str.Length()))
+		cdec_throw(Exception(EC_OutOfRange));
+	return FromHexString(str.c_str() + pos, cch);
 }
 
 // -------------------------------------------------------------------------- //

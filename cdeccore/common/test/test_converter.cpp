@@ -16,7 +16,9 @@ class TestConverter: public UnitTestSuite
 		UNITTEST_METHOD(testStrToInt32)
 		UNITTEST_METHOD(testStrToInt64)
 		UNITTEST_METHOD(testInt32ToStr)
-		UNITTEST_METHOD(testFromHexString)
+		UNITTEST_METHOD(testFromHexString1)
+		UNITTEST_METHOD(testFromHexString2)
+		UNITTEST_METHOD(testFromHexString3)
 		UNITTEST_METHOD(testToHexString)
 	UNITTEST_SUITE_END()
 
@@ -59,18 +61,60 @@ public:
 		UNITTEST_ASSERT(Converter::ToString((UINT)681) == __X("681"));
 	}
 
-	void testFromHexString()
+	void testFromHexString1()
 	{
-		ref<ByteArray> r = Converter::FromHexString(__X("FACE00"));
-		UNITTEST_ASSERT(r->Count() == 3 && r->at(0) == 0xFA && r->at(1) == 0xCE && r->at(2) == 0);
+		// int FromHexString(PCWSTR str, int cch, BYTE* bytes, int length);
+		BYTE buf[16];
+		memset(buf, 0x33, sizeof(buf));
+		UNITTEST_ASSERT(Converter::FromHexString(__X("cafe88"), 6, buf + 1, 3) == 3);
+		TestEnv::AssertByteRangeEqual(buf, "\x33\xca\xfe\x88\x33\x33", 6);
 
-		r = gc_new<ByteArray>(4);
-		UNITTEST_ASSERT(Converter::FromHexString(__X("cafe80"), r, 1) == 3);
-		UNITTEST_ASSERT(r->at(0) == 0 && r->at(1) == 0xCA && r->at(2) == 0xFE && r->at(3) == 0x80);
+		// int FromHexString(stringx str, int pos, int cch, BYTE* bytes, int length);
+		memset(buf, 0x33, sizeof(buf));
+		UNITTEST_ASSERT(Converter::FromHexString(__X("abeef"), 1, 4, buf + 1, 2) == 2);
+		TestEnv::AssertByteRangeEqual(buf, "\x33\xbe\xef\x33", 4);
 
-		BYTE buf;
-		UNITTEST_ASSERT(Converter::FromHexString(__X("3A"), 2, &buf, 1) == 1);
-		UNITTEST_ASSERT(buf == 0x3A);
+		// int FromHexString(stringx str, BYTE* bytes, int length);
+		memset(buf, 0x33, sizeof(buf));
+		UNITTEST_ASSERT(Converter::FromHexString(__X("3A"), buf + 1, 2) == 1);
+		TestEnv::AssertByteRangeEqual(buf, "\x33\x3A\x33\x33", 4);
+	}
+
+	void testFromHexString2()
+	{
+		// int FromHexString(PCWSTR str, int cch, ref<ByteArray> bytes, int offset) { return ConverterFromHexStringA(str, cch, bytes, offset); }
+		ref<ByteArray> r = gc_new<ByteArray>(16);
+		r->MemoryFill(0x33, 0, r->Count());
+		UNITTEST_ASSERT(Converter::FromHexString(__X("cafe88"), 6, r, 1) == 3);
+		TestEnv::AssertByteRangeEqual(r, 0, "\x33\xca\xfe\x88\x33\x33", 6);
+
+		// int FromHexString(stringx str, int pos, int cch, ref<ByteArray> bytes, int offset);
+		r->MemoryFill(0x33, 0, r->Count());
+		UNITTEST_ASSERT(Converter::FromHexString(__X("abeef"), 1, 4, r, 1) == 2);
+		TestEnv::AssertByteRangeEqual(r, 0, "\x33\xbe\xef\x33", 4);
+
+		// int FromHexString(stringx str, ref<ByteArray> bytes, int offset) { return FromHexString(str.c_str(), str.Length(), bytes, offset); }
+		r->MemoryFill(0x33, 0, r->Count());
+		UNITTEST_ASSERT(Converter::FromHexString(__X("3A"), r, 1) == 1);
+		TestEnv::AssertByteRangeEqual(r, 0, "\x33\x3A\x33\x33", 4);
+	}
+
+	void testFromHexString3()
+	{
+		// ref<ByteArray> FromHexString(PCWSTR str, UINT cch)
+		ref<ByteArray> r = Converter::FromHexString(__X("CA3888"), 4);
+		BYTE t1[] = { 0xCA, 0x38 };
+		TestEnv::AssertByteArrayEqual(r, t1, sizeof(t1));
+
+		// ref<ByteArray> FromHexString(stringx str, int pos, int cch)
+		r = Converter::FromHexString(__X("FACE00"), 1, 2);
+		BYTE t2[] = { 0xAC };
+		TestEnv::AssertByteArrayEqual(r, t2, sizeof(t2));
+
+		// ref<ByteArray> FromHexString(stringx str)
+		r = Converter::FromHexString(__X("FACE00"));
+		BYTE t3[] = { 0xFA, 0xCE, 0 };
+		TestEnv::AssertByteArrayEqual(r, t3, sizeof(t3));
 	}
 
 	void testToHexString()
@@ -81,9 +125,7 @@ public:
 		UNITTEST_ASSERT(Converter::ToHexString(r) == __X("babe0330"));
 		UNITTEST_ASSERT(Converter::ToHexString(r, 1, 2) == __X("be03"));
 
-		std::wstring16 s = __X("S");
-		Converter::ToHexString(rs, 2, s);
-		UNITTEST_ASSERT(s == __X("Sbabe"));
+		
 	}
 
 	void tearDown()
