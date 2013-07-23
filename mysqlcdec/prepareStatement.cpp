@@ -64,4 +64,10 @@ void PrepareStatement::SetString(UINT index, stringx value)
 void PrepareStatement::SetInt(UINT index ,int value)
 {
 	m_impl->setInt(index,value);
+	
+}
+void PrepareStatement::SetInt64(UINT index ,INT64 value)
+{
+	m_impl->setInt64(index,value);
+
 }

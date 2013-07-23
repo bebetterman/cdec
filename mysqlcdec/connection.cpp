@@ -5,6 +5,10 @@ using namespace  cdec;
 // Connection
 // -------------------------------------------------------------------------- //
 
+Connection::Connection()
+{
+	m_impl = NULL;
+}
 Connection::Connection(stringx dburl, stringx uname, stringx pwd)
 {
 	m_driver = get_driver_instance();
@@ -21,13 +25,25 @@ Connection::Connection(stringx dburl, stringx uname, stringx pwd, stringx databa
 	m_impl = m_driver->connect(sddburl,Strx2SqlStr(uname),Strx2SqlStr(pwd));
 	m_impl->setSchema(Strx2SqlStr(database));
 }
-
+Connection::~Connection()
+{
+	if (m_impl != NULL && !m_impl->isClosed())
+	{
+		m_impl->close();
+		delete m_impl;
+		m_impl = NULL;
+	}
+}
 void Connection::Close()
 {
     try
     {
-        m_impl->close();
-        delete m_impl;
+		if (m_impl != NULL && !m_impl->isClosed())
+		{
+			m_impl->close();
+			delete m_impl;
+			m_impl = NULL;
+		}
     }
     catch (sql::SQLException &e)
     {

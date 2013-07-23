@@ -20,8 +20,10 @@ private:
 	sql::Driver * m_driver;
 	sql::Connection *  m_impl;
 public:
+	Connection();
 	Connection(stringx dburl,stringx uname,stringx pwd,stringx database);
 	Connection(stringx dburl,stringx uname,stringx pwd);
+	~Connection();
 	ref<Statement> CreateStatement();
 	ref<PrepareStatement> CreatePrepareStatement(stringx sql);
 	void Close();
