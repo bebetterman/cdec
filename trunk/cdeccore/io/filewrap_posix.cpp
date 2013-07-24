@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "filewrap.h"
 
-#if !defined(X_OS_WINDOWS) && USE_POSIX_FILEIO
+#if !defined(X_OS_WINDOWS)
 
 #include <unistd.h>
 #include <fcntl.h>
