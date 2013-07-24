@@ -79,6 +79,15 @@ public:
 
 	ref<JsonNode>	GetChild(int index);
 	ref<JsonNode>	GetChild(stringx key);
+
+	stringx		GetChildTextValue(int index) { return GetChild(index)->TextValue; }
+	stringx		GetChildTextValue(stringx key) { return GetChild(key)->TextValue; }
+
+	int			GetChildIntValue(int index) { return GetChild(index)->IntValue; }
+	int			GetChildIntValue(stringx key) { return GetChild(key)->IntValue; }
+
+	double		GetChildDblValue(int index) { return GetChild(index)->DblValue; }
+	double		GetChildDblValue(stringx key) { return GetChild(key)->DblValue; }
 };
 
 class CDECCOREEXPORT JsonDom: public Object
