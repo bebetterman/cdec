@@ -1,0 +1,9 @@
+Version curl-7.31.0
+
+[Build Config]
+
+libcurl-vc10-x86-debug-static-ipv6-sspi-spnego-winssl
+nmake /f Makefile.vc mode=static VC=10 DEBUG=yes
+
+libcurl-vc10-x86-release-static-ipv6-sspi-spnego-winssl
+nmake /f Makefile.vc mode=static VC=10 DEBUG=no
