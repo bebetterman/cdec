@@ -72,6 +72,30 @@ void TestGet()
 	puts(buffer.c_str());
 }
 
+void TestPost()
+{
+	puts("[TestPost]");
+
+	ByteBuffer buffer;
+
+	void* curl = curl_easy_init();
+	UNITTEST_ASSERT(curl != NULL);
+
+	VERIFY(curl_easy_setopt(curl, CURLOPT_URL, MYURL "post"));
+	VERIFY(curl_easy_setopt(curl, CURLOPT_POSTFIELDS, "name=abc&value=123"));
+	VERIFY(curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, CurlDataReceiveCallback));
+	VERIFY(curl_easy_setopt(curl, CURLOPT_WRITEDATA, &buffer));
+	VERIFY(curl_easy_perform(curl));
+
+	long responseCode = 0;
+	VERIFY(curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &responseCode));
+	UNITTEST_ASSERT(responseCode == 200);
+	
+	curl_easy_cleanup(curl);
+
+	puts(buffer.c_str());
+}
+
 // -------------------------------------------------------------------------- //
 
 int main(int argc, char* argv[])
@@ -79,6 +103,7 @@ int main(int argc, char* argv[])
 	Initialize();
 
 	TestGet();
+	TestPost();
 
 	Terminate();
 
