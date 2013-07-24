@@ -14,6 +14,8 @@
 #elif defined(X_OS_WIN64)
 #endif
 
+bool cdec_PrintError = true;
+
 #ifdef X_OS_WINDOWS
 
 BOOL APIENTRY DllMain( HMODULE hModule,
