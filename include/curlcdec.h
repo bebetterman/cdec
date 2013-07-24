@@ -8,6 +8,16 @@
 #define __CDEC_CURL__
 
 // -------------------------------------------------------------------------- //
+// Used in this project only 
+// -------------------------------------------------------------------------- //
+
+#ifdef CURLCDEC_EXPORTS
+#define CURLCDECEXPORT DECLSPEC_EXPORT
+#else
+#define CURLCDECEXPORT DECLSPEC_IMPORT
+#endif
+
+// -------------------------------------------------------------------------- //
 
 enum
 {
@@ -148,24 +158,7 @@ interface ICurlContentWriter: public Object
 	virtual void OnCurlReceive(const void* buffer, int size) = 0;
 };
 
-class CurlByteBufferContentWriter: public ICurlContentWriter
-{
-	DECLARE_REF_CLASS(CurlByteBufferContentWriter)
-
-	typedef std::vector<unsigned char> ByteBuffer;
-	ByteBuffer	m_buffer;
-
-public:
-	void	Reserve(int size) { m_buffer.reserve(size); }
-
-	void	OnCurlReset() { m_buffer.clear(); }
-	void	OnCurlReceive(const void* buffer, int size);
-
-	int		GetDataLength() { return m_buffer.size(); }
-	const void*		GetData() { return &m_buffer[0]; }
-};
-
-class CurlEasy: public Object
+class CURLCDECEXPORT CurlEasy: public Object
 {
 	DECLARE_REF_CLASS(CurlEasy)
 
@@ -184,6 +177,8 @@ public:
 	void	Request();
 
 	long	GetResponseCode();
+	
+	ref<ByteArray>	ReadResponseData();
 
 private:
 	static size_t CurlDataReceiveCallback(void *buffer, size_t size, size_t nmemb, void *user_p);
