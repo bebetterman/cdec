@@ -69,6 +69,11 @@ void CurlEasy::SetUrl(const char* url)
 	VERIFY_CURL_CODE(code);
 }
 
+void CurlEasy::SetUrl(stringx url)
+{
+	SetUrl(Encoding::get_UTF8()->FromUnicode(url).c_str());
+}
+
 void CurlEasy::AddHeader(stringx key, stringx value)
 {
 	stringx line = key + __X(": ") + value;
