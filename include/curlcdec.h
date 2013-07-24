@@ -175,6 +175,8 @@ public:
 	~CurlEasy();
 
 	void	SetUrl(const char* url);
+	void	SetUrl(stringx url);
+
 	void	SetContentWriter(ref<ICurlContentWriter> cWriter) { m_cWriter = cWriter; }
 
 	void	AddHeader(stringx key, stringx value);
