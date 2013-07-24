@@ -79,6 +79,7 @@ public:
 
 	ref<JsonNode>	GetChild(int index);
 	ref<JsonNode>	GetChild(stringx key);
+	int				GetChildrenCount();
 
 	stringx		GetChildTextValue(int index) { return GetChild(index)->TextValue; }
 	stringx		GetChildTextValue(stringx key) { return GetChild(key)->TextValue; }
@@ -117,6 +118,19 @@ inline ref<JsonNode> JsonNode::GetChild(stringx key)
 	if (NodeType != JSN_Dictionary)
 		cdec_throw(JsonException(EC_JSON_TypeError, 0));
 	return NodeDict->Get(key);
+}
+
+inline int JsonNode::GetChildrenCount()
+{
+	switch (NodeType)
+	{
+	case JSN_NodeList:
+		return NodeList->Count();
+	case JSN_Dictionary:
+		return NodeDict->Count();
+	default:
+		return 0;
+	}
 }
 
 // -------------------------------------------------------------------------- //
