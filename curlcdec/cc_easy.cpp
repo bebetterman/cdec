@@ -65,23 +65,75 @@ CurlEasy::~CurlEasy()
 
 void CurlEasy::SetUrl(const char* url)
 {
-	int code = curl_easy_setopt(m_curl, CURLOPT_URL, url);;
+	int code = curl_easy_setopt(m_curl, CURLOPT_URL, url);
 	VERIFY_CURL_CODE(code);
+}
+
+void CurlEasy::AddHeader(stringx key, stringx value)
+{
+	stringx line = key + __X(": ") + value;
+	m_headers.push_back(Encoding::get_UTF8()->FromUnicode(line));
+}
+
+void CurlEasy::SetPostBytes(const void* data, int length)
+{
+	int code = curl_easy_setopt(m_curl, CURLOPT_POSTFIELDSIZE, length);		// Set post data length
+	VERIFY_CURL_CODE(code);
+
+	// CURLOPT_COPYPOSTFIELDS to copy the data
+	// CURLOPT_POSTFIELDS for static resource
+	code = curl_easy_setopt(m_curl, CURLOPT_COPYPOSTFIELDS, data);	// Set post data
+	VERIFY_CURL_CODE(code);
+}
+
+void CurlEasy::SetPostBytes(ref<ByteArray> data, int offset, int length)
+{
+	if (CheckOutOfRange(offset, length, data->Count()))
+		cdec_throw(Exception(EC_OutOfRange));
+
+	SetPostBytes(data->GetBuffer().ptr() + offset, length);
+}
+
+void CurlEasy::SetPostText(stringx s, int offset, int length)
+{
+	std::string ss = Encoding::get_UTF8()->FromUnicode(s, offset, length);
+	SetPostBytes(ss.c_str(), ss.size());
+	ss.clear();
 }
 
 //size_t xxx(size_t, void*, void*, size_t) { return 0; }
 void CurlEasy::Request()
 {
+	int code = 0;
+
+	// Write headers
+	struct curl_slist *headers = NULL;
+	if (m_headers.size() != 0)
+	{
+		typedef std::vector<std::string>::iterator headers_it;
+		foreach_it (headers_it, it, m_headers.begin(), m_headers.end())
+			headers = curl_slist_append(headers, it->c_str());
+	
+		code = curl_easy_setopt(m_curl, CURLOPT_HTTPHEADER, headers);
+		VERIFY_CURL_CODE(code);
+	}
+
+	// Set response receiver
 	m_cWriter->OnCurlReset();
 
-	int code = curl_easy_setopt(m_curl, CURLOPT_WRITEFUNCTION, CurlDataReceiveCallback);
+	code = curl_easy_setopt(m_curl, CURLOPT_WRITEFUNCTION, CurlDataReceiveCallback);
 	VERIFY_CURL_CODE(code);
 
 	code = curl_easy_setopt(m_curl, CURLOPT_WRITEDATA, m_cWriter.__GetPointer());
 	VERIFY_CURL_CODE(code);
 
+	// Perform action
 	code = curl_easy_perform(m_curl);
 	VERIFY_CURL_CODE(code);
+
+	// Clean up
+	if (headers != NULL)
+		curl_slist_free_all(headers); // free the header list
 }
 
 long CurlEasy::GetResponseCode()

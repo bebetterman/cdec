@@ -163,7 +163,9 @@ class CURLCDECEXPORT CurlEasy: public Object
 	DECLARE_REF_CLASS(CurlEasy)
 
 	void*	m_curl;
-	ref<ICurlContentWriter>	m_cWriter;
+	std::vector<std::string>	m_headers;
+
+	ref<ICurlContentWriter>		m_cWriter;
 
 public:
 	static void GlobalInit();
@@ -174,6 +176,16 @@ public:
 
 	void	SetUrl(const char* url);
 	void	SetContentWriter(ref<ICurlContentWriter> cWriter) { m_cWriter = cWriter; }
+
+	void	AddHeader(stringx key, stringx value);
+
+	void	SetPostBytes(const void* data, int length);
+	void	SetPostBytes(ref<ByteArray> data, int offset, int length);
+	void	SetPostBytes(ref<ByteArray> data) { SetPostBytes(data, 0, data->Count()); }
+	void	SetPostText(const char* text, int length) { SetPostBytes(text, length); }
+	void	SetPostText(stringx str, int offset, int length);
+	void	SetPostText(stringx str) { SetPostText(str, 0, str.Length()); }
+
 	void	Request();
 
 	long	GetResponseCode();
