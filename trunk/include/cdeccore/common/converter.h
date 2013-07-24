@@ -71,7 +71,6 @@ protected:
 	static stringx FormatNumberNegative(T value, UINT n);
 
 public:	// Internal usage
-	static UINT ParseDigit(WCHAR ch);
 	static UINT ParseDigit(WCHAR ch, UINT n);
 
 	static WCHAR ToDigit(UINT d, UINT n);
