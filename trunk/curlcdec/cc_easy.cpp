@@ -1,13 +1,26 @@
 #include "stdafx.h"
-#include "../include/cdeccore.h"
-#include "../include/curlcdec.h"
-#include "adapt_define.h"
-#include "adapt_easy.h"
 
 #define VERIFY_CURL_CODE(code)	if (code != 0) throw CurlException((code) + EC_CURL_ST);
 
 CDEC_NS_BEGIN
 // -------------------------------------------------------------------------- //
+
+class CurlByteBufferContentWriter: public ICurlContentWriter
+{
+	DECLARE_REF_CLASS(CurlByteBufferContentWriter)
+
+	typedef std::vector<unsigned char> ByteBuffer;
+	ByteBuffer	m_buffer;
+
+public:
+	void	Reserve(int size) { m_buffer.reserve(size); }
+
+	void	OnCurlReset() { m_buffer.clear(); }
+	void	OnCurlReceive(const void* buffer, int size);
+
+	int		GetDataLength() { return m_buffer.size(); }
+	const void*		GetData() { return &m_buffer[0]; }
+};
 
 void CurlByteBufferContentWriter::OnCurlReceive(const void* buffer, int size)
 {
@@ -27,30 +40,32 @@ void CurlEasy::GlobalInit()
 	long flags = CURL_GLOBAL_NOTHING;
 #endif
 
-	int code = curl_adapt_global_init(flags);
+	int code = curl_global_init(flags);
 	VERIFY_CURL_CODE(code);
 }
 
 void CurlEasy::GlobalTerm()
 {
-	curl_adapt_global_cleanup();
+	curl_global_cleanup();
 }
 
-CurlEasy::CurlEasy(): m_cWriter(NULL)
+CurlEasy::CurlEasy()
 {
-	if ((m_curl = curl_adapt_easy_init()) == NULL)
+	if ((m_curl = curl_easy_init()) == NULL)
 		throw CurlException(EC_CURL_FAILED_INIT);
+
+	m_cWriter = gc_new<CurlByteBufferContentWriter>();
 }
 
 CurlEasy::~CurlEasy()
 {
-	curl_adapt_easy_cleanup(m_curl);
+	curl_easy_cleanup(m_curl);
 	m_curl = NULL;
 }
 
 void CurlEasy::SetUrl(const char* url)
 {
-	int code = curl_adapt_easy_seturl(m_curl, url);
+	int code = curl_easy_setopt(m_curl, CURLOPT_URL, url);;
 	VERIFY_CURL_CODE(code);
 }
 
@@ -59,20 +74,20 @@ void CurlEasy::Request()
 {
 	m_cWriter->OnCurlReset();
 
-	int code = curl_adapt_easy_setwritefunction(m_curl, CurlDataReceiveCallback);
+	int code = curl_easy_setopt(m_curl, CURLOPT_WRITEFUNCTION, CurlDataReceiveCallback);
 	VERIFY_CURL_CODE(code);
 
-	code = curl_adapt_easy_setwritedata(m_curl, m_cWriter.__GetPointer());
+	code = curl_easy_setopt(m_curl, CURLOPT_WRITEDATA, m_cWriter.__GetPointer());
 	VERIFY_CURL_CODE(code);
 
-	code = curl_adapt_easy_perform(m_curl);
+	code = curl_easy_perform(m_curl);
 	VERIFY_CURL_CODE(code);
 }
 
 long CurlEasy::GetResponseCode()
 {
 	long responseCode = 0;
-	int code = curl_adapt_easy_getresponsecode(m_curl, &responseCode);
+	int code = curl_easy_getinfo(m_curl, CURLINFO_RESPONSE_CODE, &responseCode);
 	VERIFY_CURL_CODE(code);
 	return responseCode;
 }
@@ -83,6 +98,13 @@ size_t CurlEasy::CurlDataReceiveCallback(void *buffer, size_t size, size_t nmemb
 	size_t cbTotal = size * nmemb;
 	pWriter->OnCurlReceive(buffer, cbTotal);
 	return cbTotal;
+}
+
+ref<ByteArray> CurlEasy::ReadResponseData()
+{
+	ref<CurlByteBufferContentWriter> cwr = ref_cast<CurlByteBufferContentWriter>(m_cWriter);
+	ref<ByteArray> data = gc_new<ByteArray>((const BYTE*)cwr->GetData(), cwr->GetDataLength());
+	return data;
 }
 
 // -------------------------------------------------------------------------- //
