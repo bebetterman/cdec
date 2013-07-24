@@ -102,7 +102,9 @@ public:
 
 	ref<XmlElement>		SelectSingleNode(stringx nameNode);
 	void				SelectNodes(stringx nameNode, ref<ArrayList<XmlElement> > items);
+
 	ref<XmlAttribute>	get_Attribute(stringx nameAttr);
+	stringx				get_AttributeValue(stringx nameAttr) { return get_Attribute(nameAttr)->get_Value(); }
 	stringx				get_ValueText();
 
 	void				AppendNode(ref<XmlNode> subNode);

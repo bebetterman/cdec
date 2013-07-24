@@ -191,6 +191,7 @@ public:
 	long	GetResponseCode();
 	
 	ref<ByteArray>	ReadResponseData();
+	stringx			ReadResponseText();
 
 private:
 	static size_t CurlDataReceiveCallback(void *buffer, size_t size, size_t nmemb, void *user_p);

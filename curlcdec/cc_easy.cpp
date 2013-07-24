@@ -159,5 +159,12 @@ ref<ByteArray> CurlEasy::ReadResponseData()
 	return data;
 }
 
+stringx CurlEasy::ReadResponseText()
+{
+	ref<CurlByteBufferContentWriter> cwr = ref_cast<CurlByteBufferContentWriter>(m_cWriter);
+	stringx text = Encoding::get_UTF8()->GetString((const BYTE*)cwr->GetData(), cwr->GetDataLength());
+	return text;
+}
+
 // -------------------------------------------------------------------------- //
 CDEC_NS_END

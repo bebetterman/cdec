@@ -76,6 +76,9 @@ public:
 	JsonNode(): NodeType(JSN_None), IntValue(0), DblValue(0.0)
 	{
 	}
+
+	ref<JsonNode>	GetChild(int index);
+	ref<JsonNode>	GetChild(stringx key);
 };
 
 class CDECCOREEXPORT JsonDom: public Object
@@ -90,6 +93,22 @@ public:
 public:
 	void	Load(stringx text);
 };
+
+// -------------------------------------------------------------------------- //
+
+inline ref<JsonNode> JsonNode::GetChild(int index)
+{
+	if (NodeType != JSN_NodeList)
+		cdec_throw(JsonException(EC_JSON_TypeError, 0));
+	return NodeList->at(index);
+}
+
+inline ref<JsonNode> JsonNode::GetChild(stringx key)
+{
+	if (NodeType != JSN_Dictionary)
+		cdec_throw(JsonException(EC_JSON_TypeError, 0));
+	return NodeDict->Get(key);
+}
 
 // -------------------------------------------------------------------------- //
 CDEC_NS_END
