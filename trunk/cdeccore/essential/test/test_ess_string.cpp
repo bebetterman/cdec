@@ -84,6 +84,8 @@ public:
 		UNITTEST_ASSERT(c.Length() == d.Length());
 		UNITTEST_ASSERT(wstrcmp16(c.ContentBuffer().ptr(), d.ContentBuffer().ptr()) == 0);
 
+		UNITTEST_ASSERT(stringx('0', 6) == __X("000000"));
+
 		stringx		str1 = __X("helloworld");
 		stringx		ends1 = __X("world");
 		stringx		ends2 = __X("hello");

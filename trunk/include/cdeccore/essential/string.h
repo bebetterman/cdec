@@ -94,7 +94,7 @@ public:
 	stringx(const stringx& r): m_pContent(NULL) { _Assign(r.m_pContent); }
 	stringx(PCWSTR pwszText): m_pContent(NULL) { _Assign(pwszText); }
 	stringx(PCWSTR pwszText, int count): m_pContent(NULL) { _Assign(pwszText, count); }
-	stringx(WCHAR ch, int count): m_pContent(NULL) { _Assign(std::wstring16(ch, count)); }
+	stringx(WCHAR ch, int count): m_pContent(NULL) { _Assign(std::wstring16(count, ch)); }
 	explicit stringx(const std::wstring16& s): m_pContent(NULL) { _Assign(s); }
 	~stringx() { Clear(); }
 
