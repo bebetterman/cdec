@@ -70,6 +70,12 @@ public:
 		wr->WriteInt(NULL, 123);
 		UNITTEST_ASSERT(wr->Complete() == __X("\"abc\",123"));
 
+		wr->Reset();
+		wr->WriteBool(NULL, true);
+		wr->WriteBool(NULL, false);
+		wr->WriteNone(NULL);
+		UNITTEST_ASSERT(wr->Complete() == __X("true,false,null"));
+
 		// Multiple values with format
 		wr->Reset();
 		wr->IndentChars = __X(" ");
