@@ -57,8 +57,10 @@ MakeDir()
 	BUILDHOME=$PWD
 }
 
-proj=("cdecegg" "cdeccore" "curlcdec" "httpserv" "TestRunnerC" 
-"testers/TestHttpServer" "testers/TestCurl")
+proj=(
+	"cdecegg" "cdeccore" "curlcdec" "httpserv" "TestRunnerC" 
+	"testers/TestHttpServer" "testers/TestCurl" "testers/TestCurlCdec"
+)
 
 TYPE=Debug
 i=0
