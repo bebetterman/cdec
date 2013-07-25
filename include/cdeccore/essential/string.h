@@ -94,6 +94,7 @@ public:
 	stringx(const stringx& r): m_pContent(NULL) { _Assign(r.m_pContent); }
 	stringx(PCWSTR pwszText): m_pContent(NULL) { _Assign(pwszText); }
 	stringx(PCWSTR pwszText, int count): m_pContent(NULL) { _Assign(pwszText, count); }
+	stringx(WCHAR ch, int count): m_pContent(NULL) { _Assign(std::wstring16(ch, count)); }
 	explicit stringx(const std::wstring16& s): m_pContent(NULL) { _Assign(s); }
 	~stringx() { Clear(); }
 
@@ -142,6 +143,9 @@ public:
 	stringx& Append(PCWSTR, int);
 	stringx& Append(PCWSTR p) { return Append(p, -1); }
 	stringx& Append(WCHAR ch) { return Append(&ch, 1); }
+	
+	stringx		PadLeft(WCHAR ch, int n);
+	stringx		PadRight(WCHAR ch, int n);
 
 	stringx& operator+=(const stringx& s) { return Append(s); }
 	stringx& operator+=(PCWSTR p) { return Append(p); }

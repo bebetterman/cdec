@@ -143,6 +143,45 @@ stringx& stringx::Append(PCWSTR p, int count)
 	return *this;
 }
 
+stringx stringx::PadLeft(WCHAR ch, int n)
+{
+	int len = Length();
+	if (len >= n)
+		return *this;
+
+	StringContent* pct = StringContent::CreateRawInstance(n);
+	WCHAR* pt = pct->Content();
+	for (int i = 0; i < n - len; ++i)
+		*pt++ = ch;
+	memcpy(pt, c_str(), len + len);
+	pct->WriteTerminatorChar();
+
+	stringx result;
+	result._Assign(pct);
+	pct->Release();
+	return result;
+}
+
+stringx stringx::PadRight(WCHAR ch, int n)
+{
+	int len = Length();
+	if (len >= n)
+		return *this;
+
+	StringContent* pct = StringContent::CreateRawInstance(n);
+	WCHAR* pt = pct->Content();
+	memcpy(pt, c_str(), len + len);
+	pt += len;
+	for (int i = len; i < n; ++i)
+		*pt++ = ch;
+	pct->WriteTerminatorChar();
+
+	stringx result;
+	result._Assign(pct);
+	pct->Release();
+	return result;
+}
+
 bool stringx::operator==(const stringx& s) const
 {
 	StringContent* pContent2 = s.m_pContent;

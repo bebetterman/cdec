@@ -42,6 +42,7 @@ class TestCdecEssString: public UnitTestSuite
 		UNITTEST_METHOD(testSubstring)
 		UNITTEST_METHOD(testStartsWith)
 		UNITTEST_METHOD(testToUpper)
+		UNITTEST_METHOD(testPadding)
 		UNITTEST_METHOD(testEnumString)
 	UNITTEST_SUITE_END()
 
@@ -224,6 +225,31 @@ public:
 		stringx a = __X("6-14-12 Akasaka, Minato-ku, Tokyo");
 		UNITTEST_ASSERT(a.ToUpper() == __X("6-14-12 AKASAKA, MINATO-KU, TOKYO"));
 		UNITTEST_ASSERT(a.ToLower() == __X("6-14-12 akasaka, minato-ku, tokyo"));
+	}
+
+	void testPadding()
+	{
+		stringx a = __X("1234");
+		UNITTEST_ASSERT(a.PadLeft('0', 6) == __X("001234"));
+		UNITTEST_ASSERT(a.PadLeft('0', 5) == __X("01234"));
+		UNITTEST_ASSERT(a.PadLeft('0', 4) == __X("1234"));
+		UNITTEST_ASSERT(a.PadLeft('0', 3) == __X("1234"));
+		UNITTEST_ASSERT(a.PadRight('#', 6) == __X("1234##"));
+		UNITTEST_ASSERT(a.PadRight('#', 5) == __X("1234#"));
+		UNITTEST_ASSERT(a.PadRight('#', 4) == __X("1234"));
+		UNITTEST_ASSERT(a.PadRight('#', 3) == __X("1234"));
+
+		a = __X("");
+		UNITTEST_ASSERT(a.PadLeft('0', 1) == __X("0"));
+		UNITTEST_ASSERT(a.PadLeft('0', 0) == __X(""));
+		UNITTEST_ASSERT(a.PadRight('#', 1) == __X("#"));
+		UNITTEST_ASSERT(a.PadRight('#', 0) == __X(""));
+
+		a = NULL;
+		UNITTEST_ASSERT(a.PadLeft('0', 1) == __X("0"));
+		UNITTEST_ASSERT(a.PadLeft('0', 0) == NULL);
+		UNITTEST_ASSERT(a.PadRight('#', 1) == __X("#"));
+		UNITTEST_ASSERT(a.PadRight('#', 0) == NULL);
 	}
 
 	void testEnumString()
