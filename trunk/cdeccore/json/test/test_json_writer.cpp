@@ -577,18 +577,29 @@ public:
 	void TestJsonWriteExpression()
 	{
 		JE expr = JE::New() +
+			__X("abc") +
+			123 +
+			JE::Bool(true) +
+			JE::None();
+		UNITTEST_ASSERT(expr.Complete() == __X("\"abc\",123,true,null"));
+
+		expr = JE::New() +
 			JE::Dict() +
 				JE::Pair(__X("name"), __X("abc")) +
 				JE::Pair(__X("value"), 123) +
+				JE::PairBool(__X("switch"), false) +
+				JE::None(__X("addon")) +
 			JE::EDict();
-		UNITTEST_ASSERT(expr.Complete() == __X("{\"name\":\"abc\",\"value\":123}"));
+		UNITTEST_ASSERT(expr.Complete() == __X("{\"name\":\"abc\",\"value\":123,\"switch\":false,\"addon\":null}"));
 
 		expr = JE::New() +
 			JE::List() +
 				__X("abc") +
 				123 +
+				JE::Bool(true) +
+				JE::None() +
 			JE::EList();
-		UNITTEST_ASSERT(expr.Complete() == __X("[\"abc\",123]"));
+		UNITTEST_ASSERT(expr.Complete() == __X("[\"abc\",123,true,null]"));
 
 		expr = JE::New() +
 			JE::Dict() +

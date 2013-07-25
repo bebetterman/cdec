@@ -142,6 +142,12 @@ public:
 			Key = key;
 			Expr = gc_new<JsonExpress>(value);
 		}
+
+		Node(stringx key, bool value)
+		{
+			Key = key;
+			Expr = gc_new<JsonExpress>(value);
+		}
 	};
 
 	struct BNode
@@ -201,10 +207,37 @@ public:
 		return Node(key, value);
 	}
 
+	// A "WCHAR*" argument (a wide-string constance) prefer to match "bool" type 
+	// than "string / stringx" types in function overloading.
+	// So this type (bool) must be declared explicitly.
+	// Refer to 
+	//     http://www.newsmth.net/nForum/#!article/CPlusPlus/355668
+	//     http://connect.microsoft.com/VisualStudio/feedback/details/694684/vc-bool-string-wstring
+	static Node PairBool(stringx key, bool value)
+	{
+		return Node(key, value);
+	}
+
 	static Node Pair(stringx key, JE sub)
 	{
 		ref<JsonExpress> expr = sub.FinalExpress();
 		return Node(key, expr);
+	}
+
+	// See method PairBool
+	static Node Bool(bool value)
+	{
+		return Node(NULL, value);
+	}
+
+	static Node None(stringx key)
+	{
+		return Node(key, JSN_None);
+	}
+
+	static Node None()
+	{
+		return Node(NULL, JSN_None);
 	}
 
 	static BNode Dict()
