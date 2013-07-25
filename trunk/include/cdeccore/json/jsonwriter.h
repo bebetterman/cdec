@@ -28,6 +28,11 @@ public:
 		Value = Converter::ToString(value);
 	}
 
+	inline JsonExpress(bool value): NodeType(JSN_Boolean)
+	{
+		Value = value ? __X("true") : __X("false");
+	}
+
 	inline JsonExpress(JsonNodeType type);
 
 	static inline ref<JsonExpress> CreateMain()
@@ -90,6 +95,8 @@ public:
 
 	void WriteString(stringx name, stringx value) { m_expr->AddChild(name, gc_new<JsonExpress>(value)); }
 	void WriteInt(stringx name, int value) { m_expr->AddChild(name, gc_new<JsonExpress>(value)); }
+	void WriteBool(stringx name, bool value) { m_expr->AddChild(name, gc_new<JsonExpress>(value)); }
+	void WriteNone(stringx name) { m_expr->AddChild(name, gc_new<JsonExpress>(JSN_None)); }
 
 	void BeginDictionary(stringx name);
 	void EndDictionary();
@@ -311,6 +318,11 @@ inline JsonExpress::JsonExpress(JsonNodeType type)
 		NodeType = type;
 		Keys = gc_new<StringArrayList>();
 		Children = gc_new<ArrayList<JsonExpress> >();
+	}
+	else if (type == JSN_None)
+	{
+		NodeType = type;
+		Value = __X("null");
 	}
 	else
 		cdec_throw(JsonException(EC_JSON_TypeError, 0));
