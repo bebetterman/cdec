@@ -1,4 +1,4 @@
-PROJECT(TestCurl)
+PROJECT(TestCurlCdec)
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 IF(NOT CMAKE_BUILD_TYPE)
 	SET(CMAKE_BUILD_TYPE Debug)
@@ -27,7 +27,7 @@ INCLUDE_DIRECTORIES(
 
 FILE(GLOB_RECURSE CPP_LIST "*.cpp")
 FOREACH(cpp ${CPP_LIST})
-	ADD_EXECUTABLE(TestCurl ${cpp})
+	ADD_EXECUTABLE(TestCurlCdec ${cpp})
 ENDFOREACH(cpp)
 
-TARGET_LINK_LIBRARIES(TestCurl cdecegg cdeccore dl iconv curl)
+TARGET_LINK_LIBRARIES(TestCurlCdec cdecegg cdeccore dl iconv curl curlcdec)
