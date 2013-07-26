@@ -58,7 +58,7 @@ MakeDir()
 }
 
 proj=(
-	"cdecegg" "cdeccore" "curlcdec" "httpserv" "TestRunnerC" 
+	"cdecegg" "cdeccore" "curlcdec" "httpserv" "mysqlcdec" "TestRunnerC" 
 	"testers/TestHttpServer" "testers/TestCurl" "testers/TestCurlCdec"
 )
 
