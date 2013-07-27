@@ -48,9 +48,8 @@ enum JsonNodeType
 {
 	JSN_None,			// null
 	JSN_String,			// string value
-	JSN_Integer,		// integer value
-	JSN_Int64,		// int64 value
-	JSN_Float,			// floating-point value
+	JSN_Integer,		// 64-bit integer value
+	JSN_Float,			// 64-bit IEEE floating-point value
 	JSN_Boolean,		// boolean value
 	JSN_Dictionary,		// a key-node dictionary
 	JSN_NodeList,		// a node list
@@ -64,73 +63,172 @@ public:
 	typedef ArrayList<JsonNode>				JsonNodeList;
 	typedef SortedMapVR<stringx, JsonNode>	JsonNodeDictionary;
 
-	JsonNodeType	NodeType;
-	stringx			Name;
-	stringx			TextValue;				// String
-	int				IntValue;				// Integer, Boolean(0/1)
-	double			DblValue;				// Floating-pointer number
+protected:
+	JsonNodeType	m_type;
+	stringx			m_name;
+	variant_core	m_value;
 
-	ref<JsonNodeDictionary>	NodeDict;		// Dictionary
-	ref<JsonNodeList>		NodeList;		// List
+private:
+	JsonNode() {}
 
 public:
-	JsonNode(): NodeType(JSN_None), IntValue(0), DblValue(0.0)
+	JsonNode(JsonNodeType type, stringx name): m_type(type), m_name(name) {}
+	~JsonNode() { ClearValue(); }
+
+	inline void	ClearValue();
+
+	JsonNodeType	GetType() { return m_type; }
+
+	stringx	GetName() { return m_name; }
+	void	SetName(stringx name) { m_name = name; }
+
+	stringx	TextValue() { ASSERT(m_type == JSN_String); return m_value.GetString(); }
+
+	INT64	IntValue() { ASSERT(m_type == JSN_Integer); return m_value.GetInt64(); }
+
+	double	FloatValue() { ASSERT(m_type == JSN_Float); return m_value.GetDouble(); }
+
+	bool	BoolValue() { ASSERT(m_type == JSN_Boolean); return m_value.GetBool(); }
+
+	ref<JsonNodeList>		NodeList()
 	{
+		ASSERT(m_type == JSN_NodeList);
+		return ref_cast<JsonNodeList>(m_value.GetObject());
 	}
 
-	ref<JsonNode>	GetChild(int index);
-	ref<JsonNode>	GetChild(stringx key);
-	int				GetChildrenCount();
+	ref<JsonNodeDictionary>	NodeDictionary()
+	{
+		ASSERT(m_type == JSN_Dictionary);
+		return ref_cast<JsonNodeDictionary>(m_value.GetObject());
+	}
 
-	stringx		GetChildTextValue(int index) { return GetChild(index)->TextValue; }
-	stringx		GetChildTextValue(stringx key) { return GetChild(key)->TextValue; }
+	ref<JsonNode>	GetChild(int index) { return NodeList()->at(index); }
 
-	int			GetChildIntValue(int index) { return GetChild(index)->IntValue; }
-	int			GetChildIntValue(stringx key) { return GetChild(key)->IntValue; }
+	ref<JsonNode>	GetChild(stringx key) { return NodeDictionary()->at(key); }
 
-	double		GetChildDblValue(int index) { return GetChild(index)->DblValue; }
-	double		GetChildDblValue(stringx key) { return GetChild(key)->DblValue; }
+	inline int		GetChildrenCount();
+
+	stringx		GetChildTextValue(int index) { return GetChild(index)->TextValue(); }
+	stringx		GetChildTextValue(stringx key) { return GetChild(key)->TextValue(); }
+
+	int			GetChildIntValue(int index) { return GetChild(index)->IntValue(); }
+	int			GetChildIntValue(stringx key) { return GetChild(key)->IntValue(); }
+
+	double		GetChildFloatValue(int index) { return GetChild(index)->FloatValue(); }
+	double		GetChildFloatValue(stringx key) { return GetChild(key)->FloatValue(); }
+
+	inline void	AddChild(ref<JsonNode> node);
+
+	static ref<JsonNode>	NewStringNode(stringx name, stringx value)
+	{
+		ref<JsonNode> node = gc_new<JsonNode>(JSN_String, name);
+		node->m_value.SetString(value);
+		return node;
+	}
+
+	static ref<JsonNode>	NewIntNode(stringx name, INT64 value)
+	{
+		ref<JsonNode> node = gc_new<JsonNode>(JSN_Integer, name);
+		node->m_value.SetInt64(value);
+		return node;
+	}
+
+	static ref<JsonNode>	NewFloatNode(stringx name, double value)
+	{
+		ref<JsonNode> node = gc_new<JsonNode>(JSN_Float, name);
+		node->m_value.SetDouble(value);
+		return node;
+	}
+
+	static ref<JsonNode>	NewBoolNode(stringx name, bool value)
+	{
+		ref<JsonNode> node = gc_new<JsonNode>(JSN_Boolean, name);
+		node->m_value.SetBool(value);
+		return node;
+	}
+
+	static ref<JsonNode>	NewNullNode(stringx name) { return gc_new<JsonNode>(JSN_None, name); }
+
+	static ref<JsonNode>	NewDictionaryNode(stringx name)
+	{
+		ref<JsonNode> node = gc_new<JsonNode>(JSN_Dictionary, name);
+		node->m_value.SetObject(gc_new<JsonNodeDictionary>());
+		return node;
+	}
+
+	static ref<JsonNode>	NewListNode(stringx name)
+	{
+		ref<JsonNode> node = gc_new<JsonNode>(JSN_NodeList, name);
+		node->m_value.SetObject(gc_new<JsonNodeList>());
+		return node;
+	}
 };
 
-class CDECCOREEXPORT JsonDom: public Object
+class CDECCOREEXPORT JsonParser
 {
-	DECLARE_REF_CLASS(JsonDom)
-
 public:
-	ref<JsonNode>	Root;
-
-public:
-	JsonDom():Root(gc_new<JsonNode>()){}
-public:
-	void	Load(stringx text);
+	static ref<JsonNode>	ParseText(stringx text);
 };
 
 // -------------------------------------------------------------------------- //
 
-inline ref<JsonNode> JsonNode::GetChild(int index)
+inline void JsonNode::ClearValue()
 {
-	if (NodeType != JSN_NodeList)
-		cdec_throw(JsonException(EC_JSON_TypeError, 0));
-	return NodeList->at(index);
-}
-
-inline ref<JsonNode> JsonNode::GetChild(stringx key)
-{
-	if (NodeType != JSN_Dictionary)
-		cdec_throw(JsonException(EC_JSON_TypeError, 0));
-	return NodeDict->Get(key);
+	switch (m_type)
+	{
+	case JSN_String:
+		m_value.ClearString();
+		break;
+	case JSN_NodeList:
+	case JSN_Dictionary:
+		m_value.ClearObject();
+		break;
+	default:
+		m_value.ClearLiteral();
+		break;
+	}
+	m_type = JSN_None;
 }
 
 inline int JsonNode::GetChildrenCount()
 {
-	switch (NodeType)
+	switch (m_type)
 	{
 	case JSN_NodeList:
-		return NodeList->Count();
+		{
+			weak_ref<JsonNodeList> list = ref_cast<JsonNodeList>(m_value.GetObject());
+			return list->Count();
+		}
 	case JSN_Dictionary:
-		return NodeDict->Count();
+		{
+			weak_ref<JsonNodeDictionary> dict = ref_cast<JsonNodeDictionary>(m_value.GetObject());
+			return dict->Count();
+		}
 	default:
 		return 0;
+	}
+}
+
+inline void JsonNode::AddChild(ref<JsonNode> node)
+{
+	switch (m_type)
+	{
+	case JSN_NodeList:
+		{
+			ASSERT(node->GetName() == NULL);
+			weak_ref<JsonNodeList> list = ref_cast<JsonNodeList>(m_value.GetObject());
+			list->Add(node);
+		}
+		break;
+	case JSN_Dictionary:
+		{
+			ASSERT(node->GetName() != NULL);
+			weak_ref<JsonNodeDictionary> dict = ref_cast<JsonNodeDictionary>(m_value.GetObject());
+			dict->Insert(node->GetName(), node);
+		}
+		break;
+	default:
+		cdec_throw(JsonException(EC_JSON_TypeError, 0));
 	}
 }
 

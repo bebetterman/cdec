@@ -23,14 +23,11 @@ public:
 		Value = '\"' + value + '\"';
 	}
 
-	inline JsonExpress(int value): NodeType(JSN_Integer)
+	inline JsonExpress(INT64 value): NodeType(JSN_Integer)
 	{
 		Value = Converter::ToString(value);
 	}
-	inline JsonExpress(INT64 value): NodeType(JSN_Int64)
-	{
-		Value = Converter::ToString(value);
-	}
+
 	inline JsonExpress(bool value): NodeType(JSN_Boolean)
 	{
 		Value = value ? __X("true") : __X("false");
@@ -97,8 +94,7 @@ public:
 	void Reset();
 
 	void WriteString(stringx name, stringx value) { m_expr->AddChild(name, gc_new<JsonExpress>(value)); }
-	void WriteInt(stringx name, int value) { m_expr->AddChild(name, gc_new<JsonExpress>(value)); }
-	void WriteInt64(stringx name, INT64 value) { m_expr->AddChild(name, gc_new<JsonExpress>(value)); }
+	void WriteInt(stringx name, INT64 value) { m_expr->AddChild(name, gc_new<JsonExpress>(value)); }
 	void WriteBool(stringx name, bool value) { m_expr->AddChild(name, gc_new<JsonExpress>(value)); }
 	void WriteNone(stringx name) { m_expr->AddChild(name, gc_new<JsonExpress>(JSN_None)); }
 
@@ -141,7 +137,7 @@ public:
 			Expr = gc_new<JsonExpress>(value);
 		}
 
-		Node(stringx key, int value)
+		Node(stringx key, INT64 value)
 		{
 			Key = key;
 			Expr = gc_new<JsonExpress>(value);
@@ -206,7 +202,7 @@ public:
 		return Node(key, value);
 	}
 
-	static Node Pair(stringx key, int value)
+	static Node Pair(stringx key, INT64 value)
 	{
 		return Node(key, value);
 	}
@@ -304,7 +300,7 @@ public:
 		return *this;
 	}
 
-	JE& operator +(int value)
+	JE& operator +(INT64 value)
 	{
 		AddItem(NULL, gc_new<JsonExpress>(value));
 		return *this;

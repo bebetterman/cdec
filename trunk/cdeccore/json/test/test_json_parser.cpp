@@ -30,102 +30,112 @@ public:
 	void TestStringValue()
 	{
 		stringx s = __X("\"abc\"");
-		ref<JsonDom> dom = gc_new<JsonDom>();
-		dom->Load(s);
-		UNITTEST_ASSERT(dom->Root->NodeType == JSN_String && dom->Root->TextValue == __X("abc"));
+		ref<JsonNode> root = JsonParser::ParseText(s);
+		UNITTEST_ASSERT(root->GetType() == JSN_NodeList && root->NodeList()->Count() == 1);
+		ref<JsonNode> node = root->GetChild(0);
+		UNITTEST_ASSERT(node->GetType() == JSN_String && node->TextValue() == __X("abc"));
 
 		s = __X(" \" abc \" ");
-		dom->Load(s);
-		UNITTEST_ASSERT(dom->Root->NodeType == JSN_String && dom->Root->TextValue == __X(" abc "));
+		root = JsonParser::ParseText(s);
+		node = root->GetChild(0);
+		UNITTEST_ASSERT(node->GetType() == JSN_String && node->TextValue() == __X(" abc "));
 
 		s = __X("\"\"");
-		dom->Load(s);
-		UNITTEST_ASSERT(dom->Root->NodeType == JSN_String && dom->Root->TextValue == __X(""));
+		root = JsonParser::ParseText(s);
+		node = root->GetChild(0);
+		UNITTEST_ASSERT(node->GetType() == JSN_String && node->TextValue() == __X(""));
 	}
 
 	void TestIntValue()
 	{
-		stringx s = __X("123");
-		ref<JsonDom> dom = gc_new<JsonDom>();
-		dom->Load(s);
-		UNITTEST_ASSERT(dom->Root->NodeType == JSN_Integer && dom->Root->IntValue == 123);
+		stringx s = __X("123456789012345");
+		ref<JsonNode> root = JsonParser::ParseText(s);
+		ref<JsonNode> node = root->GetChild(0);
+		UNITTEST_ASSERT(node->GetType() == JSN_Integer && node->IntValue() == 123456789012345);
 
 		s = __X(" 123 ");
-		dom->Load(s);
-		UNITTEST_ASSERT(dom->Root->NodeType == JSN_Integer && dom->Root->IntValue == 123);
-
+		root = JsonParser::ParseText(s);
+		node = root->GetChild(0);
+		UNITTEST_ASSERT(node->GetType() == JSN_Integer && node->IntValue() == 123);
 	}
 
 	void TestBooleanValue()
 	{
-		ref<JsonDom> dom = gc_new<JsonDom>();
 		stringx s = __X("true");
-		dom->Load(s);
-		UNITTEST_ASSERT(dom->Root->NodeType == JSN_Boolean && dom->Root->IntValue == 1);
+		ref<JsonNode> root = JsonParser::ParseText(s);
+		ref<JsonNode> node = root->GetChild(0);
+		UNITTEST_ASSERT(node->GetType() == JSN_Boolean && node->BoolValue() == 1);
 
 		s = __X(" TrUe ");
-		dom->Load(s);
-		UNITTEST_ASSERT(dom->Root->NodeType == JSN_Boolean && dom->Root->IntValue == 1);
+		root = JsonParser::ParseText(s);
+		node = root->GetChild(0);
+		UNITTEST_ASSERT(node->GetType() == JSN_Boolean && node->BoolValue() == 1);
 
 		s = __X(" fAlSe ");
-		dom->Load(s);
-		UNITTEST_ASSERT(dom->Root->NodeType == JSN_Boolean && dom->Root->IntValue == 0);
+		root = JsonParser::ParseText(s);
+		node = root->GetChild(0);
+		UNITTEST_ASSERT(node->GetType() == JSN_Boolean && node->BoolValue() == 0);
 	}
 
 	void TestNoneValue()
 	{
-		ref<JsonDom> dom = gc_new<JsonDom>();
 		stringx s = __X("null");
-		dom->Load(s);
-		UNITTEST_ASSERT(dom->Root->NodeType ==JSN_None);
+		ref<JsonNode> root = JsonParser::ParseText(s);
+		ref<JsonNode> node = root->GetChild(0);
+		UNITTEST_ASSERT(node->GetType() ==JSN_None);
 
 		s = __X(" NuLl ");
-		dom->Load(s);
-		UNITTEST_ASSERT(dom->Root->NodeType == JSN_None);
+		root = JsonParser::ParseText(s);
+		node = root->GetChild(0);
+		UNITTEST_ASSERT(node->GetType() == JSN_None);
 	}
 
 	void TestSimpleDictionary()
 	{
 		stringx s = __X("{\"a\":\"b\"}");
-		ref<JsonDom> dom = gc_new<JsonDom>();
-		dom->Load(s);
-		UNITTEST_ASSERT(dom->Root->NodeType == JSN_Dictionary && dom->Root->NodeDict->Count() == 1);
-		ref<JsonNode> node = dom->Root->NodeDict->Get(__X("a"));
-		UNITTEST_ASSERT(node->NodeType == JSN_String && node->Name == __X("a") && node->TextValue == __X("b"));
+		ref<JsonNode> root = JsonParser::ParseText(s);
+		ref<JsonNode> nodeDict = root->GetChild(0);
+		UNITTEST_ASSERT(nodeDict->GetType() == JSN_Dictionary && nodeDict->NodeDictionary()->Count() == 1);
+		ref<JsonNode> node = nodeDict->NodeDictionary()->Get(__X("a"));
+		UNITTEST_ASSERT(node->GetType() == JSN_String && node->GetName() == __X("a") && node->TextValue() == __X("b"));
 
 		s = __X(" { \"a\" : \"1\" , \"b\":\"\" } ");
-		dom->Load(s);
-		UNITTEST_ASSERT(dom->Root->NodeType == JSN_Dictionary && dom->Root->NodeDict->Count() == 2);
-		node = dom->Root->NodeDict->Get(__X("a"));
-		UNITTEST_ASSERT(node->NodeType == JSN_String && node->TextValue == __X("1"));
-		node = dom->Root->NodeDict->Get(__X("b"));
-		UNITTEST_ASSERT(node->NodeType == JSN_String && node->TextValue == __X(""));
+		root = JsonParser::ParseText(s);
+		nodeDict = root->GetChild(0);
+		UNITTEST_ASSERT(nodeDict->GetType() == JSN_Dictionary && nodeDict->NodeDictionary()->Count() == 2);
+		node = nodeDict->NodeDictionary()->Get(__X("a"));
+		UNITTEST_ASSERT(node->GetType() == JSN_String && node->TextValue() == __X("1"));
+		node = nodeDict->NodeDictionary()->Get(__X("b"));
+		UNITTEST_ASSERT(node->GetType() == JSN_String && node->TextValue() == __X(""));
 
 		s = __X("{}");
-		dom->Load(s);
-		UNITTEST_ASSERT(dom->Root->NodeType == JSN_Dictionary && dom->Root->NodeDict->Count() == 0);
+		root = JsonParser::ParseText(s);
+		nodeDict = root->GetChild(0);
+		UNITTEST_ASSERT(nodeDict->GetType() == JSN_Dictionary && nodeDict->NodeDictionary()->Count() == 0);
 	}
 
 	void TestSimpleList()
 	{
 		stringx s = __X("[\"a\"]");
-		ref<JsonDom> dom = gc_new<JsonDom>();
-		dom->Load(s);
-		UNITTEST_ASSERT(dom->Root->NodeType == JSN_NodeList && dom->Root->NodeList->Count() == 1);
-		ref<JsonNode> node = dom->Root->NodeList->at(0);
-		UNITTEST_ASSERT(node->NodeType == JSN_String && node->Name == NULL && node->TextValue == __X("a"));
+		ref<JsonNode> root = JsonParser::ParseText(s);
+		ref<JsonNode> nodeList = root->GetChild(0);
+		UNITTEST_ASSERT(nodeList->GetType() == JSN_NodeList && nodeList->NodeList()->Count() == 1);
+		ref<JsonNode> node = nodeList->NodeList()->at(0);
+		UNITTEST_ASSERT(node->GetType() == JSN_String && node->GetName() == NULL && node->TextValue() == __X("a"));
 
 		s = __X(" [ \"a\" , \"\" ] ");
-		dom->Load(s);
-		UNITTEST_ASSERT(dom->Root->NodeType == JSN_NodeList && dom->Root->NodeList->Count() == 2);
-		node = dom->Root->NodeList->at(0);
-		UNITTEST_ASSERT(node->NodeType == JSN_String && node->TextValue == __X("a"));
-		node = dom->Root->NodeList->at(1);
-		UNITTEST_ASSERT(node->NodeType == JSN_String && node->TextValue == __X(""));
+		root = JsonParser::ParseText(s);
+		nodeList = root->GetChild(0);
+		UNITTEST_ASSERT(nodeList->GetType() == JSN_NodeList && nodeList->NodeList()->Count() == 2);
+		node = nodeList->NodeList()->at(0);
+		UNITTEST_ASSERT(node->GetType() == JSN_String && node->TextValue() == __X("a"));
+		node = nodeList->NodeList()->at(1);
+		UNITTEST_ASSERT(node->GetType() == JSN_String && node->TextValue() == __X(""));
 
 		s = __X("[]");
-		dom->Load(s);
-		UNITTEST_ASSERT(dom->Root->NodeType == JSN_NodeList && dom->Root->NodeList->Count() == 0);
+		root = JsonParser::ParseText(s);
+		nodeList = root->GetChild(0);
+		UNITTEST_ASSERT(nodeList->GetType() == JSN_NodeList && nodeList->NodeList()->Count() == 0);
 	}
 
 	void TestComplextSample()
@@ -147,36 +157,38 @@ public:
 			__X("  },") +
 			__X("  \"code\":\"Ok\"") +
 			__X("}");
-		ref<JsonDom> dom = gc_new<JsonDom>();
-		dom->Load(s);
-		UNITTEST_ASSERT(dom->Root->NodeType == JSN_Dictionary && dom->Root->NodeDict->Count() == 2);
+		ref<JsonNode> root = JsonParser::ParseText(s);
+		UNITTEST_ASSERT(root->GetType() == JSN_NodeList && root->NodeList()->Count() == 1);
 
-		ref<JsonNode> node1 = dom->Root->NodeDict->Get(__X("return"));	// \[return]
-		UNITTEST_ASSERT(node1->NodeType == JSN_Dictionary && node1->NodeDict->Count() == 2);
+		ref<JsonNode> node0 = root->GetChild(0);
+		UNITTEST_ASSERT(node0->GetType() == JSN_Dictionary && node0->NodeDictionary()->Count() == 2);
 
-		ref<JsonNode> node2 = node1->NodeDict->Get(__X("u"));	// \[return]\[u]
-		UNITTEST_ASSERT(node2->NodeType == JSN_NodeList && node2->NodeList->Count() == 2);
+		ref<JsonNode> node1 = node0->NodeDictionary()->Get(__X("return"));	// \[return]
+		UNITTEST_ASSERT(node1->GetType() == JSN_Dictionary && node1->NodeDictionary()->Count() == 2);
 
-		ref<JsonNode> node3 = node2->NodeList->at(0);	// \[return]\[u]\[0]
-		UNITTEST_ASSERT(node3->NodeType == JSN_Dictionary && node3->NodeDict->Count() == 2);
-		UNITTEST_ASSERT(node3->NodeDict->Get(__X("u"))->TextValue == __X("http://118.144.67.133/ufa/") && node3->NodeDict->Get(__X("t"))->TextValue == __X("2"));
+		ref<JsonNode> node2 = node1->NodeDictionary()->Get(__X("u"));	// \[return]\[u]
+		UNITTEST_ASSERT(node2->GetType() == JSN_NodeList && node2->NodeList()->Count() == 2);
 
-		node3 = node2->NodeList->at(1); 	// \[return]\[u]\[1]
-		UNITTEST_ASSERT(node3->NodeDict->Get(__X("u"))->TextValue == __X("http://61.189.5.13/ufa/") && node3->NodeDict->Get(__X("t"))->TextValue == __X("1"));
+		ref<JsonNode> node3 = node2->NodeList()->at(0);	// \[return]\[u]\[0]
+		UNITTEST_ASSERT(node3->GetType() == JSN_Dictionary && node3->NodeDictionary()->Count() == 2);
+		UNITTEST_ASSERT(node3->NodeDictionary()->Get(__X("u"))->TextValue() == __X("http://118.144.67.133/ufa/") && node3->NodeDictionary()->Get(__X("t"))->TextValue() == __X("2"));
 
-		node2 = node1->NodeDict->Get(__X("b"));	// \[return]\[b]
-		UNITTEST_ASSERT(node2->NodeType == JSN_NodeList && node2->NodeList->Count() == 1);
+		node3 = node2->NodeList()->at(1); 	// \[return]\[u]\[1]
+		UNITTEST_ASSERT(node3->NodeDictionary()->Get(__X("u"))->TextValue() == __X("http://61.189.5.13/ufa/") && node3->NodeDictionary()->Get(__X("t"))->TextValue() == __X("1"));
 
-		node3 = node2->NodeList->at(0);	// \[return]\[b]\[0]
-		UNITTEST_ASSERT(node3->NodeType == JSN_Dictionary && node3->NodeDict->Count() == 3);
-		UNITTEST_ASSERT(node3->NodeDict->Get(__X("id"))->TextValue == __X("0") && node3->NodeDict->Get(__X("index"))->TextValue == __X("1"));
+		node2 = node1->NodeDictionary()->Get(__X("b"));	// \[return]\[b]
+		UNITTEST_ASSERT(node2->GetType() == JSN_NodeList && node2->NodeList()->Count() == 1);
 
-		ref<JsonNode> node4 = node3->NodeDict->Get(__X("u"));	// \[return]\[b]\[0]\[u]
-		UNITTEST_ASSERT(node4->NodeType == JSN_NodeList && node4->NodeList->Count() == 2);
-		UNITTEST_ASSERT(node4->NodeList->at(0)->TextValue == __X("0") && node4->NodeList->at(1)->TextValue == __X("1"));
+		node3 = node2->NodeList()->at(0);	// \[return]\[b]\[0]
+		UNITTEST_ASSERT(node3->GetType() == JSN_Dictionary && node3->NodeDictionary()->Count() == 3);
+		UNITTEST_ASSERT(node3->NodeDictionary()->Get(__X("id"))->TextValue() == __X("0") && node3->NodeDictionary()->Get(__X("index"))->TextValue() == __X("1"));
 
-		node1 = dom->Root->NodeDict->Get(__X("code"));	// \[code]
-		UNITTEST_ASSERT(node1->NodeType == JSN_String && node1->TextValue == __X("Ok"));
+		ref<JsonNode> node4 = node3->NodeDictionary()->Get(__X("u"));	// \[return]\[b]\[0]\[u]
+		UNITTEST_ASSERT(node4->GetType() == JSN_NodeList && node4->NodeList()->Count() == 2);
+		UNITTEST_ASSERT(node4->NodeList()->at(0)->TextValue() == __X("0") && node4->NodeList()->at(1)->TextValue() == __X("1"));
+
+		node1 = node0->NodeDictionary()->Get(__X("code"));	// \[code]
+		UNITTEST_ASSERT(node1->GetType() == JSN_String && node1->TextValue() == __X("Ok"));
 	}
 
 	void tearDown()

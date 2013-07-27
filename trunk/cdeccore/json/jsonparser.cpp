@@ -3,359 +3,374 @@
 CDEC_NS_BEGIN
 // -------------------------------------------------------------------------- //
 
-class JsonTextParser
+class JsonParserImpl
 {
-protected:
-	ref<JsonDom>	m_dom;
-
-protected:
-	
-	int ParseInnerTextVariant(ref<JsonNode> node, stringx text, int pos)
-	{
-		pos = SeekNextNotSpace(text, pos);
-		if (pos < 0)
-			cdec_throw(JsonException(EC_JSON_ExpectContent, pos));
-
-		WCHAR ch = text[pos];
-		if (ch == '{')
-			return ParseInnerTextDictionary(node, text, pos);
-		else if (ch == '[')
-			return ParseInnerTextList(node, text, pos);
-		else if (ch == '\"')
-			return ParseInnerTextStringValue(node, text, pos);
-		else if (ch >= '0' && ch <= '9')
-			return ParseInnerTextNumberValue(node, text, pos);
-		else if (ch == 'T' || ch == 't' || ch == 'F' || ch == 'f')
-			return ParseInnerTextBooleanValue(node, text, pos);
-		else if (ch == 'N' || ch == 'n')
-			return ParseInnerTextNoneValue(node, text, pos);
-		else
-			cdec_throw(JsonException(EC_JSON_UnexpectedSymbol, pos));
-	}
-
-	int ParseInnerTextStringValue(ref<JsonNode> node, stringx text, int pos)
-	{
-		ASSERT(text[pos] == '\"');
-
-		node->NodeType = JSN_String;
-		node->TextValue = ParseStringValueToken(text,  pos);
-		return pos;
-	}
-
-
-	int ParseInnerTextNumberValue(ref<JsonNode> node, stringx text, int pos)
-	{
-		ASSERT(text[pos] >= '0' && text[pos] <= '9');
-
-		bool fFloat = ParseNumberValueToken(text, pos, node->IntValue, node->DblValue);
-		node->NodeType = fFloat ? JSN_Float : JSN_Integer;
-		return pos;
-	}
-
-	int ParseInnerTextBooleanValue(ref<JsonNode> node, stringx text, int pos)
-	{
-		node->NodeType = JSN_Boolean;
-		node->IntValue = ParseBooleanValueToken(text, pos) ? 1 : 0;
-		return pos;
-	}
-
-	int ParseInnerTextNoneValue(ref<JsonNode> node, stringx text, int pos)
-	{
-		node->NodeType = JSN_None;
-		ParseNoneValueToken(text, pos);
-		return pos;
-	}
-
-	int ParseInnerTextDictionary(ref<JsonNode> node, stringx text, int pos)
-	{
-		ASSERT(text[pos] == '{');
-
-		node->NodeType = JSN_Dictionary;
-		node->NodeDict = gc_new<JsonNode::JsonNodeDictionary>();
-		++pos;
-		int flag = 0;	// last symbol: 0 init; 1 comma, 2 content
-
-		while (true)
-		{
-			pos = SeekNextNotSpace(text, pos);
-			if (pos < 0)
-				cdec_throw(JsonException(EC_JSON_ExpectEndDictionry, pos));
-
-			WCHAR ch = text[pos];
-			if (ch == '\"')
-			{
-				if (flag == 2)
-					cdec_throw(JsonException(EC_JSON_ExpectComma, pos));
-
-				stringx key = ParseStringValueToken(text, pos);
-				if (key.Length() == 0)
-					cdec_throw(JsonException(EC_JSON_EmptyKey, pos));
-
-				pos = SeekNextNotSpace(text, pos);
-				if (pos < 0 || text[pos] != ':')
-					cdec_throw(JsonException(EC_JSON_ExpectColon, pos));
-
-				ref<JsonNode> subnode = gc_new<JsonNode>();
-				subnode->Name = key;
-
-				//--------------------------------------------------------
-				//Add function mapping to Insert function
-				//--------------------------------------------------------
-				node->NodeDict->Insert(key, subnode);
-
-				pos = ParseInnerTextVariant(subnode, text, ++pos);
-				flag = 2;
-			}
-			else if (ch == ',')
-			{
-				if (flag != 2)
-					cdec_throw(JsonException(EC_JSON_UnexpectedComma, pos));
-				++pos;
-				flag = 1;
-			}
-			else if (ch == '}')
-			{
-				if (flag == 1)
-					cdec_throw(JsonException(EC_JSON_UnexpectedRCB, pos));
-				++pos;
-				break;
-			}
-			else
-				cdec_throw(JsonException(EC_JSON_UnexpectedSymbol, pos));
-		}
-		return pos;
-	}
-
-	int ParseInnerTextList(ref<JsonNode> node, stringx text, int pos)
-	{
-		ASSERT(text[pos] == '[');
-	
-		node->NodeType = JSN_NodeList;
-		node->NodeList = gc_new<JsonNode::JsonNodeList>();
-		++pos;
-		int flag = 0;	// last symbol: 0 init; 1 comma, 2 content
-
-		while (true)
-		{
-			pos = SeekNextNotSpace(text, pos);
-			if (pos < 0)
-				cdec_throw(JsonException(EC_JSON_ExpectEndList, pos));
-
-			WCHAR ch = text[pos];
-			if (ch == ']')
-			{
-				if (flag == 1)
-					cdec_throw(JsonException(EC_JSON_UnexpectedRSB, pos));
-				++pos;
-				break;
-			}
-			else if (ch == ',')
-			{
-				if (flag != 2)
-					cdec_throw(JsonException(EC_JSON_UnexpectedComma, pos));
-				++pos;
-				flag = 1;
-			}
-			else
-			{
-				if (flag == 2)
-					cdec_throw(JsonException(EC_JSON_ExpectComma, pos));
-
-				ref<JsonNode> subnode = gc_new<JsonNode>();
-				node->NodeList->Add(subnode);
-				pos = ParseInnerTextVariant(subnode, text, pos);
-				flag = 2;
-			}
-		}
-		return pos;
-	}
-
-	stringx ParseStringValueToken(stringx text, int& pos)
-	{
-		ASSERT(text[pos] == '\"');
-
-		ref<StringBuilder> sb = gc_new<StringBuilder>();
-		++pos;
-
-		while (pos < text.Length())
-		{
-			WCHAR ch = text[pos++];
-			if (ch == '\\')
-			{
-				ch = text[pos++];
-				switch (ch)
-				{
-				case '0':
-					sb->Append('\0');	// 0
-					break;
-				case 'a':
-					sb->Append('\a');	// 7 BELL
-					break;
-				case 'b':
-					sb->Append('b');		// 8 Backspace
-					break;
-				case 't':
-					sb->Append('\t');	// 9 Table
-					break;
-				case 'n':
-					sb->Append('\n');	// 10 LF
-					break;
-				case 'v':
-					sb->Append('\v');	// 11 FF
-					break;
-				case 'f':
-					sb->Append('\f');	// 12 FF
-					break;
-				case 'r':
-					sb->Append('\r');	// 13 CR
-					break;
-				case 'u':
-					sb->Append((WCHAR)Converter::ToUInt16(text.Substring(pos, 4), 16));
-					pos += 4;
-					break;
-				case '\\':
-				case '\'':
-				case '\"':
-				default:
-					sb->Append(ch);
-					break;
-				}
-			}
-			else if (ch == '\"')
-				return sb->ToString();
-			else
-				sb->Append(ch);
-		}
-		cdec_throw(JsonException(EC_JSON_ExpectEndValue, pos));
-	}
-	
-	bool ParseNumberValueToken(stringx text, int& pos, int& ivalue, double& fvalue)
-	{
-		ivalue = ParseNumberValueIntPart(text, pos);
-		if (pos < text.Length() && text[pos] == '.')
-		{
-			++pos;
-			fvalue = ParseNumberValueDecimalPart(text, pos) + ivalue;
-			return true;
-		}
-		return false;
-	}
-
-	int ParseNumberValueIntPart(stringx text, int& pos)
-	{
-		ASSERT(text[pos] >= '0' && text[pos] <= '9');
-		int value = 0;
-		while (pos < text.Length())
-		{
-			WCHAR ch = text[pos];
-			if (ch >= '0' && ch <= '9')
-				value = value * 10 + (ch - '0');
-			else
-				break;
-
-			++pos;
-		}
-		return value;
-	}
-
-	double ParseNumberValueDecimalPart(stringx text, int& pos)
-	{
-		ASSERT(text[pos] >= '0' && text[pos] <= '9');
-
-		double value = 0.0, prec = 0.1;
-		while (pos < text.Length())
-		{
-			WCHAR ch = text[pos];
-			if (ch >= '0' && ch <= '9')
-				value += (ch - '0') * prec;
-			else
-				break;
-
-			++pos;
-			prec *= 0.1;
-		}
-		return value;
-	}
-
-	bool ParseBooleanValueToken(stringx text, int& pos)
-	{
-		int endpos = pos;
-		while (endpos < text.Length())
-		{
-			WCHAR ch = text[endpos];
-			if (!((ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z')))
-				break;
-			++endpos;
-		}
-
-		stringx token = text.Substring(pos, endpos - pos).ToLower();
-		pos = endpos;
-		if (token == __X("true"))
-			return true;
-		else if (token == __X("false"))
-			return false;
-		else 
-			cdec_throw(JsonException(EC_JSON_UnexpectedValueToken, pos));
-	}
-
-	void ParseNoneValueToken(stringx text, int& pos)
-	{
-		int endpos = pos;
-		while (endpos < text.Length())
-		{
-			WCHAR ch = text[endpos];
-			if (!((ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z')))
-				break;
-			++endpos;
-		}
-
-		stringx token = text.Substring(pos, endpos - pos).ToLower();
-		pos = endpos;
-		if (token != __X("null"))
-			cdec_throw(JsonException(EC_JSON_UnexpectedNullToken, pos));
-	}
-
-	int SeekNextNotSpace(stringx text, int pos)
-	{
-		while (pos < text.Length())
-		{
-			if (text[pos] > 32)
-				return pos;
-			else
-				++pos;
-		}
-		return -1;
-	}
-
 public:
-	JsonTextParser(ref<JsonDom> dom);
-	void	Parse(stringx text);
+	static ref<JsonNode> ParseText(stringx text);
+
+protected:
+	static ref<JsonNode> ParseInnerTextVariant(stringx text, int& pos);
+
+	static ref<JsonNode> ParseInnerTextDictionary(stringx text, int& pos);
+	static ref<JsonNode> ParseInnerTextList(stringx text, int& pos);
+	static ref<JsonNode> ParseInnerTextStringValue(stringx text, int& pos);
+	static ref<JsonNode> ParseInnerTextNumberValue(stringx text, int& pos);
+	static ref<JsonNode> ParseInnerTextBooleanValue(stringx text, int& pos);
+	static ref<JsonNode> ParseInnerTextNoneValue(stringx text, int& pos);
+
+	static stringx ParseStringValueToken(stringx text, int& pos);
+
+	static bool ParseNumberValueToken(stringx text, int& pos, INT64& ivalue, double& fvalue);
+	static INT64 ParseNumberValueIntPart(stringx text, int& pos);
+	static double ParseNumberValueDecimalPart(stringx text, int& pos);
+
+	static bool ParseBooleanValueToken(stringx text, int& pos);
+	static void ParseNoneValueToken(stringx text, int& pos);
+
+	static int SeekNextNotSpace(stringx text, int pos);
 };
 
 // -------------------------------------------------------------------------- //
 
-JsonTextParser::JsonTextParser(ref<JsonDom> dom): m_dom(dom)
+ref<JsonNode> JsonParserImpl::ParseText(stringx text)
 {
+	ref<JsonNode> root = JsonNode::NewListNode(NULL);
+
+	int pos = 0;
+	ref<JsonNode> node = ParseInnerTextVariant(text, pos);
+	root->AddChild(node);
+
+	if (pos >= 0 && pos < text.Length())
+	{
+		pos = SeekNextNotSpace(text, pos);
+		if (pos >= 0)
+			cdec_throw(JsonException(EC_JSON_UnexpectedContent, pos));
+	}
+
+	return root;
 }
 
-void JsonTextParser::Parse(stringx text)
+ref<JsonNode> JsonParserImpl::ParseInnerTextVariant(stringx text, int& pos)
 {
-	ref<JsonNode> root = m_dom->Root;	// Root node
-	int endp = ParseInnerTextVariant(root, text, 0);
+	pos = SeekNextNotSpace(text, pos);
+	if (pos < 0)
+		cdec_throw(JsonException(EC_JSON_ExpectContent, pos));
 
-	if (endp >= 0 && endp < text.Length())
-	{
-		endp = SeekNextNotSpace(text, endp);
-		if (endp >= 0)
-			cdec_throw(JsonException(EC_JSON_UnexpectedContent, endp));
-	}	
+	WCHAR ch = text[pos];
+	if (ch == '{')
+		return ParseInnerTextDictionary(text, pos);
+	else if (ch == '[')
+		return ParseInnerTextList(text, pos);
+	else if (ch == '\"')
+		return ParseInnerTextStringValue(text, pos);
+	else if (ch >= '0' && ch <= '9')
+		return ParseInnerTextNumberValue(text, pos);
+	else if (ch == 'T' || ch == 't' || ch == 'F' || ch == 'f')
+		return ParseInnerTextBooleanValue(text, pos);
+	else if (ch == 'N' || ch == 'n')
+		return ParseInnerTextNoneValue(text, pos);
+	else
+		cdec_throw(JsonException(EC_JSON_UnexpectedSymbol, pos));
+}
+
+ref<JsonNode> JsonParserImpl::ParseInnerTextStringValue(stringx text, int& pos)
+{
+	ASSERT(text[pos] == '\"');
+	stringx value = ParseStringValueToken(text,  pos);
+	return JsonNode::NewStringNode(NULL, value);
+}
+
+ref<JsonNode> JsonParserImpl::ParseInnerTextNumberValue(stringx text, int& pos)
+{
+	ASSERT(text[pos] >= '0' && text[pos] <= '9');
+	INT64 intV = 0;
+	double dblV = 0.0;
+	bool fFloat = ParseNumberValueToken(text, pos, intV, dblV);
+	if (fFloat)
+		return JsonNode::NewFloatNode(NULL, dblV);
+	else
+		return JsonNode::NewIntNode(NULL, intV);
+}
+
+ref<JsonNode> JsonParserImpl::ParseInnerTextBooleanValue(stringx text, int& pos)
+{
+	bool value = ParseBooleanValueToken(text, pos);
+	return JsonNode::NewBoolNode(NULL, value);
+}
+
+ref<JsonNode> JsonParserImpl::ParseInnerTextNoneValue(stringx text, int& pos)
+{
+	ParseNoneValueToken(text, pos);
+	return JsonNode::NewNullNode(NULL);
 }
 
 // -------------------------------------------------------------------------- //
 
-void JsonDom::Load(stringx text)
+ref<JsonNode> JsonParserImpl::ParseInnerTextDictionary(stringx text, int& pos)
 {
-	JsonTextParser(this).Parse(text);
+	ASSERT(text[pos] == '{');
+
+	ref<JsonNode> node = JsonNode::NewDictionaryNode(NULL);
+	++pos;
+	int flag = 0;	// last symbol: 0 init; 1 comma, 2 content
+
+	while (true)
+	{
+		pos = SeekNextNotSpace(text, pos);
+		if (pos < 0)
+			cdec_throw(JsonException(EC_JSON_ExpectEndDictionry, pos));
+
+		WCHAR ch = text[pos];
+		if (ch == '\"')
+		{
+			// Parse key part
+			if (flag == 2)
+				cdec_throw(JsonException(EC_JSON_ExpectComma, pos));
+
+			stringx key = ParseStringValueToken(text, pos);
+			if (key.Length() == 0)
+				cdec_throw(JsonException(EC_JSON_EmptyKey, pos));
+
+			pos = SeekNextNotSpace(text, pos);
+			if (pos < 0 || text[pos] != ':')
+				cdec_throw(JsonException(EC_JSON_ExpectColon, pos));
+			++pos;
+
+			// Parse value part			
+			ref<JsonNode> subnode = ParseInnerTextVariant(text, pos);
+			subnode->SetName(key);
+			node->AddChild(subnode);
+
+			flag = 2;
+		}
+		else if (ch == ',')
+		{
+			if (flag != 2)
+				cdec_throw(JsonException(EC_JSON_UnexpectedComma, pos));
+			++pos;
+			flag = 1;
+		}
+		else if (ch == '}')
+		{
+			if (flag == 1)
+				cdec_throw(JsonException(EC_JSON_UnexpectedRCB, pos));
+			++pos;
+			break;
+		}
+		else
+			cdec_throw(JsonException(EC_JSON_UnexpectedSymbol, pos));
+	}
+
+	return node;
+}
+
+ref<JsonNode> JsonParserImpl::ParseInnerTextList(stringx text, int& pos)
+{
+	ASSERT(text[pos] == '[');
+
+	ref<JsonNode> node = JsonNode::NewListNode(NULL);
+	++pos;
+	int flag = 0;	// last symbol: 0 init; 1 comma, 2 content
+
+	while (true)
+	{
+		pos = SeekNextNotSpace(text, pos);
+		if (pos < 0)
+			cdec_throw(JsonException(EC_JSON_ExpectEndList, pos));
+
+		WCHAR ch = text[pos];
+		if (ch == ']')
+		{
+			if (flag == 1)
+				cdec_throw(JsonException(EC_JSON_UnexpectedRSB, pos));
+			++pos;
+			break;
+		}
+		else if (ch == ',')
+		{
+			if (flag != 2)
+				cdec_throw(JsonException(EC_JSON_UnexpectedComma, pos));
+			++pos;
+			flag = 1;
+		}
+		else
+		{
+			if (flag == 2)
+				cdec_throw(JsonException(EC_JSON_ExpectComma, pos));
+
+			ref<JsonNode> subnode = ParseInnerTextVariant(text, pos);
+			node->AddChild(subnode);
+			flag = 2;
+		}
+	}
+
+	return node;
+}
+
+// -------------------------------------------------------------------------- //
+
+stringx JsonParserImpl::ParseStringValueToken(stringx text, int& pos)
+{
+	ASSERT(text[pos] == '\"');
+
+	ref<StringBuilder> sb = gc_new<StringBuilder>();
+	++pos;
+
+	while (pos < text.Length())
+	{
+		WCHAR ch = text[pos++];
+		if (ch == '\\')
+		{
+			ch = text[pos++];
+			switch (ch)
+			{
+			case '0':
+				sb->Append('\0');	// 0
+				break;
+			case 'a':
+				sb->Append('\a');	// 7 BELL
+				break;
+			case 'b':
+				sb->Append('b');		// 8 Backspace
+				break;
+			case 't':
+				sb->Append('\t');	// 9 Table
+				break;
+			case 'n':
+				sb->Append('\n');	// 10 LF
+				break;
+			case 'v':
+				sb->Append('\v');	// 11 FF
+				break;
+			case 'f':
+				sb->Append('\f');	// 12 FF
+				break;
+			case 'r':
+				sb->Append('\r');	// 13 CR
+				break;
+			case 'u':
+				sb->Append((WCHAR)Converter::ToUInt16(text.Substring(pos, 4), 16));
+				pos += 4;
+				break;
+			case '\\':
+			case '\'':
+			case '\"':
+			default:
+				sb->Append(ch);
+				break;
+			}
+		}
+		else if (ch == '\"')
+			return sb->ToString();
+		else
+			sb->Append(ch);
+	}
+	cdec_throw(JsonException(EC_JSON_ExpectEndValue, pos));
+}
+
+bool JsonParserImpl::ParseNumberValueToken(stringx text, int& pos, INT64& ivalue, double& fvalue)
+{
+	ivalue = ParseNumberValueIntPart(text, pos);
+	if (pos < text.Length() && text[pos] == '.')
+	{
+		++pos;
+		fvalue = ParseNumberValueDecimalPart(text, pos) + ivalue;
+		return true;
+	}
+	return false;
+}
+
+INT64 JsonParserImpl::ParseNumberValueIntPart(stringx text, int& pos)
+{
+	ASSERT(text[pos] >= '0' && text[pos] <= '9');
+	INT64 value = 0;
+	while (pos < text.Length())
+	{
+		WCHAR ch = text[pos];
+		if (ch >= '0' && ch <= '9')
+			value = value * 10 + (ch - '0');
+		else
+			break;
+
+		++pos;
+	}
+	return value;
+}
+
+double JsonParserImpl::ParseNumberValueDecimalPart(stringx text, int& pos)
+{
+	ASSERT(text[pos] >= '0' && text[pos] <= '9');
+
+	double value = 0.0, prec = 0.1;
+	while (pos < text.Length())
+	{
+		WCHAR ch = text[pos];
+		if (ch >= '0' && ch <= '9')
+			value += (ch - '0') * prec;
+		else
+			break;
+
+		++pos;
+		prec *= 0.1;
+	}
+	return value;
+}
+
+bool JsonParserImpl::ParseBooleanValueToken(stringx text, int& pos)
+{
+	int endpos = pos;
+	while (endpos < text.Length())
+	{
+		WCHAR ch = text[endpos];
+		if (!((ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z')))
+			break;
+		++endpos;
+	}
+
+	stringx token = text.Substring(pos, endpos - pos).ToLower();
+	pos = endpos;
+	if (token == __X("true"))
+		return true;
+	else if (token == __X("false"))
+		return false;
+	else 
+		cdec_throw(JsonException(EC_JSON_UnexpectedValueToken, pos));
+}
+
+void JsonParserImpl::ParseNoneValueToken(stringx text, int& pos)
+{
+	int endpos = pos;
+	while (endpos < text.Length())
+	{
+		WCHAR ch = text[endpos];
+		if (!((ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z')))
+			break;
+		++endpos;
+	}
+
+	stringx token = text.Substring(pos, endpos - pos).ToLower();
+	pos = endpos;
+	if (token != __X("null"))
+		cdec_throw(JsonException(EC_JSON_UnexpectedNullToken, pos));
+}
+
+int JsonParserImpl::SeekNextNotSpace(stringx text, int pos)
+{
+	while (pos < text.Length())
+	{
+		if (text[pos] > 32)
+			return pos;
+		else
+			++pos;
+	}
+	return -1;
+}
+
+// -------------------------------------------------------------------------- //
+
+ref<JsonNode> JsonParser::ParseText(stringx text)
+{
+	return JsonParserImpl::ParseText(text);
 }
 
 // -------------------------------------------------------------------------- //
