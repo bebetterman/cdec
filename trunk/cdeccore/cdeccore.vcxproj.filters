@@ -234,6 +234,9 @@
     <ClCompile Include="collection\test\test_coll_stack.cpp">
       <Filter>cdec\collection\test</Filter>
     </ClCompile>
+    <ClCompile Include="essential\test\test_ess_variant.cpp">
+      <Filter>cdec\essential\test</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -355,6 +358,9 @@
     </ClInclude>
     <ClInclude Include="..\include\cdeccore\collection\stack.h">
       <Filter>cdec\collection\export</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\cdeccore\essential\variant.h">
+      <Filter>cdec\essential\export</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

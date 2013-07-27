@@ -28,6 +28,7 @@
 #include "cdeccore/essential/interop.h"
 #include "cdeccore/essential/string.h"
 #include "cdeccore/collection/array.h"
+#include "cdeccore/essential/variant.h"
 
 // -------------------------------------------------------------------------- //
 // C-- Library - Common

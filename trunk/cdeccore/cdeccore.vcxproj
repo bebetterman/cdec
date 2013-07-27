@@ -164,6 +164,7 @@
     <ClInclude Include="..\include\cdeccore\essential\predef.h" />
     <ClInclude Include="..\include\cdeccore\essential\ref.h" />
     <ClInclude Include="..\include\cdeccore\essential\string.h" />
+    <ClInclude Include="..\include\cdeccore\essential\variant.h" />
     <ClInclude Include="..\include\cdeccore\io\directory.h" />
     <ClInclude Include="..\include\cdeccore\io\mapping.h" />
     <ClInclude Include="..\include\cdeccore\io\stream.h" />
@@ -206,6 +207,7 @@
     <ClCompile Include="essential\test\test_ess_interop.cpp" />
     <ClCompile Include="essential\test\test_ess_ref.cpp" />
     <ClCompile Include="essential\test\test_ess_string.cpp" />
+    <ClCompile Include="essential\test\test_ess_variant.cpp" />
     <ClCompile Include="io\directory.cpp" />
     <ClCompile Include="io\directory_linux.cpp" />
     <ClCompile Include="io\filewrap_posix.cpp" />
