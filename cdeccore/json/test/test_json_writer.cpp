@@ -21,7 +21,6 @@ class TestJsonWriter : public UnitTestSuite
 		UNITTEST_METHOD(TestWriteDictionary)
 		UNITTEST_METHOD(TestWriteDictionaryFormat)
 		UNITTEST_METHOD(TestWriteList)
-		UNITTEST_METHOD(TestWriteINT64)
 		
 		UNITTEST_METHOD(TestWriteListFormat)
 
@@ -64,8 +63,8 @@ public:
 		UNITTEST_ASSERT(wr->Complete() == __X("\"abc\""));
 
 		wr->Reset();
-		wr->WriteInt(NULL, 123);
-		UNITTEST_ASSERT(wr->Complete() == __X("123"));
+		wr->WriteInt(NULL, 1234567890123456789L);
+		UNITTEST_ASSERT(wr->Complete() == __X("1234567890123456789"));
 
 		wr->Reset();
 		wr->WriteString(NULL, __X("abc"));
@@ -150,16 +149,6 @@ public:
 		wr->WriteInt(NULL, 123);
 		wr->EndList();
 		UNITTEST_ASSERT(wr->Complete() == __X("[\"abc\",123]"));
-	}
-
-	void TestWriteINT64()
-	{
-		ref<JsonWriter> wr = gc_new<JsonWriter>();
-		wr->BeginList(NULL);
-		wr->WriteInt64(NULL, (INT64)1234567890123456789);
-		wr->EndList();
-		//Console::WriteLine(wr->Complete());
-		UNITTEST_ASSERT(wr->Complete() == __X("[1234567890123456789]"));
 	}
 
 	void TestWriteListFormat()
