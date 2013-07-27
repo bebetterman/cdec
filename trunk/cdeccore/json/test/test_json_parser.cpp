@@ -31,111 +31,94 @@ public:
 	{
 		stringx s = __X("\"abc\"");
 		ref<JsonNode> root = JsonParser::ParseText(s);
-		UNITTEST_ASSERT(root->GetType() == JSN_NodeList && root->NodeList()->Count() == 1);
-		ref<JsonNode> node = root->GetChild(0);
-		UNITTEST_ASSERT(node->GetType() == JSN_String && node->TextValue() == __X("abc"));
+		UNITTEST_ASSERT(root->GetType() == JSN_String && root->TextValue() == __X("abc"));
 
 		s = __X(" \" abc \" ");
 		root = JsonParser::ParseText(s);
-		node = root->GetChild(0);
-		UNITTEST_ASSERT(node->GetType() == JSN_String && node->TextValue() == __X(" abc "));
+		UNITTEST_ASSERT(root->GetType() == JSN_String && root->TextValue() == __X(" abc "));
 
 		s = __X("\"\"");
 		root = JsonParser::ParseText(s);
-		node = root->GetChild(0);
-		UNITTEST_ASSERT(node->GetType() == JSN_String && node->TextValue() == __X(""));
+		UNITTEST_ASSERT(root->GetType() == JSN_String && root->TextValue() == __X(""));
 	}
 
 	void TestIntValue()
 	{
 		stringx s = __X("123456789012345");
 		ref<JsonNode> root = JsonParser::ParseText(s);
-		ref<JsonNode> node = root->GetChild(0);
-		UNITTEST_ASSERT(node->GetType() == JSN_Integer && node->IntValue() == 123456789012345);
+		UNITTEST_ASSERT(root->GetType() == JSN_Integer && root->IntValue() == 123456789012345);
 
 		s = __X(" 123 ");
 		root = JsonParser::ParseText(s);
-		node = root->GetChild(0);
-		UNITTEST_ASSERT(node->GetType() == JSN_Integer && node->IntValue() == 123);
+		UNITTEST_ASSERT(root->GetType() == JSN_Integer && root->IntValue() == 123);
 	}
 
 	void TestBooleanValue()
 	{
 		stringx s = __X("true");
 		ref<JsonNode> root = JsonParser::ParseText(s);
-		ref<JsonNode> node = root->GetChild(0);
-		UNITTEST_ASSERT(node->GetType() == JSN_Boolean && node->BoolValue() == 1);
+		UNITTEST_ASSERT(root->GetType() == JSN_Boolean && root->BoolValue() == 1);
 
 		s = __X(" TrUe ");
 		root = JsonParser::ParseText(s);
-		node = root->GetChild(0);
-		UNITTEST_ASSERT(node->GetType() == JSN_Boolean && node->BoolValue() == 1);
+		UNITTEST_ASSERT(root->GetType() == JSN_Boolean && root->BoolValue() == 1);
 
 		s = __X(" fAlSe ");
 		root = JsonParser::ParseText(s);
-		node = root->GetChild(0);
-		UNITTEST_ASSERT(node->GetType() == JSN_Boolean && node->BoolValue() == 0);
+		UNITTEST_ASSERT(root->GetType() == JSN_Boolean && root->BoolValue() == 0);
 	}
 
 	void TestNoneValue()
 	{
 		stringx s = __X("null");
 		ref<JsonNode> root = JsonParser::ParseText(s);
-		ref<JsonNode> node = root->GetChild(0);
-		UNITTEST_ASSERT(node->GetType() ==JSN_None);
+		UNITTEST_ASSERT(root->GetType() ==JSN_None);
 
 		s = __X(" NuLl ");
 		root = JsonParser::ParseText(s);
-		node = root->GetChild(0);
-		UNITTEST_ASSERT(node->GetType() == JSN_None);
+		UNITTEST_ASSERT(root->GetType() == JSN_None);
 	}
 
 	void TestSimpleDictionary()
 	{
 		stringx s = __X("{\"a\":\"b\"}");
 		ref<JsonNode> root = JsonParser::ParseText(s);
-		ref<JsonNode> nodeDict = root->GetChild(0);
-		UNITTEST_ASSERT(nodeDict->GetType() == JSN_Dictionary && nodeDict->NodeDictionary()->Count() == 1);
-		ref<JsonNode> node = nodeDict->NodeDictionary()->Get(__X("a"));
+		UNITTEST_ASSERT(root->GetType() == JSN_Dictionary && root->NodeDictionary()->Count() == 1);
+		ref<JsonNode> node = root->NodeDictionary()->Get(__X("a"));
 		UNITTEST_ASSERT(node->GetType() == JSN_String && node->GetName() == __X("a") && node->TextValue() == __X("b"));
 
 		s = __X(" { \"a\" : \"1\" , \"b\":\"\" } ");
 		root = JsonParser::ParseText(s);
-		nodeDict = root->GetChild(0);
-		UNITTEST_ASSERT(nodeDict->GetType() == JSN_Dictionary && nodeDict->NodeDictionary()->Count() == 2);
-		node = nodeDict->NodeDictionary()->Get(__X("a"));
+		UNITTEST_ASSERT(root->GetType() == JSN_Dictionary && root->NodeDictionary()->Count() == 2);
+		node = root->NodeDictionary()->Get(__X("a"));
 		UNITTEST_ASSERT(node->GetType() == JSN_String && node->TextValue() == __X("1"));
-		node = nodeDict->NodeDictionary()->Get(__X("b"));
+		node = root->NodeDictionary()->Get(__X("b"));
 		UNITTEST_ASSERT(node->GetType() == JSN_String && node->TextValue() == __X(""));
 
 		s = __X("{}");
 		root = JsonParser::ParseText(s);
-		nodeDict = root->GetChild(0);
-		UNITTEST_ASSERT(nodeDict->GetType() == JSN_Dictionary && nodeDict->NodeDictionary()->Count() == 0);
+		UNITTEST_ASSERT(root->GetType() == JSN_Dictionary && root->NodeDictionary()->Count() == 0);
 	}
 
 	void TestSimpleList()
 	{
 		stringx s = __X("[\"a\"]");
 		ref<JsonNode> root = JsonParser::ParseText(s);
-		ref<JsonNode> nodeList = root->GetChild(0);
-		UNITTEST_ASSERT(nodeList->GetType() == JSN_NodeList && nodeList->NodeList()->Count() == 1);
-		ref<JsonNode> node = nodeList->NodeList()->at(0);
+		UNITTEST_ASSERT(root->GetType() == JSN_NodeList && root->NodeList()->Count() == 1);
+		ref<JsonNode> node = root->NodeList()->at(0);
 		UNITTEST_ASSERT(node->GetType() == JSN_String && node->GetName() == NULL && node->TextValue() == __X("a"));
 
 		s = __X(" [ \"a\" , \"\" ] ");
 		root = JsonParser::ParseText(s);
-		nodeList = root->GetChild(0);
-		UNITTEST_ASSERT(nodeList->GetType() == JSN_NodeList && nodeList->NodeList()->Count() == 2);
-		node = nodeList->NodeList()->at(0);
+		UNITTEST_ASSERT(root->GetType() == JSN_NodeList && root->NodeList()->Count() == 2);
+		node = root->NodeList()->at(0);
 		UNITTEST_ASSERT(node->GetType() == JSN_String && node->TextValue() == __X("a"));
-		node = nodeList->NodeList()->at(1);
+		node = root->NodeList()->at(1);
 		UNITTEST_ASSERT(node->GetType() == JSN_String && node->TextValue() == __X(""));
 
 		s = __X("[]");
 		root = JsonParser::ParseText(s);
-		nodeList = root->GetChild(0);
-		UNITTEST_ASSERT(nodeList->GetType() == JSN_NodeList && nodeList->NodeList()->Count() == 0);
+		UNITTEST_ASSERT(root->GetType() == JSN_NodeList && root->NodeList()->Count() == 0);
 	}
 
 	void TestComplextSample()
@@ -158,12 +141,9 @@ public:
 			__X("  \"code\":\"Ok\"") +
 			__X("}");
 		ref<JsonNode> root = JsonParser::ParseText(s);
-		UNITTEST_ASSERT(root->GetType() == JSN_NodeList && root->NodeList()->Count() == 1);
+		UNITTEST_ASSERT(root->GetType() == JSN_Dictionary && root->NodeDictionary()->Count() == 2);
 
-		ref<JsonNode> node0 = root->GetChild(0);
-		UNITTEST_ASSERT(node0->GetType() == JSN_Dictionary && node0->NodeDictionary()->Count() == 2);
-
-		ref<JsonNode> node1 = node0->NodeDictionary()->Get(__X("return"));	// \[return]
+		ref<JsonNode> node1 = root->NodeDictionary()->Get(__X("return"));	// \[return]
 		UNITTEST_ASSERT(node1->GetType() == JSN_Dictionary && node1->NodeDictionary()->Count() == 2);
 
 		ref<JsonNode> node2 = node1->NodeDictionary()->Get(__X("u"));	// \[return]\[u]
@@ -187,7 +167,7 @@ public:
 		UNITTEST_ASSERT(node4->GetType() == JSN_NodeList && node4->NodeList()->Count() == 2);
 		UNITTEST_ASSERT(node4->NodeList()->at(0)->TextValue() == __X("0") && node4->NodeList()->at(1)->TextValue() == __X("1"));
 
-		node1 = node0->NodeDictionary()->Get(__X("code"));	// \[code]
+		node1 = root->NodeDictionary()->Get(__X("code"));	// \[code]
 		UNITTEST_ASSERT(node1->GetType() == JSN_String && node1->TextValue() == __X("Ok"));
 	}
 
