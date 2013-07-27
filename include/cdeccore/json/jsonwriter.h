@@ -27,7 +27,10 @@ public:
 	{
 		Value = Converter::ToString(value);
 	}
-
+	inline JsonExpress(INT64 value): NodeType(JSN_Int64)
+	{
+		Value = Converter::ToString(value);
+	}
 	inline JsonExpress(bool value): NodeType(JSN_Boolean)
 	{
 		Value = value ? __X("true") : __X("false");
@@ -95,6 +98,7 @@ public:
 
 	void WriteString(stringx name, stringx value) { m_expr->AddChild(name, gc_new<JsonExpress>(value)); }
 	void WriteInt(stringx name, int value) { m_expr->AddChild(name, gc_new<JsonExpress>(value)); }
+	void WriteInt64(stringx name, INT64 value) { m_expr->AddChild(name, gc_new<JsonExpress>(value)); }
 	void WriteBool(stringx name, bool value) { m_expr->AddChild(name, gc_new<JsonExpress>(value)); }
 	void WriteNone(stringx name) { m_expr->AddChild(name, gc_new<JsonExpress>(JSN_None)); }
 
