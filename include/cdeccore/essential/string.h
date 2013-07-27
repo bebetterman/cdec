@@ -169,17 +169,17 @@ public:
 		return r += ch;
 	}
 
-	virtual bool operator==(const stringx&) const;
-	virtual bool operator==(PCWSTR) const;
-	virtual bool operator==(const std::wstring16&) const;
+	bool operator==(const stringx&) const;
+	bool operator==(PCWSTR) const;
+	bool operator==(const std::wstring16&) const;
 
-	virtual bool operator>(const stringx&) const;
-	virtual bool operator>(PCWSTR) const;
-	virtual bool operator>(const std::wstring16&) const;
+	bool operator>(const stringx&) const;
+	bool operator>(PCWSTR) const;
+	bool operator>(const std::wstring16&) const;
 
-	virtual bool operator<(const stringx&) const;
-	virtual bool operator<(PCWSTR) const;
-	virtual bool operator<(const std::wstring16&) const;
+	bool operator<(const stringx&) const;
+	bool operator<(PCWSTR) const;
+	bool operator<(const std::wstring16&) const;
 
 	bool operator!=(const stringx& s) const { return !(*this == s); }
 	bool operator!=(PCWSTR p) const { return !(*this == p); }
@@ -220,7 +220,7 @@ public:
 	void Clear() { if (m_pContent != NULL) { m_pContent->Release(); m_pContent = NULL; } }
 
 	// Enumerator
-	virtual ref<IEnumerator<WCHAR> > GetEnumerator();
+	ref<IEnumerator<WCHAR> > GetEnumerator();
 
 protected:
 	// Assignment
