@@ -34,11 +34,8 @@ protected:
 
 ref<JsonNode> JsonParserImpl::ParseText(stringx text)
 {
-	ref<JsonNode> root = JsonNode::NewListNode(NULL);
-
 	int pos = 0;
-	ref<JsonNode> node = ParseInnerTextVariant(text, pos);
-	root->AddChild(node);
+	ref<JsonNode> root = ParseInnerTextVariant(text, pos);
 
 	if (pos >= 0 && pos < text.Length())
 	{
@@ -77,7 +74,7 @@ ref<JsonNode> JsonParserImpl::ParseInnerTextStringValue(stringx text, int& pos)
 {
 	ASSERT(text[pos] == '\"');
 	stringx value = ParseStringValueToken(text,  pos);
-	return JsonNode::NewStringNode(NULL, value);
+	return JsonNode::NewStringNode(value);
 }
 
 ref<JsonNode> JsonParserImpl::ParseInnerTextNumberValue(stringx text, int& pos)
@@ -87,21 +84,21 @@ ref<JsonNode> JsonParserImpl::ParseInnerTextNumberValue(stringx text, int& pos)
 	double dblV = 0.0;
 	bool fFloat = ParseNumberValueToken(text, pos, intV, dblV);
 	if (fFloat)
-		return JsonNode::NewFloatNode(NULL, dblV);
+		return JsonNode::NewFloatNode(dblV);
 	else
-		return JsonNode::NewIntNode(NULL, intV);
+		return JsonNode::NewIntNode(intV);
 }
 
 ref<JsonNode> JsonParserImpl::ParseInnerTextBooleanValue(stringx text, int& pos)
 {
 	bool value = ParseBooleanValueToken(text, pos);
-	return JsonNode::NewBoolNode(NULL, value);
+	return JsonNode::NewBoolNode(value);
 }
 
 ref<JsonNode> JsonParserImpl::ParseInnerTextNoneValue(stringx text, int& pos)
 {
 	ParseNoneValueToken(text, pos);
-	return JsonNode::NewNullNode(NULL);
+	return JsonNode::NewNullNode();
 }
 
 // -------------------------------------------------------------------------- //
@@ -110,7 +107,7 @@ ref<JsonNode> JsonParserImpl::ParseInnerTextDictionary(stringx text, int& pos)
 {
 	ASSERT(text[pos] == '{');
 
-	ref<JsonNode> node = JsonNode::NewDictionaryNode(NULL);
+	ref<JsonNode> node = JsonNode::NewDictionaryNode();
 	++pos;
 	int flag = 0;	// last symbol: 0 init; 1 comma, 2 content
 
@@ -139,7 +136,7 @@ ref<JsonNode> JsonParserImpl::ParseInnerTextDictionary(stringx text, int& pos)
 			// Parse value part			
 			ref<JsonNode> subnode = ParseInnerTextVariant(text, pos);
 			subnode->SetName(key);
-			node->AddChild(subnode);
+			node->AddDictionaryItem(subnode);
 
 			flag = 2;
 		}
@@ -168,7 +165,7 @@ ref<JsonNode> JsonParserImpl::ParseInnerTextList(stringx text, int& pos)
 {
 	ASSERT(text[pos] == '[');
 
-	ref<JsonNode> node = JsonNode::NewListNode(NULL);
+	ref<JsonNode> node = JsonNode::NewListNode();
 	++pos;
 	int flag = 0;	// last symbol: 0 init; 1 comma, 2 content
 
@@ -199,7 +196,7 @@ ref<JsonNode> JsonParserImpl::ParseInnerTextList(stringx text, int& pos)
 				cdec_throw(JsonException(EC_JSON_ExpectComma, pos));
 
 			ref<JsonNode> subnode = ParseInnerTextVariant(text, pos);
-			node->AddChild(subnode);
+			node->AddListItem(subnode);
 			flag = 2;
 		}
 	}

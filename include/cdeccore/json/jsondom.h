@@ -72,7 +72,7 @@ private:
 	JsonNode() {}
 
 public:
-	JsonNode(JsonNodeType type, stringx name): m_type(type), m_name(name) {}
+	JsonNode(JsonNodeType type): m_type(type) {}
 	~JsonNode() { ClearValue(); }
 
 	inline void	ClearValue();
@@ -117,48 +117,49 @@ public:
 	double		GetChildFloatValue(int index) { return GetChild(index)->FloatValue(); }
 	double		GetChildFloatValue(stringx key) { return GetChild(key)->FloatValue(); }
 
-	inline void	AddChild(ref<JsonNode> node);
+	inline void	AddListItem(ref<JsonNode> node);
+	inline void	AddDictionaryItem(ref<JsonNode> node);
 
-	static ref<JsonNode>	NewStringNode(stringx name, stringx value)
+	static ref<JsonNode>	NewStringNode(stringx value)
 	{
-		ref<JsonNode> node = gc_new<JsonNode>(JSN_String, name);
+		ref<JsonNode> node = gc_new<JsonNode>(JSN_String);
 		node->m_value.SetString(value);
 		return node;
 	}
 
-	static ref<JsonNode>	NewIntNode(stringx name, INT64 value)
+	static ref<JsonNode>	NewIntNode(INT64 value)
 	{
-		ref<JsonNode> node = gc_new<JsonNode>(JSN_Integer, name);
+		ref<JsonNode> node = gc_new<JsonNode>(JSN_Integer);
 		node->m_value.SetInt64(value);
 		return node;
 	}
 
-	static ref<JsonNode>	NewFloatNode(stringx name, double value)
+	static ref<JsonNode>	NewFloatNode(double value)
 	{
-		ref<JsonNode> node = gc_new<JsonNode>(JSN_Float, name);
+		ref<JsonNode> node = gc_new<JsonNode>(JSN_Float);
 		node->m_value.SetDouble(value);
 		return node;
 	}
 
-	static ref<JsonNode>	NewBoolNode(stringx name, bool value)
+	static ref<JsonNode>	NewBoolNode(bool value)
 	{
-		ref<JsonNode> node = gc_new<JsonNode>(JSN_Boolean, name);
+		ref<JsonNode> node = gc_new<JsonNode>(JSN_Boolean);
 		node->m_value.SetBool(value);
 		return node;
 	}
 
-	static ref<JsonNode>	NewNullNode(stringx name) { return gc_new<JsonNode>(JSN_None, name); }
+	static ref<JsonNode>	NewNullNode() { return gc_new<JsonNode>(JSN_None); }
 
-	static ref<JsonNode>	NewDictionaryNode(stringx name)
+	static ref<JsonNode>	NewDictionaryNode()
 	{
-		ref<JsonNode> node = gc_new<JsonNode>(JSN_Dictionary, name);
+		ref<JsonNode> node = gc_new<JsonNode>(JSN_Dictionary);
 		node->m_value.SetObject(gc_new<JsonNodeDictionary>());
 		return node;
 	}
 
-	static ref<JsonNode>	NewListNode(stringx name)
+	static ref<JsonNode>	NewListNode()
 	{
-		ref<JsonNode> node = gc_new<JsonNode>(JSN_NodeList, name);
+		ref<JsonNode> node = gc_new<JsonNode>(JSN_NodeList);
 		node->m_value.SetObject(gc_new<JsonNodeList>());
 		return node;
 	}
@@ -209,27 +210,24 @@ inline int JsonNode::GetChildrenCount()
 	}
 }
 
-inline void JsonNode::AddChild(ref<JsonNode> node)
+inline void JsonNode::AddListItem(ref<JsonNode> node)
 {
-	switch (m_type)
-	{
-	case JSN_NodeList:
-		{
-			ASSERT(node->GetName() == NULL);
-			weak_ref<JsonNodeList> list = ref_cast<JsonNodeList>(m_value.GetObject());
-			list->Add(node);
-		}
-		break;
-	case JSN_Dictionary:
-		{
-			ASSERT(node->GetName() != NULL);
-			weak_ref<JsonNodeDictionary> dict = ref_cast<JsonNodeDictionary>(m_value.GetObject());
-			dict->Insert(node->GetName(), node);
-		}
-		break;
-	default:
+	if (m_type != JSN_NodeList)
 		cdec_throw(JsonException(EC_JSON_TypeError, 0));
-	}
+
+	ASSERT(node->GetName() == NULL);
+	weak_ref<JsonNodeList> list = ref_cast<JsonNodeList>(m_value.GetObject());
+	list->Add(node);
+}
+
+inline void JsonNode::AddDictionaryItem(ref<JsonNode> node)
+{
+	if (m_type != JSN_Dictionary)
+		cdec_throw(JsonException(EC_JSON_TypeError, 0));
+
+	ASSERT(node->GetName() != NULL);
+	weak_ref<JsonNodeDictionary> dict = ref_cast<JsonNodeDictionary>(m_value.GetObject());
+	dict->Insert(node->GetName(), node);
 }
 
 // -------------------------------------------------------------------------- //
