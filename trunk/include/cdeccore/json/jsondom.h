@@ -105,6 +105,7 @@ public:
 	ref<JsonNode>	GetChild(int index) { return NodeList()->at(index); }
 
 	ref<JsonNode>	GetChild(stringx key) { return NodeDictionary()->at(key); }
+	ref<JsonNode>	TryGetChild(stringx key) { return NodeDictionary()->Get(key); }
 
 	inline int		GetChildrenCount();
 
