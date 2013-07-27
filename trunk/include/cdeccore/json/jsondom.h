@@ -49,6 +49,7 @@ enum JsonNodeType
 	JSN_None,			// null
 	JSN_String,			// string value
 	JSN_Integer,		// integer value
+	JSN_Int64,		// int64 value
 	JSN_Float,			// floating-point value
 	JSN_Boolean,		// boolean value
 	JSN_Dictionary,		// a key-node dictionary
