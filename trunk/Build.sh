@@ -58,8 +58,8 @@ MakeDir()
 }
 
 proj=(
-	"cdecegg" "cdeccore" "curlcdec" "httpserv" "mysqlcdec" "TestRunnerC" 
-	"testers/TestHttpServer" "testers/TestCurl" "testers/TestCurlCdec"
+	"cdecegg" "cdeccore" "curlcdec" "httpserv" "mysqlcdec" "lzmacdec"
+	"TestRunnerC" "testers/TestHttpServer" "testers/TestCurl" "testers/TestCurlCdec"
 )
 
 TYPE=Debug
