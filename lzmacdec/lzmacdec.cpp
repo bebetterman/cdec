@@ -8,8 +8,16 @@
 // Building lzmalib before this project.
 //
 // Under Windows
-//   Build project import-win\lzma920\C\Util\LzmaLib\LzmaLib.vcxproj (for Visual 
-// Studio 2010, supports for other versions shall be updated later).
+//   Open import-win\lzma920\C\Util\LzmaLib\LzmaLib.vcxproj
+//   Run build
+//   * LzmaLib.vcxproj is for Visual Studio 2010 (10) or later
+//
+// Under Linux
+//   cd import-win/lzma920/C/Util/LzmaLib
+//   make -f makefile-a.gcc (static library, preferred)
+//   make -f makefile.gcc (shared library)
+//   * Choose either of static library or shared library but not both.
+//     The static library is preferred.
 // -------------------------------------------------------------------------- //
 
 #ifdef X_OS_WINDOWS
