@@ -9,6 +9,8 @@ class SortedMapVV: public Object
 	DECLARE_REF_CLASS(TreeMapVV(_K, _V))
 
 public:
+	typedef _K								key_type;
+	typedef _V								value_type;
 	typedef std::pair<_K, _V>				KeyValuePair;
 
 	typedef std::map<_K, _V>				impl_type;
