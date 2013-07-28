@@ -46,7 +46,13 @@ public:
 		UNITTEST_ASSERT(a.GetUInt16() == 0x7788);
 		UNITTEST_ASSERT(a.GetUInt8() == 0x88);
 
+#ifdef X_OS_WINDOWS
 		UNITTEST_ASSERT(a.GetBool());
+#else
+		UNITTEST_ASSERT(a.GetBool() == 0x88);
+		a.SetBool(true);
+		UNITTEST_ASSERT(a.GetBool());
+#endif
 		a.ClearLiteral();
 	}
 
