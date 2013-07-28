@@ -43,6 +43,9 @@ protected:
 
 public:
 	JsonWriter() { Reset(); }
+
+	// Re-open root node for appending items, if it is a collection node
+	JsonWriter(ref<JsonNode> root, bool fReopen = false);
 	
 	void Reset();
 
@@ -124,15 +127,19 @@ namespace json_express
 			m_wr = gc_new<JsonWriter>();
 		}
 
-		JE(ref<JsonNode> node)
+		JE(ref<JsonNode> node, bool fReopen = false)	// Re-open function
 		{
-			m_wr = gc_new<JsonWriter>();
-			m_wr->WriteNode(NULL, node);
+			m_wr = gc_new<JsonWriter>(node, fReopen);
 		}
 
 		static JE New()
 		{
 			return JE();
+		}
+
+		static JE Reopen(ref<JsonNode> node)
+		{
+			return JE(node, true);
 		}
 
 		static Expr Pair(stringx key, stringx value)
@@ -158,7 +165,7 @@ namespace json_express
 
 		static Expr Pair(stringx key, JE sub)
 		{
-			ref<JsonNode> expr = sub.FinalExpress();
+			ref<JsonNode> expr = sub.Complete();
 			return Expr(key, expr);
 		}
 
@@ -260,26 +267,25 @@ namespace json_express
 
 		JE& operator +(JE sub)
 		{
-			ref<JsonNode> node = sub.FinalExpress();
+			ref<JsonNode> node = sub.Complete();
 			m_wr->WriteNode(NULL, node);
 			return *this;
 		}
 
 		stringx GetString()
 		{
-			ref<JsonNode> node = FinalExpress();
+			ref<JsonNode> node = Complete();
 			ref<JsonExpressFormater> jsf = gc_new<JsonExpressFormater>();
 			return jsf->Format(node);
 		}
 
 		stringx GetString(ref<JsonExpressFormater> jsf)
 		{
-			ref<JsonNode> node = FinalExpress();
+			ref<JsonNode> node = Complete();
 			return jsf->Format(node);
 		}
 
-	protected:
-		ref<JsonNode> FinalExpress()
+		ref<JsonNode> Complete()
 		{
 			return m_wr->Complete();
 		}
