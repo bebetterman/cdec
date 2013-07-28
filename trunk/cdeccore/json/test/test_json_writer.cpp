@@ -20,8 +20,7 @@ class TestJsonWriter : public UnitTestSuite
 
 		UNITTEST_METHOD(TestWriteDictionary)
 		UNITTEST_METHOD(TestWriteDictionaryFormat)
-		UNITTEST_METHOD(TestWriteList)
-		
+		UNITTEST_METHOD(TestWriteList)		
 		UNITTEST_METHOD(TestWriteListFormat)
 
 		UNITTEST_METHOD(TestWriteDictionaryUnderDictionary)
@@ -36,6 +35,7 @@ class TestJsonWriter : public UnitTestSuite
 
 		UNITTEST_METHOD(TestComplextSample)
 
+		UNITTEST_METHOD_EXCEPTION(ErrorMultiRoot)
 		UNITTEST_METHOD_EXCEPTION(ErrorRootNodeHasName)
 		UNITTEST_METHOD_EXCEPTION(ErrorListChildHasName)
 		UNITTEST_METHOD_EXCEPTION(ErrorDictionaryChildWithoutName)
@@ -60,30 +60,30 @@ public:
 	{
 		ref<JsonWriter> wr = gc_new<JsonWriter>();
 		wr->WriteString(NULL, __X("abc"));
-		UNITTEST_ASSERT(wr->Complete() == __X("\"abc\""));
+		UNITTEST_ASSERT(wr->GetString() == __X("\"abc\""));
 
 		wr->Reset();
 		wr->WriteInt(NULL, 1234567890123456789L);
-		UNITTEST_ASSERT(wr->Complete() == __X("1234567890123456789"));
-
-		wr->Reset();
-		wr->WriteString(NULL, __X("abc"));
-		wr->WriteInt(NULL, 123);
-		UNITTEST_ASSERT(wr->Complete() == __X("\"abc\",123"));
+		UNITTEST_ASSERT(wr->GetString() == __X("1234567890123456789"));
 
 		wr->Reset();
 		wr->WriteBool(NULL, true);
-		wr->WriteBool(NULL, false);
-		wr->WriteNone(NULL);
-		UNITTEST_ASSERT(wr->Complete() == __X("true,false,null"));
+		UNITTEST_ASSERT(wr->GetString() == __X("true"));
 
-		// Multiple values with format
+		wr->Reset();
+		wr->WriteBool(NULL, false);
+		UNITTEST_ASSERT(wr->GetString() == __X("false"));
+
+		wr->Reset();
+		wr->WriteNull(NULL);
+		UNITTEST_ASSERT(wr->GetString() == __X("null"));
+
+		// With format
 		wr->Reset();
 		wr->IndentChars = __X(" ");
 		wr->NewLineChars = __X("\n");
 		wr->WriteString(NULL, __X("abc"));
-		wr->WriteInt(NULL, 123);
-		UNITTEST_ASSERT(wr->Complete() == __X("\"abc\",\n123"));
+		UNITTEST_ASSERT(wr->GetString() == __X("\"abc\""));
 	}
 
 	void TestWriteDictionary()
@@ -91,20 +91,20 @@ public:
 		ref<JsonWriter> wr = gc_new<JsonWriter>();
 		wr->BeginDictionary(NULL);
 		wr->EndDictionary();
-		UNITTEST_ASSERT(wr->Complete() == __X("{}"));
+		UNITTEST_ASSERT(wr->GetString() == __X("{}"));
 
 		wr->Reset();
 		wr->BeginDictionary(NULL);
 		wr->WriteString(__X("name"), __X("abc"));
 		wr->EndDictionary();
-		UNITTEST_ASSERT(wr->Complete() == __X("{\"name\":\"abc\"}"));
+		UNITTEST_ASSERT(wr->GetString() == __X("{\"name\":\"abc\"}"));
 
 		wr->Reset();
 		wr->BeginDictionary(NULL);
 		wr->WriteString(__X("name"), __X("abc"));
 		wr->WriteInt(__X("value"), 123);
 		wr->EndDictionary();
-		UNITTEST_ASSERT(wr->Complete() == __X("{\"name\":\"abc\",\"value\":123}"));
+		UNITTEST_ASSERT(wr->GetString() == __X("{\"name\":\"abc\",\"value\":123}"));
 	}
 
 	void TestWriteDictionaryFormat()
@@ -114,20 +114,20 @@ public:
 		wr->NewLineChars = __X("\n");
 		wr->BeginDictionary(NULL);
 		wr->EndDictionary();
-		UNITTEST_ASSERT(wr->Complete() == __X("{\n}"));
+		UNITTEST_ASSERT(wr->GetString() == __X("{\n}"));
 
 		wr->Reset();
 		wr->BeginDictionary(NULL);
 		wr->WriteString(__X("name"), __X("abc"));
 		wr->EndDictionary();
-		UNITTEST_ASSERT(wr->Complete() == __X("{\n \"name\":\"abc\"\n}"));
+		UNITTEST_ASSERT(wr->GetString() == __X("{\n \"name\":\"abc\"\n}"));
 
 		wr->Reset();
 		wr->BeginDictionary(NULL);
 		wr->WriteString(__X("name"), __X("abc"));
 		wr->WriteInt(__X("value"), 123);
 		wr->EndDictionary();
-		UNITTEST_ASSERT(wr->Complete() == __X("{\n \"name\":\"abc\",\n \"value\":123\n}"));
+		UNITTEST_ASSERT(wr->GetString() == __X("{\n \"name\":\"abc\",\n \"value\":123\n}"));
 	}
 
 	void TestWriteList()
@@ -135,20 +135,20 @@ public:
 		ref<JsonWriter> wr = gc_new<JsonWriter>();
 		wr->BeginList(NULL);
 		wr->EndList();
-		UNITTEST_ASSERT(wr->Complete() == __X("[]"));
+		UNITTEST_ASSERT(wr->GetString() == __X("[]"));
 
 		wr->Reset();
 		wr->BeginList(NULL);
 		wr->WriteString(NULL, __X("abc"));
 		wr->EndList();
-		UNITTEST_ASSERT(wr->Complete() == __X("[\"abc\"]"));
+		UNITTEST_ASSERT(wr->GetString() == __X("[\"abc\"]"));
 
 		wr->Reset();
 		wr->BeginList(NULL);
 		wr->WriteString(NULL, __X("abc"));
 		wr->WriteInt(NULL, 123);
 		wr->EndList();
-		UNITTEST_ASSERT(wr->Complete() == __X("[\"abc\",123]"));
+		UNITTEST_ASSERT(wr->GetString() == __X("[\"abc\",123]"));
 	}
 
 	void TestWriteListFormat()
@@ -158,20 +158,20 @@ public:
 		wr->NewLineChars = __X("\n");
 		wr->BeginList(NULL);
 		wr->EndList();
-		UNITTEST_ASSERT(wr->Complete() == __X("[\n]"));
+		UNITTEST_ASSERT(wr->GetString() == __X("[\n]"));
 
 		wr->Reset();
 		wr->BeginList(NULL);
 		wr->WriteString(NULL, __X("abc"));
 		wr->EndList();
-		UNITTEST_ASSERT(wr->Complete() == __X("[\n \"abc\"\n]"));
+		UNITTEST_ASSERT(wr->GetString() == __X("[\n \"abc\"\n]"));
 
 		wr->Reset();
 		wr->BeginList(NULL);
 		wr->WriteString(NULL, __X("abc"));
 		wr->WriteInt(NULL, 123);
 		wr->EndList();
-		UNITTEST_ASSERT(wr->Complete() == __X("[\n \"abc\",\n 123\n]"));
+		UNITTEST_ASSERT(wr->GetString() == __X("[\n \"abc\",\n 123\n]"));
 	}
 
 	void TestWriteDictionaryUnderDictionary()
@@ -182,7 +182,7 @@ public:
 		wr->BeginDictionary(__X("dict"));
 		wr->EndDictionary();
 		wr->EndDictionary();
-		UNITTEST_ASSERT(wr->Complete() == __X("{\"dict\":{}}"));
+		UNITTEST_ASSERT(wr->GetString() == __X("{\"dict\":{}}"));
 
 		wr->Reset();
 		wr->BeginDictionary(NULL);
@@ -190,7 +190,7 @@ public:
 		wr->WriteInt(__X("key"), 123);
 		wr->EndDictionary();
 		wr->EndDictionary();
-		UNITTEST_ASSERT(wr->Complete() == __X("{\"dict\":{\"key\":123}}"));
+		UNITTEST_ASSERT(wr->GetString() == __X("{\"dict\":{\"key\":123}}"));
 
 		wr->Reset();
 		wr->BeginDictionary(NULL);
@@ -199,7 +199,7 @@ public:
 		wr->WriteInt(__X("value"), 456);
 		wr->EndDictionary();
 		wr->EndDictionary();
-		UNITTEST_ASSERT(wr->Complete() == __X("{\"dict\":{\"key\":123,\"value\":456}}"));
+		UNITTEST_ASSERT(wr->GetString() == __X("{\"dict\":{\"key\":123,\"value\":456}}"));
 
 		wr->Reset();
 		wr->BeginDictionary(NULL);
@@ -208,7 +208,7 @@ public:
 		wr->EndDictionary();
 		wr->WriteInt(__X("value"), 456);
 		wr->EndDictionary();
-		UNITTEST_ASSERT(wr->Complete() == __X("{\"dict\":{\"key\":123},\"value\":456}"));
+		UNITTEST_ASSERT(wr->GetString() == __X("{\"dict\":{\"key\":123},\"value\":456}"));
 	}
 
 	void TestWriteDictionaryUnderDictionaryFormat()
@@ -220,7 +220,7 @@ public:
 		wr->BeginDictionary(__X("dict"));
 		wr->EndDictionary();
 		wr->EndDictionary();
-		UNITTEST_ASSERT(wr->Complete() == __X("{\n \"dict\":{\n }\n}"));
+		UNITTEST_ASSERT(wr->GetString() == __X("{\n \"dict\":{\n }\n}"));
 
 		wr->Reset();
 		wr->BeginDictionary(NULL);
@@ -228,7 +228,7 @@ public:
 		wr->WriteInt(__X("key"), 123);
 		wr->EndDictionary();
 		wr->EndDictionary();
-		UNITTEST_ASSERT(wr->Complete() == __X("{\n \"dict\":{\n  \"key\":123\n }\n}"));
+		UNITTEST_ASSERT(wr->GetString() == __X("{\n \"dict\":{\n  \"key\":123\n }\n}"));
 
 		wr->Reset();
 		wr->BeginDictionary(NULL);
@@ -237,7 +237,7 @@ public:
 		wr->WriteInt(__X("value"), 456);
 		wr->EndDictionary();
 		wr->EndDictionary();
-		UNITTEST_ASSERT(wr->Complete() == __X("{\n \"dict\":{\n  \"key\":123,\n  \"value\":456\n }\n}"));
+		UNITTEST_ASSERT(wr->GetString() == __X("{\n \"dict\":{\n  \"key\":123,\n  \"value\":456\n }\n}"));
 
 		wr->Reset();
 		wr->BeginDictionary(NULL);
@@ -246,7 +246,7 @@ public:
 		wr->EndDictionary();
 		wr->WriteInt(__X("value"), 456);
 		wr->EndDictionary();
-		UNITTEST_ASSERT(wr->Complete() == __X("{\n \"dict\":{\n  \"key\":123\n },\n \"value\":456\n}"));
+		UNITTEST_ASSERT(wr->GetString() == __X("{\n \"dict\":{\n  \"key\":123\n },\n \"value\":456\n}"));
 	}
 
 	void TestWriteListUnderDictionary()
@@ -256,7 +256,7 @@ public:
 		wr->BeginList(__X("list"));
 		wr->EndList();
 		wr->EndDictionary();
-		UNITTEST_ASSERT(wr->Complete() == __X("{\"list\":[]}"));
+		UNITTEST_ASSERT(wr->GetString() == __X("{\"list\":[]}"));
 
 		wr->Reset();
 		wr->BeginDictionary(NULL);
@@ -264,7 +264,7 @@ public:
 		wr->WriteInt(NULL, 123);
 		wr->EndList();
 		wr->EndDictionary();
-		UNITTEST_ASSERT(wr->Complete() == __X("{\"list\":[123]}"));
+		UNITTEST_ASSERT(wr->GetString() == __X("{\"list\":[123]}"));
 
 		wr->Reset();
 		wr->BeginDictionary(NULL);
@@ -273,7 +273,7 @@ public:
 		wr->WriteInt(NULL, 456);
 		wr->EndList();
 		wr->EndDictionary();
-		UNITTEST_ASSERT(wr->Complete() == __X("{\"list\":[123,456]}"));
+		UNITTEST_ASSERT(wr->GetString() == __X("{\"list\":[123,456]}"));
 
 		wr->Reset();
 		wr->BeginDictionary(NULL);
@@ -282,7 +282,7 @@ public:
 		wr->EndList();
 		wr->WriteInt(__X("value"), 456);
 		wr->EndDictionary();
-		UNITTEST_ASSERT(wr->Complete() == __X("{\"list\":[123],\"value\":456}"));
+		UNITTEST_ASSERT(wr->GetString() == __X("{\"list\":[123],\"value\":456}"));
 	}
 
 	void TestWriteListUnderDictionaryFormat()
@@ -294,7 +294,7 @@ public:
 		wr->BeginList(__X("list"));
 		wr->EndList();
 		wr->EndDictionary();
-		UNITTEST_ASSERT(wr->Complete() == __X("{\n \"list\":[\n ]\n}"));
+		UNITTEST_ASSERT(wr->GetString() == __X("{\n \"list\":[\n ]\n}"));
 
 		wr->Reset();
 		wr->BeginDictionary(NULL);
@@ -302,7 +302,7 @@ public:
 		wr->WriteInt(NULL, 123);
 		wr->EndList();
 		wr->EndDictionary();
-		UNITTEST_ASSERT(wr->Complete() == __X("{\n \"list\":[\n  123\n ]\n}"));
+		UNITTEST_ASSERT(wr->GetString() == __X("{\n \"list\":[\n  123\n ]\n}"));
 
 		wr->Reset();
 		wr->BeginDictionary(NULL);
@@ -311,7 +311,7 @@ public:
 		wr->WriteInt(NULL, 456);
 		wr->EndList();
 		wr->EndDictionary();
-		UNITTEST_ASSERT(wr->Complete() == __X("{\n \"list\":[\n  123,\n  456\n ]\n}"));
+		UNITTEST_ASSERT(wr->GetString() == __X("{\n \"list\":[\n  123,\n  456\n ]\n}"));
 
 		wr->Reset();
 		wr->BeginDictionary(NULL);
@@ -320,7 +320,7 @@ public:
 		wr->EndList();
 		wr->WriteInt(__X("value"), 456);
 		wr->EndDictionary();
-		UNITTEST_ASSERT(wr->Complete() == __X("{\n \"list\":[\n  123\n ],\n \"value\":456\n}"));
+		UNITTEST_ASSERT(wr->GetString() == __X("{\n \"list\":[\n  123\n ],\n \"value\":456\n}"));
 	}
 
 	void TestWriteDictionaryUnderList()
@@ -330,7 +330,7 @@ public:
 		wr->BeginDictionary(NULL);
 		wr->EndDictionary();
 		wr->EndList();
-		UNITTEST_ASSERT(wr->Complete() == __X("[{}]"));
+		UNITTEST_ASSERT(wr->GetString() == __X("[{}]"));
 
 		wr->Reset();
 		wr->BeginList(NULL);
@@ -338,7 +338,7 @@ public:
 		wr->WriteInt(__X("key"), 123);
 		wr->EndDictionary();
 		wr->EndList();
-		UNITTEST_ASSERT(wr->Complete() == __X("[{\"key\":123}]"));
+		UNITTEST_ASSERT(wr->GetString() == __X("[{\"key\":123}]"));
 
 		wr->Reset();
 		wr->BeginList(NULL);
@@ -347,7 +347,7 @@ public:
 		wr->WriteInt(__X("value"), 456);
 		wr->EndDictionary();
 		wr->EndList();
-		UNITTEST_ASSERT(wr->Complete() == __X("[{\"key\":123,\"value\":456}]"));
+		UNITTEST_ASSERT(wr->GetString() == __X("[{\"key\":123,\"value\":456}]"));
 
 		wr->Reset();
 		wr->BeginList(NULL);
@@ -356,7 +356,7 @@ public:
 		wr->EndDictionary();
 		wr->WriteInt(NULL, 456);
 		wr->EndList();
-		UNITTEST_ASSERT(wr->Complete() == __X("[{\"key\":123},456]"));
+		UNITTEST_ASSERT(wr->GetString() == __X("[{\"key\":123},456]"));
 	}
 
 	void TestWriteDictionaryUnderListFormat()
@@ -368,7 +368,7 @@ public:
 		wr->BeginDictionary(NULL);
 		wr->EndDictionary();
 		wr->EndList();
-		UNITTEST_ASSERT(wr->Complete() == __X("[\n {\n }\n]"));
+		UNITTEST_ASSERT(wr->GetString() == __X("[\n {\n }\n]"));
 
 		wr->Reset();
 		wr->BeginList(NULL);
@@ -376,7 +376,7 @@ public:
 		wr->WriteInt(__X("key"), 123);
 		wr->EndDictionary();
 		wr->EndList();
-		UNITTEST_ASSERT(wr->Complete() == __X("[\n {\n  \"key\":123\n }\n]"));
+		UNITTEST_ASSERT(wr->GetString() == __X("[\n {\n  \"key\":123\n }\n]"));
 
 		wr->Reset();
 		wr->BeginList(NULL);
@@ -385,7 +385,7 @@ public:
 		wr->WriteInt(__X("value"), 456);
 		wr->EndDictionary();
 		wr->EndList();
-		UNITTEST_ASSERT(wr->Complete() == __X("[\n {\n  \"key\":123,\n  \"value\":456\n }\n]"));
+		UNITTEST_ASSERT(wr->GetString() == __X("[\n {\n  \"key\":123,\n  \"value\":456\n }\n]"));
 
 		wr->Reset();
 		wr->BeginList(NULL);
@@ -394,7 +394,7 @@ public:
 		wr->EndDictionary();
 		wr->WriteInt(NULL, 456);
 		wr->EndList();
-		UNITTEST_ASSERT(wr->Complete() == __X("[\n {\n  \"key\":123\n },\n 456\n]"));
+		UNITTEST_ASSERT(wr->GetString() == __X("[\n {\n  \"key\":123\n },\n 456\n]"));
 	}
 
 	void TestWriteListUnderList()
@@ -404,7 +404,7 @@ public:
 		wr->BeginList(NULL);
 		wr->EndList();
 		wr->EndList();
-		UNITTEST_ASSERT(wr->Complete() == __X("[[]]"));
+		UNITTEST_ASSERT(wr->GetString() == __X("[[]]"));
 
 		wr->Reset();
 		wr->BeginList(NULL);
@@ -412,7 +412,7 @@ public:
 		wr->WriteInt(NULL, 123);
 		wr->EndList();
 		wr->EndList();
-		UNITTEST_ASSERT(wr->Complete() == __X("[[123]]"));
+		UNITTEST_ASSERT(wr->GetString() == __X("[[123]]"));
 
 		wr->Reset();
 		wr->BeginList(NULL);
@@ -421,7 +421,7 @@ public:
 		wr->WriteInt(NULL, 456);
 		wr->EndList();
 		wr->EndList();
-		UNITTEST_ASSERT(wr->Complete() == __X("[[123,456]]"));
+		UNITTEST_ASSERT(wr->GetString() == __X("[[123,456]]"));
 
 		wr->Reset();
 		wr->BeginList(NULL);
@@ -430,7 +430,7 @@ public:
 		wr->EndList();
 		wr->WriteInt(NULL, 456);
 		wr->EndList();
-		UNITTEST_ASSERT(wr->Complete() == __X("[[123],456]"));
+		UNITTEST_ASSERT(wr->GetString() == __X("[[123],456]"));
 	}
 
 	void TestWriteListUnderListFormat()
@@ -442,7 +442,7 @@ public:
 		wr->BeginList(NULL);
 		wr->EndList();
 		wr->EndList();
-		UNITTEST_ASSERT(wr->Complete() == __X("[\n [\n ]\n]"));
+		UNITTEST_ASSERT(wr->GetString() == __X("[\n [\n ]\n]"));
 
 		wr->Reset();
 		wr->BeginList(NULL);
@@ -450,7 +450,7 @@ public:
 		wr->WriteInt(NULL, 123);
 		wr->EndList();
 		wr->EndList();
-		UNITTEST_ASSERT(wr->Complete() == __X("[\n [\n  123\n ]\n]"));
+		UNITTEST_ASSERT(wr->GetString() == __X("[\n [\n  123\n ]\n]"));
 
 		wr->Reset();
 		wr->BeginList(NULL);
@@ -459,7 +459,7 @@ public:
 		wr->WriteInt(NULL, 456);
 		wr->EndList();
 		wr->EndList();
-		UNITTEST_ASSERT(wr->Complete() == __X("[\n [\n  123,\n  456\n ]\n]"));
+		UNITTEST_ASSERT(wr->GetString() == __X("[\n [\n  123,\n  456\n ]\n]"));
 
 		wr->Reset();
 		wr->BeginList(NULL);
@@ -468,7 +468,7 @@ public:
 		wr->EndList();
 		wr->WriteInt(NULL, 456);
 		wr->EndList();
-		UNITTEST_ASSERT(wr->Complete() == __X("[\n [\n  123\n ],\n 456\n]"));
+		UNITTEST_ASSERT(wr->GetString() == __X("[\n [\n  123\n ],\n 456\n]"));
 	}
 
 	void TestComplextSample()
@@ -512,8 +512,15 @@ public:
 			wr->WriteString(__X("code"), __X("Ok"));
 		wr->EndDictionary();
 
-		stringx t = wr->Complete();
+		stringx t = wr->GetString();
 		UNITTEST_ASSERT(s == t);
+	}
+
+	void ErrorMultiRoot()
+	{
+		ref<JsonWriter> wr = gc_new<JsonWriter>();
+		wr->WriteString(NULL, __X("abc"));
+		wr->WriteInt(NULL, 123);
 	}
 
 	void ErrorRootNodeHasName()
@@ -542,7 +549,7 @@ public:
 		// A dictionary is not closed before completing
 		ref<JsonWriter> wr = gc_new<JsonWriter>();
 		wr->BeginDictionary(NULL);
-		wr->Complete();
+		wr->GetString();
 	}
 	
 	void ErrorCloseNonexistDictionary()
@@ -577,12 +584,17 @@ public:
 
 	void TestJsonWriteExpression()
 	{
-		JE expr = JE::New() +
-			__X("abc") +
-			123 +
-			JE::Bool(true) +
-			JE::None();
-		UNITTEST_ASSERT(expr.Complete() == __X("\"abc\",123,true,null"));
+		JE expr = JE::New() + __X("abc");
+		UNITTEST_ASSERT(expr.GetString() == __X("\"abc\""));
+
+		expr = JE::New() + 123;
+		UNITTEST_ASSERT(expr.GetString() == __X("123"));
+
+		expr = JE::New() + JE::Bool(true);
+		UNITTEST_ASSERT(expr.GetString() == __X("true"));
+
+		expr = JE::New() + JE::None();
+		UNITTEST_ASSERT(expr.GetString() == __X("null"));
 
 		expr = JE::New() +
 			JE::Dict() +
@@ -591,7 +603,7 @@ public:
 				JE::PairBool(__X("switch"), false) +
 				JE::None(__X("addon")) +
 			JE::EDict();
-		UNITTEST_ASSERT(expr.Complete() == __X("{\"name\":\"abc\",\"value\":123,\"switch\":false,\"addon\":null}"));
+		UNITTEST_ASSERT(expr.GetString() == __X("{\"name\":\"abc\",\"value\":123,\"switch\":false,\"addon\":null}"));
 
 		expr = JE::New() +
 			JE::List() +
@@ -600,7 +612,7 @@ public:
 				JE::Bool(true) +
 				JE::None() +
 			JE::EList();
-		UNITTEST_ASSERT(expr.Complete() == __X("[\"abc\",123,true,null]"));
+		UNITTEST_ASSERT(expr.GetString() == __X("[\"abc\",123,true,null]"));
 
 		expr = JE::New() +
 			JE::Dict() +
@@ -629,7 +641,7 @@ public:
 				__X("],") +
 				__X("\"weight\":[\"nil\",180]") +
 			__X("}");
-		stringx t = expr.Complete();
+		stringx t = expr.GetString();
 		UNITTEST_ASSERT(s == t);
 	}
 
@@ -643,21 +655,28 @@ public:
 		ref<JsonExpressFormater> jsf = gc_new<JsonExpressFormater>();
 		jsf->IndentChars = __X(" ");
 		jsf->NewLineChars = __X("\n");
-		UNITTEST_ASSERT(expr.Complete(jsf) == __X("{\n \"name\":\"abc\",\n \"value\":123\n}"));
+		UNITTEST_ASSERT(expr.GetString(jsf) == __X("{\n \"name\":\"abc\",\n \"value\":123\n}"));
 	}
 
 	void TestJsonWriteExpressionNested()
 	{
 		// A dictionary sub-expression
-		JE sub = JE::DictExpr() +
-			JE::Pair(__X("name"), __X("abc")) +
-			JE::Pair(__X("value"), 123);
+		JE sub = JE::New() +
+			JE::Dict() +
+				JE::Pair(__X("name"), __X("abc")) +
+				JE::Pair(__X("value"), 123) +
+			JE::EDict();
 		JE expr = JE::New() + sub;
-		UNITTEST_ASSERT(expr.Complete() == __X("{\"name\":\"abc\",\"value\":123}"));
+		UNITTEST_ASSERT(expr.GetString() == __X("{\"name\":\"abc\",\"value\":123}"));
 
 		// A dictionary sub-expression under a list
-		expr = JE::New() + 1 + sub + 2;
-		UNITTEST_ASSERT(expr.Complete() == __X("1,{\"name\":\"abc\",\"value\":123},2"));
+		expr = JE::New() +
+			JE::List() +
+				1 + 
+				sub + 
+				2 +
+			JE::EList();
+		UNITTEST_ASSERT(expr.GetString() == __X("[1,{\"name\":\"abc\",\"value\":123},2]"));
 
 		// A dictionary sub-expression under a dictionary
 		expr = JE::New() +
@@ -666,18 +685,25 @@ public:
 				JE::Pair(__X("body"), sub) +
 				JE::Pair(__X("extra"), 0) +
 			JE::EDict();
-		UNITTEST_ASSERT(expr.Complete() == __X("{\"result\":\"ok\",\"body\":{\"name\":\"abc\",\"value\":123},\"extra\":0}"));
+		UNITTEST_ASSERT(expr.GetString() == __X("{\"result\":\"ok\",\"body\":{\"name\":\"abc\",\"value\":123},\"extra\":0}"));
 
 		// A list sub-expression
-		sub = JE::ListExpr() +
-			__X("abc") +
-			123;
+		sub = JE::New() +
+			JE::List() +
+				__X("abc") +
+				123 +
+			JE::EList();
 		expr = JE::New() + sub;
-		UNITTEST_ASSERT(expr.Complete() == __X("[\"abc\",123]"));
+		UNITTEST_ASSERT(expr.GetString() == __X("[\"abc\",123]"));
 
 		// A list sub-expression under a list
-		expr = JE::New() + 1 + sub + 2;
-		UNITTEST_ASSERT(expr.Complete() == __X("1,[\"abc\",123],2"));
+		expr = JE::New() +
+			JE::List() + 
+				1 + 
+				sub + 
+				2 +
+			JE::EList();
+		UNITTEST_ASSERT(expr.GetString() == __X("[1,[\"abc\",123],2]"));
 
 		// A list sub-expression under a dictionary
 		expr = JE::New() +
@@ -686,7 +712,7 @@ public:
 				JE::Pair(__X("body"), sub) +
 				JE::Pair(__X("extra"), 0) +
 			JE::EDict();
-		UNITTEST_ASSERT(expr.Complete() == __X("{\"result\":\"ok\",\"body\":[\"abc\",123],\"extra\":0}"));
+		UNITTEST_ASSERT(expr.GetString() == __X("{\"result\":\"ok\",\"body\":[\"abc\",123],\"extra\":0}"));
 	}
 
 	void tearDown()

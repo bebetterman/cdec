@@ -3,34 +3,42 @@
 CDEC_NS_BEGIN
 // -------------------------------------------------------------------------- //
 
-stringx JsonExpressFormater::Format(ref<JsonExpress> expr)
+stringx JsonExpressFormater::Format(ref<JsonNode> node)
 {
-	if (expr->NodeType != JSN_NodeList)
-		cdec_throw(JsonException(EC_JSON_IncorrectRoot, 0));
-
 	ref<StringBuilder> sb = gc_new<StringBuilder>();
-	WriteCollectionBody(expr, false, true, sb, 0);
+	WriteExpression(NULL, node, sb, 0);
 
 	// Delete the final new line chars
-	if (NewLineChars != NULL)
-		sb->Remove(sb->Length() - NewLineChars.Length(), NewLineChars.Length());
+	//if (NewLineChars != NULL)
+	//	sb->Remove(sb->Length() - NewLineChars.Length(), NewLineChars.Length());
 
 	return sb->ToString();
 }
 
-void JsonExpressFormater::WriteExpression(stringx name, ref<JsonExpress> expr, ref<StringBuilder> sb, int level)
+void JsonExpressFormater::WriteExpression(stringx name, ref<JsonNode> node, ref<StringBuilder> sb, int level)
 {
-	switch (expr->NodeType)
+	switch (node->GetType())
 	{
-		case JSN_Dictionary:
-			WriteSubDictionary(name, expr, sb, level);
-			break;
-		case JSN_NodeList:
-			WriteSubList(name, expr, sb, level);
-			break;
-		default:
-			WriteValue(name, expr->Value, sb, level);
-			break;
+	case JSN_String:
+		WriteValue(name, '\"' + node->TextValue() + '\"', sb, level);
+		break;
+	case JSN_Integer:
+		WriteValue(name, Converter::ToString(node->IntValue()), sb, level);
+		break;
+	case JSN_Boolean:
+		WriteValue(name, node->BoolValue() ? __X("true") : __X("false"), sb, level);
+		break;
+	case JSN_None:
+		WriteValue(name, __X("null"), sb, level);
+		break;
+	case JSN_Dictionary:
+		WriteSubDictionary(name, node, sb, level);
+		break;
+	case JSN_NodeList:
+		WriteSubList(name, node, sb, level);
+		break;
+	default:
+		cdec_throw(JsonException(EC_JSON_NotImplemented, 0));
 	}
 }
 
@@ -58,87 +66,126 @@ void JsonExpressFormater::WriteNewLine(ref<StringBuilder> sb)
 		sb->Append(NewLineChars);
 }
 
-void JsonExpressFormater::WriteSubDictionary(stringx name, ref<JsonExpress> expr, ref<StringBuilder> sb, int level)
+void JsonExpressFormater::WriteSubDictionary(stringx name, ref<JsonNode> node, ref<StringBuilder> sb, int level)
 {
 	WriteValue(name, __X("{"), sb, level);
-	WriteCollectionBody(expr, true, false, sb, level + 1);
-	WriteValue(NULL, __X("}"), sb, level);
-}
+	WriteNewLine(sb);
 
-void JsonExpressFormater::WriteSubList(stringx name, ref<JsonExpress> expr, ref<StringBuilder> sb, int level)
-{
-	WriteValue(name, __X("["), sb, level);
-	WriteCollectionBody(expr, false, false, sb, level + 1);
-	WriteValue(NULL, __X("]"), sb, level);
-}
-
-void JsonExpressFormater::WriteCollectionBody(ref<JsonExpress> expr, bool fKey, bool fMain, ref<StringBuilder> sb, int level)
-{
-	ref<StringArrayList> keys = expr->Keys;
-	ref<ArrayList<JsonExpress> > children = expr->Children;
-	if (!fMain)
-		WriteNewLine(sb);
-	for (int i = 0, n = children->Count(); i < n; ++i)
+	ref<JsonNode::JsonNodeDictionary> dict = node->NodeDictionary();
+	int count = dict->Count();
+	foreach (ref<JsonNode>, subnode, dict)
 	{
-		stringx name = fKey ? keys->at(i) : NULL;
-		WriteExpression(name, children->at(i), sb, level);
-		if (i + 1 < n)
+		ASSERT(subnode->GetName() != NULL);
+		WriteExpression(subnode->GetName(), subnode, sb, level + 1);
+		if (--count > 0)
 			sb->Append(',');
 		WriteNewLine(sb);
 	}
+	ASSERT(count == 0);
+
+	WriteValue(NULL, __X("}"), sb, level);
+}
+
+void JsonExpressFormater::WriteSubList(stringx name, ref<JsonNode> node, ref<StringBuilder> sb, int level)
+{
+	WriteValue(name, __X("["), sb, level);
+	WriteNewLine(sb);
+
+	ref<JsonNode::JsonNodeList> list = node->NodeList();
+	int count = list->Count();
+	foreach (ref<JsonNode>, subnode, list)
+	{
+		ASSERT(subnode->GetName() == NULL);
+		WriteExpression(NULL, subnode, sb, level + 1);
+		if (--count > 0)
+			sb->Append(',');
+		WriteNewLine(sb);
+	}
+
+	WriteValue(NULL, __X("]"), sb, level);
 }
 
 // -------------------------------------------------------------------------- //
 
 void JsonWriter::Reset()
 {
-	m_expr = JsonExpress::CreateMain();
-	m_stack = gc_new< Stack<JsonExpress> >();
-	m_stack->Push(m_expr);
+	m_root = m_top = NULL;
+	m_stack = gc_new< Stack<JsonNode> >();
+}
+
+void JsonWriter::WriteNode(stringx name, ref<JsonNode> node)
+{
+	if (m_root != NULL)
+	{
+		// Add a child node under a list or dictionary node
+		if (m_top == NULL)
+			cdec_throw(JsonException(EC_JSON_WrongCollectionType, 0));
+
+		ASSERT(!m_stack->Empty());
+		node->SetName(name);
+		m_top->AddChildItem(node);
+	}
+	else
+	{
+		// The root element
+		ASSERT(m_stack->Empty() && m_top == NULL);
+		if (name != NULL)
+			cdec_throw(JsonException(EC_JSON_MustNotHaveName, 0));
+
+		m_root = node;
+	}
 }
 
 void JsonWriter::BeginDictionary(stringx name)
 {
-	ref<JsonExpress> expr = gc_new<JsonExpress>(JSN_Dictionary);
-	m_expr->AddChild(name, expr);
-	m_expr = expr;
-	m_stack->Push(expr);
+	ref<JsonNode> node = JsonNode::NewDictionaryNode();
+	WriteNode(name, node);
+	m_stack->Push(m_top = node);
 }
 
 void JsonWriter::EndDictionary()
 {
-	if (m_stack->Count() < 2 || m_expr->NodeType != JSN_Dictionary)
+	if (m_top == NULL || m_top->GetType() != JSN_Dictionary)
 		cdec_throw(JsonException(EC_JSON_NoMatchedDictionary, 0));
+
 	m_stack->Pop();
-	m_expr = m_stack->Peek();
+	m_top = m_stack->Empty() ? NULL : m_stack->Peek();
 }
 
 void JsonWriter::BeginList(stringx name)
 {
-	ref<JsonExpress> expr = gc_new<JsonExpress>(JSN_NodeList);
-	m_expr->AddChild(name, expr);
-	m_expr = expr;
-	m_stack->Push(expr);	
+	ref<JsonNode> node = JsonNode::NewListNode();
+	WriteNode(name, node);
+	m_stack->Push(m_top = node);	
 }
 
 void JsonWriter::EndList()
 {
-	if (m_stack->Count() < 2 || m_expr->NodeType != JSN_NodeList)
+	if (m_top == NULL || m_top->GetType() != JSN_NodeList)
 		cdec_throw(JsonException(EC_JSON_NoMatchedList, 0));
+
 	m_stack->Pop();
-	m_expr = m_stack->Peek();			
+	m_top = m_stack->Empty() ? NULL : m_stack->Peek();		
 }
 
-stringx JsonWriter::Complete()
+ref<JsonNode> JsonWriter::Complete()
 {
-	if (m_stack->Count() != 1)
+	if (m_top != NULL)
 		cdec_throw(JsonException(EC_JSON_NodeUnclosed, 0));
+	if (m_root == NULL)
+		cdec_throw(JsonException(EC_JSON_NoRootNode, 0));
 
-	ASSERT(m_stack->Peek() == m_expr);
+	ASSERT(m_stack->Empty());
+	return m_root;
+}
+
+stringx JsonWriter::GetString()
+{
+	ref<JsonNode> root = Complete();
 	ref<JsonExpressFormater> jsf = gc_new<JsonExpressFormater>();
 	jsf->IndentChars = IndentChars;
 	jsf->NewLineChars = NewLineChars;
-	return jsf->Format(m_expr);
+	return jsf->Format(root);
 }
 
 // -------------------------------------------------------------------------- //

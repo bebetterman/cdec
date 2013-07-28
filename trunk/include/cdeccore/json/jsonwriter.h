@@ -6,52 +6,6 @@ CDEC_NS_BEGIN
 
 class JsonExpressFormater;
 
-class JsonExpress: public Object
-{
-	DECLARE_REF_CLASS(JsonExpress)
-
-public:
-	JsonNodeType	NodeType;
-	stringx			Value;
-
-	ref<StringArrayList>			Keys;
-	ref<ArrayList<JsonExpress> >	Children;
-
-public:
-	inline JsonExpress(stringx value): NodeType(JSN_String)
-	{
-		Value = '\"' + value + '\"';
-	}
-
-	inline JsonExpress(INT64 value): NodeType(JSN_Integer)
-	{
-		Value = Converter::ToString(value);
-	}
-
-	inline JsonExpress(bool value): NodeType(JSN_Boolean)
-	{
-		Value = value ? __X("true") : __X("false");
-	}
-
-	inline JsonExpress(JsonNodeType type);
-
-	static inline ref<JsonExpress> CreateMain()
-	{
-		return gc_new<JsonExpress>(JSN_NodeList);
-	}
-
-	inline bool IsCollection()
-	{
-		return NodeType == JSN_Dictionary || NodeType == JSN_NodeList;
-	}
-
-	inline void AddChild(stringx name, ref<JsonExpress> value);
-
-	inline stringx Complete();
-
-	inline stringx Complete(ref<JsonExpressFormater> jsf);
-};
-
 // -------------------------------------------------------------------------- //
 
 class CDECCOREEXPORT JsonExpressFormater: public Object
@@ -63,15 +17,14 @@ public:
 	stringx	NewLineChars;
 
 public:
-	stringx Format(ref<JsonExpress> expr);
+	stringx Format(ref<JsonNode> expr);
 
 protected:
-	void WriteExpression(stringx name, ref<JsonExpress> expr, ref<StringBuilder> sb, int level);
+	void WriteExpression(stringx name, ref<JsonNode> expr, ref<StringBuilder> sb, int level);
 	void WriteValue(stringx name, stringx value, ref<StringBuilder> sb, int level);
 	void WriteNewLine(ref<StringBuilder> sb);
-	void WriteSubDictionary(stringx name, ref<JsonExpress> expr, ref<StringBuilder> sb, int level);
-	void WriteSubList(stringx name, ref<JsonExpress> expr, ref<StringBuilder> sb, int level);
-	void WriteCollectionBody(ref<JsonExpress> expr, bool fKey, bool fMain, ref<StringBuilder> sb, int level);
+	void WriteSubDictionary(stringx name, ref<JsonNode> expr, ref<StringBuilder> sb, int level);
+	void WriteSubList(stringx name, ref<JsonNode> expr, ref<StringBuilder> sb, int level);
 };
 
 // -------------------------------------------------------------------------- //
@@ -85,18 +38,35 @@ public:
 	stringx		NewLineChars;
 
 protected:
-	ref<JsonExpress>			m_expr;
-	ref<Stack<JsonExpress> >	m_stack;
+	ref<JsonNode>			m_root, m_top;
+	ref<Stack<JsonNode> >	m_stack;
 
 public:
 	JsonWriter() { Reset(); }
 	
 	void Reset();
 
-	void WriteString(stringx name, stringx value) { m_expr->AddChild(name, gc_new<JsonExpress>(value)); }
-	void WriteInt(stringx name, INT64 value) { m_expr->AddChild(name, gc_new<JsonExpress>(value)); }
-	void WriteBool(stringx name, bool value) { m_expr->AddChild(name, gc_new<JsonExpress>(value)); }
-	void WriteNone(stringx name) { m_expr->AddChild(name, gc_new<JsonExpress>(JSN_None)); }
+	void WriteNode(stringx name, ref<JsonNode> node);
+
+	void WriteString(stringx name, stringx value)
+	{
+		WriteNode(name, JsonNode::NewStringNode(value));
+	}
+	
+	void WriteInt(stringx name, INT64 value)
+	{
+		WriteNode(name, JsonNode::NewIntNode(value));
+	}
+
+	void WriteBool(stringx name, bool value)
+	{
+		WriteNode(name, JsonNode::NewBoolNode(value));
+	}
+
+	void WriteNull(stringx name)
+	{
+		WriteNode(name, JsonNode::NewNullNode());
+	}
 
 	void BeginDictionary(stringx name);
 	void EndDictionary();
@@ -104,291 +74,217 @@ public:
 	void BeginList(stringx name);
 	void EndList();
 
-	stringx Complete();
+	ref<JsonNode>	Complete();
+
+	stringx		GetString();
 };
 
 // -------------------------------------------------------------------------- //
-namespace json_express {
-
-// Note: JE is not a Cdec class
-class JE
+namespace json_express
 {
-public:
-	struct Node
+
+	// Note: JE is not a Cdec class
+	class JE
 	{
-		stringx				Key;
-		ref<JsonExpress>	Expr;
-
-		Node(stringx key, ref<JsonExpress> expr)
+	public:
+		struct Expr
 		{
-			Key = key;
-			Expr = expr;
-		}
+			stringx			Key;
+			ref<JsonNode>	Node;
 
-		Node(stringx key, JsonNodeType vt)
+			Expr(stringx _key, ref<JsonNode> _node): Key(_key), Node(_node)
+			{
+			}
+		};
+
+		struct BExpr
 		{
-			Key = key;
-			Expr = gc_new<JsonExpress>(vt);
-		}
+			stringx			Key;
+			JsonNodeType	NodeType;
 
-		Node(stringx key, stringx value)
+			BExpr(stringx _key, JsonNodeType _type): Key(_key), NodeType(_type)
+			{
+			}
+		};
+
+		struct EExpr
 		{
-			Key = key;
-			Expr = gc_new<JsonExpress>(value);
-		}
+			JsonNodeType	NodeType;
 
-		Node(stringx key, INT64 value)
-		{
-			Key = key;
-			Expr = gc_new<JsonExpress>(value);
-		}
-
-		Node(stringx key, bool value)
-		{
-			Key = key;
-			Expr = gc_new<JsonExpress>(value);
-		}
-	};
-
-	struct BNode
-	{
-		stringx				Key;
-		ref<JsonExpress>	Expr;
-
-		BNode(stringx key, JsonNodeType type)
-		{
-			Key = key;
-			Expr = gc_new<JsonExpress>(type);
-		}
-	};
-
-	struct ENode
-	{
-		JsonNodeType		NodeType;
-
-		ENode(JsonNodeType type)
-		{
-			NodeType = type;
-		}
-	};
+			EExpr(JsonNodeType type)
+			{
+				NodeType = type;
+			}
+		};
 	
-	ref< Stack<JsonExpress> >	m_stack;
+		ref<JsonWriter>		m_wr;
 
-	JE(ref<JsonExpress> expr)
-	{
-		m_stack = gc_new< Stack<JsonExpress> >();
-		m_stack->Push(expr);
-	}
+		JE()
+		{
+			m_wr = gc_new<JsonWriter>();
+		}
 
-	static JE New()
-	{
-		return ListExpr();
-	}
+		JE(ref<JsonNode> node)
+		{
+			m_wr = gc_new<JsonWriter>();
+			m_wr->WriteNode(NULL, node);
+		}
 
-	static JE ListExpr()
-	{
-		ref<JsonExpress> expr = gc_new<JsonExpress>(JSN_NodeList);
-		return JE(expr);
-	}
+		static JE New()
+		{
+			return JE();
+		}
 
-	static JE DictExpr()
-	{
-		ref<JsonExpress> expr = gc_new<JsonExpress>(JSN_Dictionary);
-		return JE(expr);
-	}
+		static Expr Pair(stringx key, stringx value)
+		{
+			return Expr(key, JsonNode::NewStringNode(value));
+		}
 
-	static Node Pair(stringx key, stringx value)
-	{
-		return Node(key, value);
-	}
+		static Expr Pair(stringx key, INT64 value)
+		{
+			return Expr(key, JsonNode::NewIntNode(value));
+		}
 
-	static Node Pair(stringx key, INT64 value)
-	{
-		return Node(key, value);
-	}
+		// A "WCHAR*" argument (a wide-string constance) prefer to match "bool" type 
+		// than "string / stringx" types in function overloading.
+		// So this type (bool) must be declared explicitly.
+		// Refer to 
+		//     http://www.newsmth.net/nForum/#!article/CPlusPlus/355668
+		//     http://connect.microsoft.com/VisualStudio/feedback/details/694684/vc-bool-string-wstring
+		static Expr PairBool(stringx key, bool value)
+		{
+			return Expr(key, JsonNode::NewBoolNode(value));
+		}
 
-	// A "WCHAR*" argument (a wide-string constance) prefer to match "bool" type 
-	// than "string / stringx" types in function overloading.
-	// So this type (bool) must be declared explicitly.
-	// Refer to 
-	//     http://www.newsmth.net/nForum/#!article/CPlusPlus/355668
-	//     http://connect.microsoft.com/VisualStudio/feedback/details/694684/vc-bool-string-wstring
-	static Node PairBool(stringx key, bool value)
-	{
-		return Node(key, value);
-	}
+		static Expr Pair(stringx key, JE sub)
+		{
+			ref<JsonNode> expr = sub.FinalExpress();
+			return Expr(key, expr);
+		}
 
-	static Node Pair(stringx key, JE sub)
-	{
-		ref<JsonExpress> expr = sub.FinalExpress();
-		return Node(key, expr);
-	}
+		// See method PairBool
+		static Expr Bool(bool value)
+		{
+			return PairBool(NULL, value);
+		}
 
-	// See method PairBool
-	static Node Bool(bool value)
-	{
-		return Node(NULL, value);
-	}
+		static Expr None(stringx key)
+		{
+			return Pair(key, JsonNode::NewNullNode());
+		}
 
-	static Node None(stringx key)
-	{
-		return Node(key, JSN_None);
-	}
+		static Expr None()
+		{
+			return None(NULL);
+		}
 
-	static Node None()
-	{
-		return Node(NULL, JSN_None);
-	}
+		static BExpr Dict(stringx key)
+		{
+			return BExpr(key, JSN_Dictionary);
+		}
 
-	static BNode Dict()
-	{
-		return BNode(NULL, JSN_Dictionary);
-	}
+		static BExpr Dict()
+		{
+			return Dict(NULL);
+		}
 
-	static BNode Dict(stringx key)
-	{
-		return BNode(key, JSN_Dictionary);
-	}
+		static BExpr List(stringx key)
+		{
+			return BExpr(key, JSN_NodeList);
+		}
 
-	static BNode List()
-	{
-		return BNode(NULL, JSN_NodeList);
-	}
+		static BExpr List()
+		{
+			return List(NULL);
+		}
 
-	static BNode List(stringx key)
-	{
-		return BNode(key, JSN_NodeList);
-	}
+		static EExpr EDict()
+		{
+			return EExpr(JSN_Dictionary);
+		}
 
-	static ENode EDict()
-	{
-		return ENode(JSN_Dictionary);
-	}
+		static EExpr EList()
+		{
+			return EExpr(JSN_NodeList);
+		}
 
-	static ENode EList()
-	{
-		return ENode(JSN_NodeList);
-	}
+		JE& operator +(Expr expr)
+		{
+			m_wr->WriteNode(expr.Key, expr.Node);
+			return *this;
+		}
 
-	JE& operator +(Node node)
-	{
-		AddItem(node.Key, node.Expr);
-		return *this;
-	}
+		JE& operator +(BExpr expr)
+		{
+			switch (expr.NodeType)
+			{
+			case JSN_Dictionary:
+				m_wr->BeginDictionary(expr.Key);
+				break;
+			case JSN_NodeList:
+				m_wr->BeginList(expr.Key);
+				break;
+			default:
+				cdec_throw(JsonException(EC_JSON_NoMatchedCollection, 0));
+			}
+			return *this;
+		}
 
-	JE& operator +(BNode node)
-	{
-		AddItem(node.Key, node.Expr);
-		m_stack->Push(node.Expr);
-		return *this;
-	}
+		JE& operator +(EExpr expr)
+		{
+			switch (expr.NodeType)
+			{
+			case JSN_Dictionary:
+				m_wr->EndDictionary();
+				break;
+			case JSN_NodeList:
+				m_wr->EndList();
+				break;
+			default:
+				cdec_throw(JsonException(EC_JSON_NoMatchedCollection, 0));
+			}
+			return *this;
+		}
 
-	JE& operator +(ENode node)
-	{
-		if (m_stack->Count() < 2)
-			cdec_throw(JsonException(EC_JSON_NoMatchedCollection, 0));
-		if (node.NodeType != m_stack->Peek()->NodeType)
-			cdec_throw(JsonException(EC_JSON_WrongCollectionType, 0));
+		JE& operator +(stringx value)
+		{
+			m_wr->WriteString(NULL, value);
+			return *this;
+		}
 
-		m_stack->Pop();
-		return *this;
-	}
+		JE& operator +(INT64 value)
+		{
+			m_wr->WriteInt(NULL, value);
+			return *this;
+		}
 
-	JE& operator +(stringx value)
-	{
-		AddItem(NULL, gc_new<JsonExpress>(value));
-		return *this;
-	}
+		JE& operator +(JE sub)
+		{
+			ref<JsonNode> node = sub.FinalExpress();
+			m_wr->WriteNode(NULL, node);
+			return *this;
+		}
 
-	JE& operator +(INT64 value)
-	{
-		AddItem(NULL, gc_new<JsonExpress>(value));
-		return *this;
-	}
+		stringx GetString()
+		{
+			ref<JsonNode> node = FinalExpress();
+			ref<JsonExpressFormater> jsf = gc_new<JsonExpressFormater>();
+			return jsf->Format(node);
+		}
 
-	JE& operator +(JE sub)
-	{
-		ref<JsonExpress> expr = sub.FinalExpress();
-		AddItem(NULL, expr);		
-		return *this;
-	}
+		stringx GetString(ref<JsonExpressFormater> jsf)
+		{
+			ref<JsonNode> node = FinalExpress();
+			return jsf->Format(node);
+		}
 
-	stringx Complete()
-	{
-		ref<JsonExpress> expr = FinalExpress();
-		ref<JsonExpressFormater> jsf = gc_new<JsonExpressFormater>();
-		return jsf->Format(expr);
-	}
+	protected:
+		ref<JsonNode> FinalExpress()
+		{
+			return m_wr->Complete();
+		}
+	};
 
-	stringx Complete(ref<JsonExpressFormater> jsf)
-	{
-		ref<JsonExpress> expr = FinalExpress();
-		return jsf->Format(expr);
-	}
-
-protected:
-	void AddItem(stringx key, ref<JsonExpress> expr)
-	{
-		m_stack->Peek()->AddChild(key, expr);
-	}
-
-	ref<JsonExpress> FinalExpress()
-	{
-		if (m_stack->Count() != 1)
-			cdec_throw(JsonException(EC_JSON_NodeUnclosed, 0));
-		return m_stack->Peek();
-	}
-};
-
-}
-
-// -------------------------------------------------------------------------- //
-
-inline JsonExpress::JsonExpress(JsonNodeType type)
-{
-	if (type == JSN_Dictionary || type == JSN_NodeList)
-	{
-		NodeType = type;
-		Keys = gc_new<StringArrayList>();
-		Children = gc_new<ArrayList<JsonExpress> >();
-	}
-	else if (type == JSN_None)
-	{
-		NodeType = type;
-		Value = __X("null");
-	}
-	else
-		cdec_throw(JsonException(EC_JSON_TypeError, 0));
-}
-
-inline void JsonExpress::AddChild(stringx name, ref<JsonExpress> value)
-{
-	if (NodeType == JSN_NodeList)
-	{
-		if (name != NULL)
-			cdec_throw(JsonException(EC_JSON_MustNotHaveName, 0));
-		Children->Add(value);
-	}
-	else if (NodeType == JSN_Dictionary)
-	{
-		if (name == NULL)
-			cdec_throw(JsonException(EC_JSON_MustHaveName, 0));
-		Keys->Add(name);
-		Children->Add(value);
-	}
-	else
-		cdec_throw(JsonException(EC_JSON_TypeError, 0));
-}
-
-inline stringx JsonExpress::Complete()
-{
-	ref<JsonExpressFormater> jsf = gc_new<JsonExpressFormater>();
-	return jsf->Format(this);
-}
-
-inline stringx JsonExpress::Complete(ref<JsonExpressFormater> jsf)
-{
-	return jsf->Format(this);
 }
 
 // -------------------------------------------------------------------------- //
