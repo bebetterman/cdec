@@ -49,6 +49,10 @@ class TestJsonWriter : public UnitTestSuite
 		UNITTEST_METHOD(TestJsonWriteExpressionFormat)
 		UNITTEST_METHOD(TestJsonWriteExpressionNested)
 
+		UNITTEST_METHOD(TestJsonWriteReopenDictionary)
+		UNITTEST_METHOD(TestJsonWriteReopenList)
+		UNITTEST_METHOD(TestJsonWriteReopenComplex)
+
 	UNITTEST_SUITE_END()
 
 public:
@@ -713,6 +717,88 @@ public:
 				JE::Pair(__X("extra"), 0) +
 			JE::EDict();
 		UNITTEST_ASSERT(expr.GetString() == __X("{\"result\":\"ok\",\"body\":[\"abc\",123],\"extra\":0}"));
+	}
+
+	void TestJsonWriteReopenDictionary()
+	{
+		// Original JE
+		JE expr = JE::New() + 
+			JE::Dict() + 
+				JE::Pair(__X("a"), 1) +
+			JE::EDict();
+		ref<JsonNode> root = expr.Complete();	// the root dictionary node to be re-opened
+
+		// Method 1, manually add a new JsonNode
+		ref<JsonNode> node = JsonNode::NewIntNode(2);
+		node->SetName(__X("b"));
+		root->AddDictionaryItem(node);
+		UNITTEST_ASSERT(JE(root).GetString() == __X("{\"a\":1,\"b\":2}"));
+
+		// Method 2, using JsonWriter re-open function
+		ref<JsonWriter> wr = gc_new<JsonWriter>(root, true);	// Re-open root node to append items
+		wr->WriteInt(__X("c"), 3);
+		wr->EndDictionary();	// Must explicitly close the root collection re-opened
+		UNITTEST_ASSERT(JE(root).GetString() == __X("{\"a\":1,\"b\":2,\"c\":3}"));
+
+		// Method 3, using JE re-open function
+		expr = 
+			JE::Reopen(root) + 
+				JE::Pair(__X("d"), 4) +
+			JE::EDict();		// Must explicitly close the root collection re-opened
+		UNITTEST_ASSERT(expr.GetString() == __X("{\"a\":1,\"b\":2,\"c\":3,\"d\":4}"));
+	}
+
+	void TestJsonWriteReopenList()
+	{
+		// Original JE
+		JE expr = JE::New() + 
+			JE::List() + 
+				1 +
+			JE::EList();
+		ref<JsonNode> root = expr.Complete();	// the root list node to be re-opened
+
+		// Method 1, manually add a new JsonNode
+		ref<JsonNode> node = JsonNode::NewIntNode(2);
+		root->AddListItem(node);
+		UNITTEST_ASSERT(JE(root).GetString() == __X("[1,2]"));
+
+		// Method 2, using JsonWriter re-open function
+		ref<JsonWriter> wr = gc_new<JsonWriter>(root, true);	// Re-open root node to append items
+		wr->WriteInt(NULL, 3);
+		wr->EndList();	// Must explicitly close the root collection re-opened
+		UNITTEST_ASSERT(JE(root).GetString() == __X("[1,2,3]"));
+
+		// Method 3, using JE re-open function
+		expr = 
+			JE::Reopen(root) + 
+				4 +
+			JE::EList();		// Must explicitly close the root collection re-opened
+		UNITTEST_ASSERT(expr.GetString() == __X("[1,2,3,4]"));
+	}
+
+	void TestJsonWriteReopenComplex()
+	{
+		JE eMain = JE::New() +
+			JE::Dict() +
+				JE::List(__X("keys")) +
+					1 +
+				JE::EList() +
+				JE::Dict(__X("units")) +
+					JE::Pair(__X("1"), __X("local")) +
+				JE::EDict() +
+			JE::EDict();		
+		ref<JsonNode> root = eMain.Complete();
+
+		// Add an item to List "keys"
+		ref<JsonNode> nodeKeys = root->GetChild(__X("keys"));
+		JE::Reopen(nodeKeys) + 2 + JE::EList();
+
+		// Add an item to Dictionary "nodes"
+		ref<JsonNode> nodeUnits = root->GetChild(__X("units"));
+		JE::Reopen(nodeUnits) + JE::Pair(__X("2"), __X("remote")) + JE::EDict();
+
+		stringx t = eMain.GetString();
+		UNITTEST_ASSERT(t == __X("{\"keys\":[1,2],\"units\":{\"1\":\"local\",\"2\":\"remote\"}}"));
 	}
 
 	void tearDown()

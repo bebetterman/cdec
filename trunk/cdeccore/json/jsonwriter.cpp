@@ -107,6 +107,17 @@ void JsonExpressFormater::WriteSubList(stringx name, ref<JsonNode> node, ref<Str
 
 // -------------------------------------------------------------------------- //
 
+JsonWriter::JsonWriter(ref<JsonNode> root, bool fReopen)
+{
+	Reset();
+	m_root = root;
+	if (fReopen && (root->GetType() == JSN_Dictionary || root->GetType() == JSN_NodeList))
+	{
+		m_top = m_root;
+		m_stack->Push(m_top);
+	}
+}
+
 void JsonWriter::Reset()
 {
 	m_root = m_top = NULL;
