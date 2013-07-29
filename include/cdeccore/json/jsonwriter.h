@@ -142,6 +142,11 @@ namespace json_express
 			return JE(node, true);
 		}
 
+		static Expr Pair(stringx key, ref<JsonNode> node)
+		{
+			return Expr(key, node);
+		}
+
 		static Expr Pair(stringx key, stringx value)
 		{
 			return Expr(key, JsonNode::NewStringNode(value));

@@ -169,29 +169,29 @@ public:
 		return r += ch;
 	}
 
-	bool operator==(const stringx&) const;
-	bool operator==(PCWSTR) const;
-	bool operator==(const std::wstring16&) const;
+	bool operator==(const stringx& rhs) const { return _Equal(rhs); }
+	bool operator==(PCWSTR rhs) const { return _Equal(rhs); }
+	bool operator==(const std::wstring16& rhs) const { return _Equal(rhs); }
 
-	bool operator>(const stringx&) const;
-	bool operator>(PCWSTR) const;
-	bool operator>(const std::wstring16&) const;
+	bool operator>(const stringx& rhs) const { return _Greater(rhs); }
+	bool operator>(PCWSTR rhs) const { return _Greater(rhs); }
+	bool operator>(const std::wstring16& rhs) const { return _Greater(rhs); }
 
-	bool operator<(const stringx&) const;
-	bool operator<(PCWSTR) const;
-	bool operator<(const std::wstring16&) const;
+	bool operator<(const stringx& rhs) const { return _Less(rhs); }
+	bool operator<(PCWSTR rhs) const { return _Less(rhs); }
+	bool operator<(const std::wstring16& rhs) const { return _Less(rhs); }
 
-	bool operator!=(const stringx& s) const { return !(*this == s); }
-	bool operator!=(PCWSTR p) const { return !(*this == p); }
-	bool operator!=(const std::wstring16& s) const { return !(*this == s); }
+	bool operator!=(const stringx& rhs) const { return !_Equal(rhs); }
+	bool operator!=(PCWSTR rhs) const { return !_Equal(rhs); }
+	bool operator!=(const std::wstring16& rhs) const { return !_Equal(rhs); }
 
-	bool operator>=(const stringx& s) const { return !(*this < s); }
-	bool operator>=(PCWSTR p) const { return !(*this < p); }
-	bool operator>=(const std::wstring16& s) const { return !(*this < s); }
+	bool operator>=(const stringx& rhs) const { return !_Less(rhs); }
+	bool operator>=(PCWSTR rhs) const { return !_Less(rhs); }
+	bool operator>=(const std::wstring16& rhs) const { return !_Less(rhs); }
 
-	bool operator<=(const stringx& s) const { return !(*this > s); }
-	bool operator<=(PCWSTR p) const { return !(*this > p); }
-	bool operator<=(const std::wstring16& s) const { return !(*this > s); }
+	bool operator<=(const stringx& rhs) const { return !_Greater(rhs); }
+	bool operator<=(PCWSTR rhs) const { return !_Greater(rhs); }
+	bool operator<=(const std::wstring16& rhs) const { return !_Greater(rhs); }
 
 	// Interoperability
 	pin_ptr<WCHAR> ContentBuffer()
@@ -252,6 +252,17 @@ protected:
 		if (pwszText != NULL)
 			_Append(pwszText, wstrlen16(pwszText));
 	}
+
+	// Comparision
+	bool _Equal(stringx rhs) const;
+	bool _Equal(PCWSTR p) const;
+	bool _Equal(const std::wstring16& s) const;
+	bool _Greater(stringx rhs) const;
+	bool _Greater(PCWSTR p) const;
+	bool _Greater(const std::wstring16& s) const;
+	bool _Less(stringx rhs) const;
+	bool _Less(PCWSTR p) const;
+	bool _Less(const std::wstring16& s) const;
 };
 
 // -------------------------------------------------------------------------- //
