@@ -237,6 +237,12 @@
     <ClCompile Include="essential\test\test_ess_variant.cpp">
       <Filter>cdec\essential\test</Filter>
     </ClCompile>
+    <ClCompile Include="common\datetime.cpp">
+      <Filter>cdec\common</Filter>
+    </ClCompile>
+    <ClCompile Include="common\test\test_datetime.cpp">
+      <Filter>cdec\common\test</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
