@@ -182,7 +182,7 @@ stringx stringx::PadRight(WCHAR ch, int n)
 	return result;
 }
 
-bool stringx::operator==(const stringx& s) const
+bool stringx::_Equal(stringx s) const
 {
 	StringContent* pContent2 = s.m_pContent;
 
@@ -198,7 +198,7 @@ bool stringx::operator==(const stringx& s) const
 	return wstrcmp16(m_pContent->Content(), pContent2->Content()) == 0;
 }
 
-bool stringx::operator==(PCWSTR p) const
+bool stringx::_Equal(PCWSTR p) const
 {
 	if (m_pContent == NULL)
 		return p == NULL;
@@ -209,7 +209,7 @@ bool stringx::operator==(PCWSTR p) const
 	return wstrcmp16(m_pContent->Content(), p) == 0;
 }
 
-bool stringx::operator==(const std::wstring16& s) const
+bool stringx::_Equal(const std::wstring16& s) const
 {
 	if (m_pContent == NULL)
 		return false;
@@ -220,7 +220,7 @@ bool stringx::operator==(const std::wstring16& s) const
 	return wstrcmp16(m_pContent->Content(), s.c_str()) == 0;
 }
 
-bool stringx::operator>(const stringx& s) const
+bool stringx::_Greater(stringx s) const
 {
 	StringContent* pContent2 = s.m_pContent;
 
@@ -233,7 +233,7 @@ bool stringx::operator>(const stringx& s) const
 	return wstrcmp16(m_pContent->Content(), pContent2->Content()) > 0;
 }
 
-bool stringx::operator>(PCWSTR p) const
+bool stringx::_Greater(PCWSTR p) const
 {
 	if (m_pContent == NULL)
 		return false;
@@ -244,7 +244,7 @@ bool stringx::operator>(PCWSTR p) const
 	return wstrcmp16(m_pContent->Content(), p) > 0;
 }
 
-bool stringx::operator>(const std::wstring16& s) const
+bool stringx::_Greater(const std::wstring16& s) const
 {
 	if (m_pContent == NULL)
 		return false;
@@ -252,7 +252,7 @@ bool stringx::operator>(const std::wstring16& s) const
 	return wstrcmp16(m_pContent->Content(), s.c_str()) > 0;
 }
 
-bool stringx::operator<(const stringx& s) const
+bool stringx::_Less(stringx s) const
 {
 	StringContent* pContent2 = s.m_pContent;
 
@@ -265,7 +265,7 @@ bool stringx::operator<(const stringx& s) const
 	return wstrcmp16(m_pContent->Content(), pContent2->Content()) < 0;
 }
 
-bool stringx::operator<(PCWSTR p) const
+bool stringx::_Less(PCWSTR p) const
 {
 	if (p == NULL)
 		return false;
@@ -276,7 +276,7 @@ bool stringx::operator<(PCWSTR p) const
 	return wstrcmp16(m_pContent->Content(), p) < 0;
 }
 
-bool stringx::operator<(const std::wstring16& s) const
+bool stringx::_Less(const std::wstring16& s) const
 {
 	if (m_pContent == NULL)
 		return true;
