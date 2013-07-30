@@ -24,7 +24,8 @@ interface HashAlgorithm: Object
 	inline void		Update(ref<ByteArray> input, int offset, int size);
 	inline ref<ByteArray>	Final();
 
-	inline ref<ByteArray>	Compute(ref<ByteArray> data);
+	inline ref<ByteArray>	Compute(ref<ByteArray> data, int offset, int size);
+	inline ref<ByteArray>	Compute(ref<ByteArray> data) { return Compute(data, 0, data->Count()); }
 };
 
 class CDECCOREEXPORT MD5: public HashAlgorithm
@@ -92,10 +93,10 @@ inline ref<ByteArray> HashAlgorithm::Final()
 	return digest;
 }
 
-inline ref<ByteArray> HashAlgorithm::Compute(ref<ByteArray> data)
+inline ref<ByteArray> HashAlgorithm::Compute(ref<ByteArray> data, int offset, int size)
 {
 	Reset();
-	Update(data, 0, data->Count());
+	Update(data, offset, size);
 	return Final();
 }
 
