@@ -11,7 +11,7 @@ using namespace  cdec;
 #define DBUTILEXPORT DECLSPEC_IMPORT
 #endif
 
-#define DBUTIL_API(type)	EXTERN_C DBUTILEXPORT type __stdcall
+#define DBUTIL_API(type)	DBUTILEXPORT type __stdcall
 
 //--------------------------------------------
 /*convert sql::SQLString to cdec::stringx*/
@@ -19,6 +19,62 @@ stringx SqlStr2Strx(sql::SQLString sqlStr, ref<Encoding> encode = Encoding::get_
 /*convert cdec::stringx to sql::SQLString*/
 sql::SQLString Strx2SqlStr(stringx strx, ref<Encoding> encode = Encoding::get_UTF8());
 
+// -------------------------------------------------------------------------- //
+// DbConnectionManager
+// -------------------------------------------------------------------------- //
+
+class DBUTILEXPORT DbConnection: public Object
+{
+	DECLARE_REF_CLASS(DbConnection)
+
+protected:
+	ref<Connection> m_conn;
+
+public:
+	DbConnection(ref<Connection> conn): m_conn(conn) {}
+
+	ref<Connection>	Conn() { return m_conn; }
+
+	bool	Execute(stringx sql);
+	int		ExecuteUpdate(stringx sql);
+	ref<ResultSet>	ExecuteQuery(stringx sql);
+	
+	// Note: Do NOT call this in your codes, use DbConnectionManager::Return instead
+	void	Dispose();
+};
+
+// -------------------------------------------------------------------------- //
+// DbConnectionManager
+// -------------------------------------------------------------------------- //
+
+struct DbConfig
+{
+	stringx	Url;
+	stringx	Username, Password;
+	stringx Database;
+
+	void LoadConfigXml(stringx path);
+};
+
+class DBUTILEXPORT DbConnectionManager: public Object
+{
+	DECLARE_REF_CLASS(DbConnectionManager)
+
+protected:
+	DbConfig	m_dbconfig;
+
+public:
+	DbConnectionManager(DbConfig dbconfig);
+
+	ref<DbConnection> Take();
+	void Return(ref<DbConnection> dbcon) { dbcon->Dispose(); }
+
+	void	Dispose() {}
+};
+
+// -------------------------------------------------------------------------- //
+
+#if 0
 
 class DBUTILEXPORT DbUtil: public Object
 {
@@ -41,5 +97,7 @@ public:
 	ref<ResultSet> ExecuteQuery(stringx sql);
 	void CloseConn();
 };
+
+#endif
 
 // -------------------------------------------------------------------------- //

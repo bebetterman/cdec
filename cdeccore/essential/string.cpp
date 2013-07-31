@@ -449,7 +449,7 @@ ref<ArrayListV<stringx> > stringx::Split(WCHAR seperator)
 		}
 	}
 
-	if (lastPos != length)
+	// if (lastPos != length)	// Keep the last empty entry
 	{
 		stringx newStr = stringx(rawContent + lastPos, length - lastPos);
 		result->Add(newStr);
@@ -480,7 +480,7 @@ ref<ArrayListV<stringx> > stringx::Split(stringx separators)
 		}
 	}
 
-	if (lastPos != length)
+	// if (lastPos != length)	// Kepp the last empty entry
 	{
 		stringx newStr = stringx(rawContent + lastPos, length - lastPos);
 		result->Add(newStr);
