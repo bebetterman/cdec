@@ -99,13 +99,18 @@ void Server::Start(UINT port)
 	}
 }
 
-int Server::OnParseGetArgs(void *cls, enum MHD_ValueKind kind, const char *key, const char *value)
+int Server::OnParseKeyValuePairs(void *cls, enum MHD_ValueKind kind, const char *key, const char *value)
 {
 	HandlerContext* ctx = (HandlerContext*)cls;
 	ref<Encoding> e = Encoding::get_UTF8();
 	stringx key_s = e->ToUnicode(key);
 	stringx value_s = value != NULL ? e->ToUnicode(value) : NULL;
-	ctx->m_getArgs.insert(HandlerContext::Value(key_s, value_s));
+
+	if (kind == MHD_HEADER_KIND)
+		ctx->m_headers.insert(HandlerContext::Value(key_s, value_s));
+	else if (kind == MHD_GET_ARGUMENT_KIND)
+		ctx->m_getArgs.insert(HandlerContext::Value(key_s, value_s));
+
 	return MHD_YES;
 }
 
@@ -185,10 +190,10 @@ int Server::OnRequestHandler(void* hdctx, MHD_Connection* connection, const char
 		HandlerContext* ctx = (HandlerContext*)(*reqctx);
 
 		// Parse GET arguments
-		MHD_get_connection_values(connection, MHD_GET_ARGUMENT_KIND, OnParseGetArgs, ctx);
+		MHD_get_connection_values(connection, MHD_GET_ARGUMENT_KIND, OnParseKeyValuePairs, ctx);
 
 		// Parse headers
-		// MHD_get_connection_values(connection, MHD_HEADER_KIND, &print_out_key, NULL);
+		MHD_get_connection_values(connection, MHD_HEADER_KIND, OnParseKeyValuePairs, ctx);
 
 		if (ctx->m_method == HandlerContext::HTTP_GET)
 		{
