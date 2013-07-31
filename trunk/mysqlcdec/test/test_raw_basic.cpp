@@ -15,23 +15,27 @@ class TestRawBasic : public UnitTestSuite
 	UNITTEST_SUITE(TestRawBasic)
 		UNITTEST_METHOD(testSimpleConn)
 		UNITTEST_METHOD(testDbUtil)
-		
-
 	UNITTEST_SUITE_END()
 public:
 	void setUp()
 	{
 	}
+
 	void testDbUtil()
 	{
-		stringx confPath=TestEnv::get_sample_path(__X("dbconfig.xml"));
-		ref<DbUtil> dbutil = gc_new<DbUtil>(confPath);
-		dbutil->Conn();
-		dbutil->Execute(__X("drop table if exists stu"));
-		dbutil->Execute(__X("create table stu(idd int(4),name varchar(20),primary key(idd))"));
-		dbutil->Execute(__X("delete from stu"));
-		dbutil->Execute(__X("insert into stu values(1,'test')"));
-		ref<ResultSet> resu = dbutil->ExecuteQuery(__X("select * from stu"));
+		stringx confPath = TestEnv::get_sample_path(__X("dbconfig.xml"));
+		DbConfig dbconfig;
+		dbconfig.LoadConfigXml(confPath);
+
+		ref<DbConnectionManager> cm = gc_new<DbConnectionManager>(dbconfig);
+		ref<DbConnection> conn = cm->Take();
+		
+		conn->Execute(__X("drop table if exists stu"));
+		conn->Execute(__X("create table stu(idd int(4),name varchar(20),primary key(idd))"));
+		conn->Execute(__X("delete from stu"));
+		conn->Execute(__X("insert into stu values(1,'test')"));
+
+		ref<ResultSet> resu = conn->ExecuteQuery(__X("select * from stu"));
 		UNITTEST_ASSERT(resu->RowsCount() == 1);
 		while(resu->Next())
 		{
@@ -39,7 +43,8 @@ public:
 			stringx w =  resu->GetString(2);
 			UNITTEST_ASSERT(s == w);
 		}
-		ref<PrepareStatement> prstmt  = dbutil->GetConn()->CreatePrepareStatement(__X("select * from stu where idd=?"));
+
+		ref<PrepareStatement> prstmt  = conn->Conn()->CreatePrepareStatement(__X("select * from stu where idd=?"));
 		prstmt->SetInt(1,1);
 		ref<ResultSet> res = prstmt->ExecuteQuery();
 		UNITTEST_ASSERT(res->RowsCount() == 1);
@@ -49,17 +54,20 @@ public:
 			stringx w =  res->GetString(2);
 			UNITTEST_ASSERT(s == w);
 		}
-		prstmt = dbutil->GetConn()->CreatePrepareStatement(__X("insert into stu values(? ,?)"));
+
+		prstmt = conn->Conn()->CreatePrepareStatement(__X("insert into stu values(? ,?)"));
 		for( int i=2; i<=10; i++)
 		{	
 			prstmt->SetInt(1,i);
 			prstmt->SetString(2,Converter::ToString(i));
 			prstmt->ExecuteUpdate();
 		}
-	    resu = dbutil->ExecuteQuery(__X("select * from stu"));
+	    resu = conn->ExecuteQuery(__X("select * from stu"));
 		UNITTEST_ASSERT(resu->RowsCount() == 10);
-		dbutil->CloseConn();
+
+		cm->Return(conn);
 	}
+
 	void testSimpleConn()
 	{
 		std::cout << std::endl;

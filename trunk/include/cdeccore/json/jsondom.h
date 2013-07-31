@@ -173,8 +173,8 @@ public:
 	stringx		GetChildTextValue(int index) { return GetChild(index)->TextValue(); }
 	stringx		GetChildTextValue(stringx key) { return GetChild(key)->TextValue(); }
 
-	int			GetChildIntValue(int index) { return GetChild(index)->IntValue(); }
-	int			GetChildIntValue(stringx key) { return GetChild(key)->IntValue(); }
+	INT64		GetChildIntValue(int index) { return GetChild(index)->IntValue(); }
+	INT64		GetChildIntValue(stringx key) { return GetChild(key)->IntValue(); }
 
 	double		GetChildFloatValue(int index) { return GetChild(index)->FloatValue(); }
 	double		GetChildFloatValue(stringx key) { return GetChild(key)->FloatValue(); }

@@ -28,4 +28,6 @@ public:
 	ref<PrepareStatement> CreatePrepareStatement(stringx sql);
 	void Close();
 	friend class DbUtil;
+	friend class DbConnection;
+	friend class DbConnectionManager;
 };
