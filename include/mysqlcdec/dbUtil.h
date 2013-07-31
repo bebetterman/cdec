@@ -47,7 +47,7 @@ public:
 // DbConnectionManager
 // -------------------------------------------------------------------------- //
 
-struct DbConfig
+struct DBUTILEXPORT DbConfig
 {
 	stringx	Url;
 	stringx	Username, Password;
