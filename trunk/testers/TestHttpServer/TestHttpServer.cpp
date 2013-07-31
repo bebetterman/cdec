@@ -33,24 +33,31 @@ public:
 	{
 		ASSERT(ctx->GetMethod() == HandlerContext::HTTP_GET);
 		ref<StringBuilder> sb = gc_new<StringBuilder>();
-		sb->Append(__X("URL=") + ctx->GetUrl());
-		sb->Append('\n');
+		sb->Append(__X("<html><body>\n<p>POST</p>\n"));
+		sb->Append(__X("<p>URL=") + ctx->GetUrl() + __X("</p>\n"));
 
-		const HandlerContext::StringPairMap& args = ctx->GetArgs();
-		foreach_it (HandlerContext::StringPairMap::const_iterator, it, args.begin(), args.end())
+		sb->Append(__X("<p>Headers</p>\n"));
+		OutputKeyValueMap(ctx->GetHeaders(), sb);
+
+		sb->Append(__X("<p>GET arguments</p>\n"));
+		OutputKeyValueMap(ctx->GetArgs(), sb);
+
+		sb->Append(__X("</body></html>\n"));
+		return ctx->SendResponse(MHD_HTTP_OK, sb);
+	}
+
+	static void OutputKeyValueMap(const HandlerContext::StringPairMap& map, ref<StringBuilder> sb)
+	{
+		sb->Append(__X("<ul>\n"));
+		foreach_it (HandlerContext::StringPairMap::const_iterator, it, map.begin(), map.end())
 		{
+			sb->Append(__X("<li>"));
 			sb->Append(it->first);
 			sb->Append('=');
-			if (it->second != NULL)
-			{
-				sb->Append(it->second);
-				sb->Append('\n');
-			}
-			else
-				sb->Append(__X("(null)\n"));
+			sb->Append(it->second != NULL ? it->second : __X("(null)"));
+			sb->Append(__X("</li>\n"));
 		}
-
-		return ctx->SendResponse(MHD_HTTP_OK, sb);
+		sb->Append(__X("</ul>\n"));
 	}
 };
 
@@ -69,8 +76,14 @@ public:
 		ref<StringBuilder> sb = gc_new<StringBuilder>();
 		sb->Append(__X("<html><body>\n<p>POST</p>\n"));
 		sb->Append(__X("<p>URL=") + ctx->GetUrl() + __X("</p>\n"));
-		sb->Append(__X("<ul>\n"));
-		
+
+		sb->Append(__X("<p>Headers</p>\n"));
+		MyGetHandler::OutputKeyValueMap(ctx->GetHeaders(), sb);
+
+		sb->Append(__X("<p>GET arguments</p>\n"));
+		MyGetHandler::OutputKeyValueMap(ctx->GetArgs(), sb);
+
+		sb->Append(__X("<p>POST arguments</p>\n<ul>\n"));
 		const HandlerContext::PostMap& args = ctx->PostArgs();
 		foreach_it (HandlerContext::PostMap::const_iterator, it, args.begin(), args.end())
 		{
@@ -80,9 +93,9 @@ public:
 			sb->Append(e->ToUnicode(it->second));
 			sb->Append(__X("</li>\n"));
 		}
+		sb->Append(__X("</ul>\n"));
 		
-		sb->Append(__X("</ul>\n</body></html>\n"));
-
+		sb->Append(__X("</body></html>\n"));
 		return ctx->SendResponse(MHD_HTTP_OK, sb);
 	}
 };
@@ -100,10 +113,20 @@ public:
 			return ctx->SendResponse(MHD_HTTP_OK, MESSAGE_EXPECT_POST, sizeof(MESSAGE_EXPECT_POST), true);
 
 		ref<StringBuilder> sb = gc_new<StringBuilder>();
-		sb->Append(__X("<html><body>\n<p>POST</p>\n<p>\n"));
-		sb->Append(Encoding::get_UTF8()->GetString(ctx->PostData()));
-		sb->Append(__X("</p>\n</body></html>\n"));
+		sb->Append(__X("<html><body>\n<p>POST</p>\n"));
+		sb->Append(__X("<p>URL=") + ctx->GetUrl() + __X("</p>\n"));
 
+		sb->Append(__X("<p>Headers</p>\n"));
+		MyGetHandler::OutputKeyValueMap(ctx->GetHeaders(), sb);
+
+		sb->Append(__X("<p>GET arguments</p>\n"));
+		MyGetHandler::OutputKeyValueMap(ctx->GetArgs(), sb);
+
+		sb->Append(__X("<p>POST data</p>\n<p>\n"));
+		sb->Append(Encoding::get_UTF8()->GetString(ctx->PostData()));
+		sb->Append(__X("</p>\n"));
+
+		sb->Append(__X("</body></html>\n"));
 		return ctx->SendResponse(MHD_HTTP_OK, sb);
 	}
 
