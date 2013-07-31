@@ -21,8 +21,10 @@ Connection::Connection(stringx dburl, stringx uname, stringx pwd, stringx databa
 {
 	m_driver = get_driver_instance();
 	std::string sddburl = Strx2SqlStr(dburl);
-	//std::cout << sddburl << std::endl;
-	m_impl = m_driver->connect(sddburl,Strx2SqlStr(uname),Strx2SqlStr(pwd));
+	std::string suname = Strx2SqlStr(uname);
+	std::string spwd = Strx2SqlStr(pwd);
+	
+	m_impl = m_driver->connect(sddburl, suname, spwd);
 	m_impl->setSchema(Strx2SqlStr(database));
 }
 Connection::~Connection()
@@ -90,6 +92,8 @@ ref<PrepareStatement> Connection::CreatePrepareStatement(stringx sql)
         std::cout << "# ERR: " << e.what();
         std::cout << " (MySQL error code: " << e.getErrorCode();
         std::cout << ", SQLState: " << e.getSQLState() << " )" << std::endl;
+
+		throw;	// Re-throw the exception
     }
     return gc_new<PrepareStatement>(sprstmt);
 }
