@@ -31,6 +31,9 @@ public:
 	stringx GetString(stringx columLabel) const;
 	int GetInt(UINT32 columIndex) const;
 	int GetInt(stringx columLabel) const;
+
+	UINT	GetUInt(int column);
+
 	INT64 GetInt64(stringx columLabel) const;
 	int RowsCount();
 
