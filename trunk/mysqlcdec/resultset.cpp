@@ -57,13 +57,17 @@ int ResultSet::GetInt(UINT32 columIndex) const
 	return sqlInt;
 }
 
-
 int ResultSet::GetInt(stringx columLabel) const
 {
 
 	int sqlInt = m_impl->getInt(Strx2SqlStr(columLabel));
 
 	return sqlInt;
+}
+
+UINT ResultSet::GetUInt(int column)
+{
+	return m_impl->getUInt(column);
 }
 
 INT64 ResultSet::GetInt64(stringx columLabel) const
