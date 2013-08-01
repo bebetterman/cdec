@@ -27,21 +27,21 @@ public:
 	
 	//---------db operator-----------------------------
 	bool Next();
-	stringx GetString(UINT32 columIndex) const;
-	stringx GetString(stringx columLabel) const;
-	int GetInt(UINT32 columIndex) const;
-	int GetInt(stringx columLabel) const;
-
-	UINT	GetUInt(int column);
-
-	INT64 GetInt64(stringx columLabel) const;
 	int RowsCount();
+
+	int		GetInt(int index);
+	int		GetInt(stringx key);
+
+	INT64	GetInt64(int index);
+	INT64	GetInt64(stringx key);
+
+	stringx	GetString(int index);
+	stringx	GetString(stringx key);
 
 protected:
 	//ref<Encoding>	 encode;
 	sql::ResultSet *m_impl;
 };
-
 
 //-----------------------------------------------------
 
