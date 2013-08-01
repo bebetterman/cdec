@@ -28,54 +28,39 @@ bool ResultSet::Next()
 	return m_impl->next();
 }
 
-stringx ResultSet::GetString(UINT32 columIndex) const
-{
-
-	sql::SQLString sqlStr = m_impl->getString(columIndex);
-
-	//convert sql::SQLString to stringx
-	return SqlStr2Strx(sqlStr);
-}
 int ResultSet::RowsCount() 
 {
 	return m_impl->rowsCount();
 }
 
+int ResultSet::GetInt(int index) { return m_impl->getInt(index); }
 
-stringx ResultSet::GetString(stringx columLabel) const
+int ResultSet::GetInt(stringx key)
 {
-	sql::SQLString sqlStr = m_impl->getString(Strx2SqlStr(columLabel));
+	sql::SQLString skey = Strx2SqlStr(key);
+	return m_impl->getInt(skey);
+}
+
+INT64 ResultSet::GetInt64(int index) { return m_impl->getInt64(index); }
+
+INT64 ResultSet::GetInt64(stringx key)
+{
+	sql::SQLString skey = Strx2SqlStr(key);
+	return m_impl->getInt64(skey);
+}
+
+stringx ResultSet::GetString(int index)
+{
+	sql::SQLString sqlStr = m_impl->getString(index);
 	return SqlStr2Strx(sqlStr);
 }
 
-int ResultSet::GetInt(UINT32 columIndex) const
+stringx ResultSet::GetString(stringx key)
 {
-
-	int sqlInt = m_impl->getInt(columIndex);
-
-	//convert sql::SQLString to stringx
-	return sqlInt;
+	sql::SQLString skey = Strx2SqlStr(key);
+	sql::SQLString sqlStr = m_impl->getString(skey);
+	return SqlStr2Strx(sqlStr);
 }
 
-int ResultSet::GetInt(stringx columLabel) const
-{
-
-	int sqlInt = m_impl->getInt(Strx2SqlStr(columLabel));
-
-	return sqlInt;
-}
-
-UINT ResultSet::GetUInt(int column)
-{
-	return m_impl->getUInt(column);
-}
-
-INT64 ResultSet::GetInt64(stringx columLabel) const
-{
-
-	INT64 sqlInt = m_impl->getInt64(Strx2SqlStr(columLabel));
-
-	return sqlInt;
-}
 //---------------------------------------------
 //CDEC_NS_BEGIN
