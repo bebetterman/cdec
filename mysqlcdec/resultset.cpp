@@ -33,6 +33,14 @@ int ResultSet::RowsCount()
 	return m_impl->rowsCount();
 }
 
+bool ResultSet::IsNull(int index) { return m_impl->isNull(index); }
+
+bool ResultSet::IsNull(stringx key)
+{
+	sql::SQLString skey = Strx2SqlStr(key);
+	return m_impl->isNull(skey);
+}
+
 int ResultSet::GetInt(int index) { return m_impl->getInt(index); }
 
 int ResultSet::GetInt(stringx key)

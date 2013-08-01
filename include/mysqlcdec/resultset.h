@@ -29,6 +29,9 @@ public:
 	bool Next();
 	int RowsCount();
 
+	bool	IsNull(int index);
+	bool	IsNull(stringx key);
+
 	int		GetInt(int index);
 	int		GetInt(stringx key);
 
