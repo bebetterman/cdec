@@ -63,7 +63,7 @@ bool File::Delete(stringx path)
 
 void File::Move(stringx pathOld, stringx pathNew)
 {
-	if (::MoveFile(pathOld.c_str(), pathNew.c_str()))
+	if (!::MoveFile(pathOld.c_str(), pathNew.c_str()))
 		cdec_throw_win32_lasterr(IOException);
 }
 
