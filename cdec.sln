@@ -19,6 +19,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TestCurlCdec", "testers\Tes
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "lzmacdec", "lzmacdec\lzmacdec.vcxproj", "{EFDF9AE6-05E1-4F8E-B502-D54EEFD85F3F}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "zlibcdec", "zlibcdec\zlibcdec.vcxproj", "{8C232107-4699-4FF9-B2DD-9F449AEA260A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Mixed Platforms = Debug|Mixed Platforms
@@ -125,6 +127,16 @@ Global
 		{EFDF9AE6-05E1-4F8E-B502-D54EEFD85F3F}.Release|Win32.ActiveCfg = Release|Win32
 		{EFDF9AE6-05E1-4F8E-B502-D54EEFD85F3F}.Release|Win32.Build.0 = Release|Win32
 		{EFDF9AE6-05E1-4F8E-B502-D54EEFD85F3F}.Release|x64.ActiveCfg = Release|Win32
+		{8C232107-4699-4FF9-B2DD-9F449AEA260A}.Debug|Mixed Platforms.ActiveCfg = Debug|Win32
+		{8C232107-4699-4FF9-B2DD-9F449AEA260A}.Debug|Mixed Platforms.Build.0 = Debug|Win32
+		{8C232107-4699-4FF9-B2DD-9F449AEA260A}.Debug|Win32.ActiveCfg = Debug|Win32
+		{8C232107-4699-4FF9-B2DD-9F449AEA260A}.Debug|Win32.Build.0 = Debug|Win32
+		{8C232107-4699-4FF9-B2DD-9F449AEA260A}.Debug|x64.ActiveCfg = Debug|Win32
+		{8C232107-4699-4FF9-B2DD-9F449AEA260A}.Release|Mixed Platforms.ActiveCfg = Release|Win32
+		{8C232107-4699-4FF9-B2DD-9F449AEA260A}.Release|Mixed Platforms.Build.0 = Release|Win32
+		{8C232107-4699-4FF9-B2DD-9F449AEA260A}.Release|Win32.ActiveCfg = Release|Win32
+		{8C232107-4699-4FF9-B2DD-9F449AEA260A}.Release|Win32.Build.0 = Release|Win32
+		{8C232107-4699-4FF9-B2DD-9F449AEA260A}.Release|x64.ActiveCfg = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
