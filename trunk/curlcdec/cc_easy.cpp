@@ -19,7 +19,8 @@ public:
 	void	OnCurlReceive(const void* buffer, int size);
 
 	int		GetDataLength() { return m_buffer.size(); }
-	const void*		GetData() { return &m_buffer[0]; }
+	const void*	GetData() { return m_buffer.size() != 0 ? &m_buffer[0] : NULL; }
+
 };
 
 void CurlByteBufferContentWriter::OnCurlReceive(const void* buffer, int size)
