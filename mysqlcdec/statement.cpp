@@ -1,57 +1,31 @@
 #include "stdafx.h"
 
-
-
-//CDEC_NS_BEGIN
-
-//-------------------------------------------------
-
-Statement::Statement()
-{
-	m_impl = NULL;
-}
-
-Statement::Statement(sql::Statement* stmt)
-	:m_impl(stmt)
-{
-	
-}
-
-Statement::~Statement()
-{
-	if (m_impl != NULL)
-	{
-		m_impl->close();
-		m_impl = NULL;
-	}
-}
+CDEC_NS_BEGIN
+// -------------------------------------------------------------------------- //
 
 bool Statement::Execute(stringx sql)
 {
-	//convert stringx to SQLString
-	sql::SQLString sqlStr = Strx2SqlStr(sql); 
-	return m_impl->execute(sqlStr);
+	sql::SQLString sql_s = Strx2SqlStr(sql); 
+	return m_impl->execute(sql_s);
 }
 
 int Statement::ExecuteUpdate(stringx sql)
 {
-	//convert stringx to SQLString
-	sql::SQLString sqlStr = Strx2SqlStr(sql); 
-	return m_impl->executeUpdate(sqlStr);
+	sql::SQLString sql_s = Strx2SqlStr(sql);
+	return m_impl->executeUpdate(sql_s);
 }
-
-
 
 ref<ResultSet> Statement::ExecuteQuery(stringx sql)
 {
-	//convert stringx to SQLString
-	sql::SQLString sqlStr = Strx2SqlStr(sql);
-	sql::ResultSet *res = m_impl->executeQuery(sqlStr);
-	ref<ResultSet> gc_res = gc_new<ResultSet>(res);
-	
-	return gc_res;
+	sql::SQLString sql_s = Strx2SqlStr(sql);
+	sql::ResultSet *rsimpl = m_impl->executeQuery(sql_s);
+	return gc_new<ResultSet>(rsimpl);
 }
 
-//-------------------------------------------------
+void Statement::Close()
+{
+	DESTORY_MYSQL_OBJECT(m_impl, Statement);
+}
 
-//CDEC_NS_END
+// -------------------------------------------------------------------------- //
+CDEC_NS_END

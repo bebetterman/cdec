@@ -1,73 +1,58 @@
 #include "stdafx.h"
 
+CDEC_NS_BEGIN
+
 // -------------------------------------------------------------------------- //
-// prepareStatement
+// PrepareStatement
 // -------------------------------------------------------------------------- //
-void PrepareStatement::Close()
+
+void PrepareStatement::SetString(int index, stringx value)
 {
-    try
-    {
-        if(m_impl != NULL)
-            m_impl->close();
-    }
-    catch (sql::SQLException &e)
-    {
-        std::cout << "# ERR: SQLException in " << __FILE__;
-        std::cout << "  on line " << __LINE__ << std::endl;
-        std::cout << "# ERR: " << e.what();
-        std::cout << " (MySQL error code: " << e.getErrorCode();
-        std::cout << ", SQLState: " << e.getSQLState() << " )" << std::endl;
-    }
-}
-int PrepareStatement::ExecuteUpdate()
-{
-    int rowNum = 0;
-    try
-    {
-        rowNum = m_impl->executeUpdate();
-    }
-    catch (sql::SQLException &e)
-    {
-        std::cout << "# ERR: SQLException in " << __FILE__;
-        std::cout << "  on line " << __LINE__ << std::endl;
-        std::cout << "# ERR: " << e.what();
-        std::cout << " (MySQL error code: " << e.getErrorCode();
-        std::cout << ", SQLState: " << e.getSQLState() << " )" << std::endl;
-    }
-    return rowNum;
-}
-ref<ResultSet> PrepareStatement::ExecuteQuery()
-{
-    sql::ResultSet   *res = NULL;
-    try
-    {
-        res = m_impl->executeQuery();
-    }
-    catch (sql::SQLException &e)
-    {
-        std::cout << "# ERR: SQLException in " << __FILE__;
-        std::cout << "  on line " << __LINE__ << std::endl;
-        std::cout << "# ERR: " << e.what();
-        std::cout << " (MySQL error code: " << e.getErrorCode();
-        std::cout << ", SQLState: " << e.getSQLState() << " )" << std::endl;
-    }
-    return gc_new<ResultSet>(res);
+	sql::SQLString value_s = Strx2SqlStr(value);
+	m_impl->setString(index, value_s);
 }
 
-void PrepareStatement::SetString(UINT index, stringx value)
-{
-	ref<Encoding>	 encode = Encoding::get_UTF8();
-	std::string stdSql = encode->FromUnicode(value);
-	m_impl->setString(index,stdSql);
-}
-
-void PrepareStatement::SetInt(UINT index ,int value)
+void PrepareStatement::SetInt(int index ,int value)
 {
 	m_impl->setInt(index,value);
 	
 }
-void PrepareStatement::SetInt64(UINT index ,INT64 value)
+
+void PrepareStatement::SetInt64(int index ,INT64 value)
 {
 	m_impl->setInt64(index,value);
-
 }
+
+int PrepareStatement::ExecuteUpdate()
+{
+    try
+    {
+        return m_impl->executeUpdate();
+    }
+    catch (sql::SQLException& e)
+    {
+		cdec_throw(MysqlException(e.getErrorCode(), e.getSQLState(), e.what()));
+    }
+}
+
+ref<ResultSet> PrepareStatement::ExecuteQuery()
+{
+	sql::ResultSet* rs = NULL;
+    try
+    {
+        rs = m_impl->executeQuery();
+    }
+    catch (sql::SQLException& e)
+    {
+		cdec_throw(MysqlException(e.getErrorCode(), e.getSQLState(), e.what()));
+    }
+    return gc_new<ResultSet>(rs);
+}
+
+void PrepareStatement::Close()
+{
+	DESTORY_MYSQL_OBJECT(m_impl, PrepareStatement);
+}
+
+// -------------------------------------------------------------------------- //
+CDEC_NS_END
