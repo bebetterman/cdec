@@ -35,6 +35,9 @@ public:
 		UNITTEST_ASSERT(Converter::ToInt32(__X("1001011000111110"), 2) == 0x963E);
 		UNITTEST_ASSERT(Converter::ToInt32(__X("330face"), 16) == 0x330FACE);
 
+		UNITTEST_ASSERT(Converter::ToInt32(__X("+1")) == 1);
+		UNITTEST_ASSERT(Converter::ToInt32(__X("-1")) == -1);
+
 		UNITTEST_ASSERT(Converter::ToUInt32(__X("4294967295")) == 0xFFFFFFFF);
 	}
 
@@ -55,6 +58,8 @@ public:
 		UNITTEST_ASSERT(Converter::ToString((int)0) == __X("0"));
 		UNITTEST_ASSERT(Converter::ToString((int)9) == __X("9"));
 		UNITTEST_ASSERT(Converter::ToString((int)681) == __X("681"));
+
+		UNITTEST_ASSERT(Converter::ToString((int)-1) == __X("-1"));
 
 		UNITTEST_ASSERT(Converter::ToString((UINT)0) == __X("0"));
 		UNITTEST_ASSERT(Converter::ToString((UINT)9) == __X("9"));
