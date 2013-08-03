@@ -34,7 +34,8 @@ public:
 		stringx table = __X("testXXX");
 
 		//connect test database;
-		ref<Connection> conn = gc_new<Connection>(url, name, pwd);
+		ref<Connection> conn = gc_new<Connection>();
+		conn->Connect(url, name, pwd);
 
 		/*create a test table demonstrating the use of cdec::Statement.excute()*/
 		ref<Statement> stmt = conn->CreateStatement();

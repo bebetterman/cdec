@@ -24,11 +24,8 @@ public:
 	void testDbUtil()
 	{
 		stringx confPath = TestEnv::get_sample_path(__X("dbconfig.xml"));
-		DbConfig dbconfig;
-		dbconfig.LoadConfigXml(confPath);
-
-		ref<DbConnectionManager> cm = gc_new<DbConnectionManager>(dbconfig);
-		ref<DbConnection> conn = cm->Take();
+		ref<ConnectionManager> cm = gc_new<ConnectionManager>(confPath);
+		ref<Connection> conn = cm->Take();
 		
 		conn->Execute(__X("drop table if exists stu"));
 		conn->Execute(__X("create table stu(idd int(4),name varchar(20),primary key(idd))"));
@@ -44,7 +41,7 @@ public:
 			UNITTEST_ASSERT(s == w);
 		}
 
-		ref<PrepareStatement> prstmt  = conn->Conn()->CreatePrepareStatement(__X("select * from stu where idd=?"));
+		ref<PrepareStatement> prstmt  = conn->CreatePrepareStatement(__X("select * from stu where idd=?"));
 		prstmt->SetInt(1,1);
 		ref<ResultSet> res = prstmt->ExecuteQuery();
 		UNITTEST_ASSERT(res->RowsCount() == 1);
@@ -55,7 +52,7 @@ public:
 			UNITTEST_ASSERT(s == w);
 		}
 
-		prstmt = conn->Conn()->CreatePrepareStatement(__X("insert into stu values(? ,?)"));
+		prstmt = conn->CreatePrepareStatement(__X("insert into stu values(? ,?)"));
 		for( int i=2; i<=10; i++)
 		{	
 			prstmt->SetInt(1,i);

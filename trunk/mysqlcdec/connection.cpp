@@ -1,5 +1,6 @@
 #include "stdafx.h"
-using namespace  cdec;
+
+CDEC_NS_BEGIN
 
 // -------------------------------------------------------------------------- //
 // Connection
@@ -7,93 +8,101 @@ using namespace  cdec;
 
 Connection::Connection()
 {
+	m_driver = get_driver_instance();
 	m_impl = NULL;
 }
-Connection::Connection(stringx dburl, stringx uname, stringx pwd)
+
+void Connection::Connect(stringx url, stringx user, stringx pass)
 {
-	m_driver = get_driver_instance();
-	std::string sddburl = Strx2SqlStr(dburl);
-	//std::cout << sddburl << std::endl;
-	m_impl = m_driver->connect(sddburl,Strx2SqlStr(uname),Strx2SqlStr(pwd));
+	sql::SQLString url_s = Strx2SqlStr(url);
+	sql::SQLString user_s = Strx2SqlStr(user);
+	sql::SQLString pass_s = Strx2SqlStr(pass);
+
+	Close();
+	m_impl = m_driver->connect(url_s, user_s, pass_s);
 }
 
-Connection::Connection(stringx dburl, stringx uname, stringx pwd, stringx database)
+void Connection::SetSchema(stringx name)
 {
-	m_driver = get_driver_instance();
-	std::string sddburl = Strx2SqlStr(dburl);
-	std::string suname = Strx2SqlStr(uname);
-	std::string spwd = Strx2SqlStr(pwd);
-	
-	m_impl = m_driver->connect(sddburl, suname, spwd);
-	m_impl->setSchema(Strx2SqlStr(database));
-}
-Connection::~Connection()
-{
-	if (m_impl != NULL && !m_impl->isClosed())
-	{
-		m_impl->close();
-		delete m_impl;
-		m_impl = NULL;
-	}
-}
-void Connection::Close()
-{
-    try
-    {
-		if (m_impl != NULL && !m_impl->isClosed())
-		{
-			m_impl->close();
-			delete m_impl;
-			m_impl = NULL;
-		}
-    }
-    catch (sql::SQLException &e)
-    {
-
-		std::cout << "# ERR: SQLException in " << __FILE__;
-		std::cout << "  on line " << __LINE__ << std::endl;
-		std::cout << "# ERR: " << e.what();
-		std::cout << " (MySQL error code: " << e.getErrorCode();
-		std::cout << ", SQLState: " << e.getSQLState() << " )" << std::endl;
-	}
+	ASSERT(m_impl != NULL);
+	sql::SQLString name_s = Strx2SqlStr(name);
+	m_impl->setSchema(name_s);
 }
 
 ref<Statement> Connection::CreateStatement()
 {
-    sql::Statement *stmt = NULL;
     try
     {
-        stmt = m_impl->createStatement();
+		sql::Statement* stmt = m_impl->createStatement();
+		return gc_new<Statement>(stmt);
     }
-    catch (sql::SQLException &e)
+    catch (sql::SQLException& e)
     {
-        std::cout << "# ERR: SQLException in " << __FILE__;
-        std::cout << "  on line " << __LINE__ << std::endl;
-        std::cout << "# ERR: " << e.what();
-        std::cout << " (MySQL error code: " << e.getErrorCode();
-        std::cout << ", SQLState: " << e.getSQLState() << " )" << std::endl;
+		cdec_throw(MysqlException(e.getErrorCode(), e.getSQLState(), e.what()));
     }
-    return  gc_new<Statement>(stmt);
 }
+
 ref<PrepareStatement> Connection::CreatePrepareStatement(stringx sql)
 {
-    ref<Encoding>	 encode = Encoding::get_UTF8();
-    std::string stdSql = encode->FromUnicode(sql);
-    sql::PreparedStatement *sprstmt = NULL;
+	sql::SQLString sql_s = Strx2SqlStr(sql);
     try
     {
-        sprstmt = m_impl->prepareStatement(stdSql);
+		sql::PreparedStatement* sprstmt = m_impl->prepareStatement(sql_s);
+		return gc_new<PrepareStatement>(sprstmt);
+    }
+    catch (sql::SQLException& e)
+    {
+		cdec_throw(MysqlException(e.getErrorCode(), e.getSQLState(), e.what()));
+    }
+}
 
+// -------------------------------------------------------------------------- //
+// Easy operations
+// -------------------------------------------------------------------------- //
+
+bool Connection::Execute(stringx sql)
+{
+	try
+	{
+		ref<Statement> stmt = CreateStatement();
+		return stmt->Execute(sql);
+	}
+    catch (sql::SQLException& e)
+    {
+		cdec_throw(MysqlException(e.getErrorCode(), e.getSQLState(), e.what()));
+    }
+}
+
+int Connection::ExecuteUpdate(stringx sql)
+{
+    try
+    {
+		ref<Statement> stmt = CreateStatement();
+		return stmt->ExecuteUpdate(sql);
     }
     catch (sql::SQLException &e)
     {
-        std::cout << "# ERR: SQLException in " << __FILE__;
-        std::cout << "  on line " << __LINE__ << std::endl;
-        std::cout << "# ERR: " << e.what();
-        std::cout << " (MySQL error code: " << e.getErrorCode();
-        std::cout << ", SQLState: " << e.getSQLState() << " )" << std::endl;
-
-		throw;	// Re-throw the exception
+		cdec_throw(MysqlException(e.getErrorCode(), e.getSQLState(), e.what()));
     }
-    return gc_new<PrepareStatement>(sprstmt);
 }
+
+ref<ResultSet> Connection::ExecuteQuery(stringx sql)
+{
+    try
+    {
+		ref<Statement> stmt = CreateStatement();
+		return stmt->ExecuteQuery(sql);
+    }
+    catch (sql::SQLException &e)
+    {
+		cdec_throw(MysqlException(e.getErrorCode(), e.getSQLState(), e.what()));
+	}
+}
+
+void Connection::Close()
+{
+	DESTORY_MYSQL_OBJECT(m_impl, Connection);
+}
+
+// -------------------------------------------------------------------------- //
+CDEC_NS_END

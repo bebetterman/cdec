@@ -1,7 +1,5 @@
 #pragma once
 
-CDEC_NS_BEGIN
-
 // -------------------------------------------------------------------------- //
 // mysqlconn headers
 // -------------------------------------------------------------------------- //
@@ -27,9 +25,40 @@ CDEC_NS_BEGIN
 // Convertion between sql::SQLString and stringx
 // -------------------------------------------------------------------------- //
 
-stringx SqlStr2Strx(sql::SQLString sqlStr, ref<Encoding> encode = Encoding::get_UTF8());
+extern ref<Encoding> g_Utf8;
 
-sql::SQLString Strx2SqlStr(stringx strx, ref<Encoding> encode = Encoding::get_UTF8());
+inline stringx SqlStr2Strx(sql::SQLString sqlStr)
+{
+	return g_Utf8->ToUnicode(sqlStr.asStdString());
+}
+
+inline sql::SQLString Strx2SqlStr(stringx strx)
+{
+    std::string stdSql = g_Utf8->FromUnicode(strx);
+    return sql::SQLString(stdSql);
+}
+
+template<class T>
+inline void DestroyMysqlObject(T*& ptr, PCSTR message)
+{
+	if (ptr != NULL)
+	{
+		try
+		{
+			ptr->close();
+			delete ptr;
+		}
+		catch (sql::SQLException& e)
+		{
+			// Ignore the exception
+			puts(message);
+			puts(e.what());
+		}
+		ptr = NULL;
+	}
+}
+
+#define DESTORY_MYSQL_OBJECT(ptr, type)			\
+	DestroyMysqlObject(ptr, "Exception raised when destroying " #type " object");
 
 // -------------------------------------------------------------------------- //
-CDEC_NS_END

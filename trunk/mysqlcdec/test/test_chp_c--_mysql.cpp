@@ -22,14 +22,13 @@ class TestMysqlCdec : public UnitTestSuite
 	UNITTEST_SUITE_END()
 
 public:
-	ref<DbConnectionManager> m_cm;
-	ref<DbConnection> m_conn;
+	ref<ConnectionManager> m_cm;
+	ref<Connection> m_conn;
 
 	void setUp()
 	{
-		DbConfig config;
-		config.LoadConfigXml(TestEnv::get_sample_path(__X("dbconfig_ly.xml")));
-		m_cm = gc_new<DbConnectionManager>(config);
+		stringx pathConfig = TestEnv::get_sample_path(__X("dbconfig_ly.xml"));
+		m_cm = gc_new<ConnectionManager>(pathConfig);
 		m_conn = m_cm->Take();
 	}
 
@@ -46,7 +45,7 @@ public:
 
 	void testInsert()
 	{
-		ref<PrepareStatement> prestmt = m_conn->Conn()->CreatePrepareStatement(__X("insert into class values(?,?)"));
+		ref<PrepareStatement> prestmt = m_conn->CreatePrepareStatement(__X("insert into class values(?,?)"));
 		for(int i=0;i<4;i++){
 			prestmt->SetInt(1,i);
 			prestmt->SetString(2,__X("class"));
@@ -78,7 +77,7 @@ public:
 
 	void testPrepare()
 	{
-		ref<PrepareStatement> prestmt = m_conn->Conn()->CreatePrepareStatement(__X("insert into class values(?,?)"));
+		ref<PrepareStatement> prestmt = m_conn->CreatePrepareStatement(__X("insert into class values(?,?)"));
 		for(int i=4;i<10;i++){
 			prestmt->SetInt(1,i);
 			 prestmt->SetString(2,__X("prepare"));
@@ -93,7 +92,7 @@ public:
 		m_cm->Return(m_conn);
 		m_conn = NULL;
 
-		m_cm->Dispose();
+		m_cm->Close();
 		m_cm = NULL;
 	}
 };

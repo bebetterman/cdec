@@ -1,32 +1,29 @@
 #pragma once
-#include "stdafx.h"
-using namespace  cdec;
 
-
+CDEC_NS_BEGIN
 // -------------------------------------------------------------------------- //
-// Used in this project only 
-// -------------------------------------------------------------------------- //
-#ifdef PREPARESTATEMENT_EXPORTS
-#define PREPARESTATEMENTEXPORT DECLSPEC_EXPORT
-#else
-#define PREPARESTATEMENTEXPORT DECLSPEC_IMPORT
-#endif
 
-#define PREPARESTATEMENT_API(type)	EXTERN_C PREPARESTATEMENTEXPORT type __stdcall
-
-class  PREPARESTATEMENTEXPORT PrepareStatement: public Object
+class MYSQLCDECEXPORT PrepareStatement: public Object
 {
 	DECLARE_REF_CLASS(PrepareStatement)
-private:
-	 sql::PreparedStatement *  m_impl;
+
+protected:
+	 sql::PreparedStatement* m_impl;
+
 public:
-	PrepareStatement(sql::PreparedStatement * pstmt):m_impl(pstmt){};
+	PrepareStatement(sql::PreparedStatement* pstmt): m_impl(pstmt) {}
 	PrepareStatement(stringx sql);
-	void Close();
-	int ExecuteUpdate();
-	ref<ResultSet> ExecuteQuery();
-	void SetString(UINT index, stringx value);
-	void SetInt(UINT index, int value);
-	void SetInt64(UINT index, INT64 value);
+
+	void	SetString(int index, stringx value);
+	void	SetInt(int index, int value);
+	void	SetInt64(int index, INT64 value);
 	
+	int		ExecuteUpdate();
+	ref<ResultSet> ExecuteQuery();
+
+	void	Close();
+	~PrepareStatement() { Close(); }
 };
+
+// -------------------------------------------------------------------------- //
+CDEC_NS_END

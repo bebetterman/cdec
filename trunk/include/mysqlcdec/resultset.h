@@ -1,33 +1,20 @@
 #pragma once
 
-#include "stdafx.h"
-
-//CDEC_NS_BEGIN
-
+CDEC_NS_BEGIN
 // -------------------------------------------------------------------------- //
-// Used in this project only 
-// -------------------------------------------------------------------------- //
-#ifdef RESULTSET_EXPORTS
-#define RESULTSETEXPORT DECLSPEC_EXPORT
-#else
-#define RESULTSETEXPORT DECLSPEC_IMPORT
-#endif
 
-#define RESULTSET_API(type)	EXTERN_C RESULTSETEXPORT type __stdcall
-
-//-----------------------------------------------------
-class  RESULTSETEXPORT ResultSet : public Object
+class MYSQLCDECEXPORT ResultSet : public Object
 {
 	DECLARE_REF_CLASS(ResultSet)
+
+protected:
+	sql::ResultSet *m_impl;
+
 public:
-	//---------constructor and deconstructor-----------
-	ResultSet();
-	ResultSet(sql::ResultSet *res);
-	~ResultSet();
+	ResultSet(sql::ResultSet* impl): m_impl(impl) { }
 	
-	//---------db operator-----------------------------
-	bool Next();
-	int RowsCount();
+	bool	Next();
+	int		RowsCount();
 
 	bool	IsNull(int index);
 	bool	IsNull(stringx key);
@@ -41,12 +28,9 @@ public:
 	stringx	GetString(int index);
 	stringx	GetString(stringx key);
 
-protected:
-	//ref<Encoding>	 encode;
-	sql::ResultSet *m_impl;
+	void	Close();
+	~ResultSet() { Close(); }
 };
 
-//-----------------------------------------------------
-
-
-//CDEC_NS_END
+// -------------------------------------------------------------------------- //
+CDEC_NS_END

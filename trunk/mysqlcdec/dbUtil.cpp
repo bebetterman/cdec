@@ -1,100 +1,15 @@
 #include "stdafx.h"
-using namespace  cdec;
 
-
-/*convert sql::SQLString to cdec::stringx*/
-stringx SqlStr2Strx(sql::SQLString sqlStr, ref<Encoding> encode)
-{
-	return encode->ToUnicode(sqlStr.asStdString());
-}
-
-/*convert cdec::stringx to sql::SQLString*/
-sql::SQLString Strx2SqlStr(stringx strx, ref<Encoding> encode)
-{
-    std::string stdSql = encode->FromUnicode(strx);
-    return sql::SQLString(stdSql);
-}
-
-// -------------------------------------------------------------------------- //
-// DbConnection
-// -------------------------------------------------------------------------- //
-
-bool DbConnection::Execute(stringx sql)
-{
-    bool retCode = false;
-    try
-    {
-        sql::Statement *stmt = m_conn->m_impl->createStatement();
-        retCode = stmt->execute(Strx2SqlStr(sql));
-        delete stmt;
-    }
-    catch (sql::SQLException &e)
-    {
-        std::cout << "# ERR: SQLException in " << __FILE__;
-        std::cout << "  on line " << __LINE__ << std::endl;
-        std::cout << "# ERR: " << e.what();
-        std::cout << " (MySQL error code: " << e.getErrorCode();
-        std::cout << ", SQLState: " << e.getSQLState() << " )" << std::endl;
-    }
-    return retCode;
-}
-
-int DbConnection::ExecuteUpdate(stringx sql)
-{
-    int rowNum = 0;
-    try
-    {
-        sql::Statement *stmt = m_conn->m_impl->createStatement();
-        rowNum = stmt->executeUpdate(Strx2SqlStr(sql));
-        stmt->close();
-        delete stmt;
-    }
-    catch (sql::SQLException &e)
-    {
-        std::cout << "# ERR: SQLException in " << __FILE__;
-        std::cout << "  on line " << __LINE__ << std::endl;
-        std::cout << "# ERR: " << e.what();
-        std::cout << " (MySQL error code: " << e.getErrorCode();
-        std::cout << ", SQLState: " << e.getSQLState() << " )" << std::endl;
-    }
-    return rowNum;
-}
-
-ref<ResultSet> DbConnection::ExecuteQuery(stringx sql)
-{
-    sql::ResultSet *res;
-    try
-    {
-        sql::Statement *stmt = m_conn->m_impl->createStatement();
-        res = stmt->executeQuery(Strx2SqlStr(sql));
-        stmt->close();
-        delete stmt;
-    }
-    catch (sql::SQLException &e)
-    {
-        std::cout << "# ERR: SQLException in " << __FILE__;
-        std::cout << "  on line " << __LINE__ << std::endl;
-        std::cout << "# ERR: " << e.what();
-        std::cout << " (MySQL error code: " << e.getErrorCode();
-        std::cout << ", SQLState: " << e.getSQLState() << " )" << std::endl;
-    }
-    return gc_new<ResultSet>(res);
-}
-
-void DbConnection::Dispose()
-{
-	m_conn->Close();
-	m_conn = NULL;
-}
+CDEC_NS_BEGIN
 
 // -------------------------------------------------------------------------- //
 // DbConnectionManager
 // -------------------------------------------------------------------------- //
 
-void DbConfig::LoadConfigXml(stringx pathConfig)
+void ConnectionManager::LoadXmlConfig(stringx path, ConnectionManager::Config& config)
 {
 	ref<XmlDocument> doc = gc_new<XmlDocument>();
-	doc->Load(pathConfig);
+	doc->Load(path);
 
 	ref<XmlElement> eDs = doc->get_DocumentElement();
 	if (eDs->get_NodeName() != __X("dbconfig"))
@@ -104,125 +19,19 @@ void DbConfig::LoadConfigXml(stringx pathConfig)
 	if (eConfig == NULL)
 		cdec_throw(Exception(EC_InvalidPtr));
 
-	Url = eConfig->get_Attribute(__X("dburl"))->get_Value();
-	Username = eConfig->get_Attribute(__X("uname"))->get_Value();
-	Password = eConfig->get_Attribute(__X("pwd"))->get_Value();
-	Database = eConfig->get_Attribute(__X("database"))->get_Value();
+	config.Url = eConfig->get_Attribute(__X("dburl"))->get_Value();
+	config.Username = eConfig->get_Attribute(__X("uname"))->get_Value();
+	config.Password = eConfig->get_Attribute(__X("pwd"))->get_Value();
+	config.Database = eConfig->get_Attribute(__X("database"))->get_Value();
 }
 
-DbConnectionManager::DbConnectionManager(DbConfig dbconfig): m_dbconfig(dbconfig)
+ref<Connection> ConnectionManager::Take()
 {
-}
-
-ref<DbConnection> DbConnectionManager::Take()
-{
-	ref<Connection> conn = gc_new<Connection>(m_dbconfig.Url, m_dbconfig.Username, m_dbconfig.Password, m_dbconfig.Database);
-	return gc_new<DbConnection>(conn);
+	ref<Connection> conn = gc_new<Connection>();
+	conn->Connect(m_config.Url, m_config.Username, m_config.Password);
+	conn->SetSchema(m_config.Database);
+	return conn;
 }
 
 // -------------------------------------------------------------------------- //
-// DbUtil
-// -------------------------------------------------------------------------- //
-
-#if 0
-
-DbUtil::DbUtil(stringx pathConfig)
-{
-	ref<XmlDocument> doc = gc_new<XmlDocument>();
-	doc->Load(pathConfig);
-
-	ref<XmlElement> eDs = doc->get_DocumentElement();
-	if (eDs->get_NodeName() != __X("dbconfig"))
-		cdec_throw(Exception(EC_InvalidValue));
-
-	ref<XmlElement> eConfig = eDs->SelectSingleNode(__X("config"));
-	if (eConfig == NULL)
-		cdec_throw(Exception(EC_InvalidPtr));
-
-	m_desc  = eDs->get_Attribute(__X("desc"))->get_Value();
-	m_dburl = eConfig->get_Attribute(__X("dburl"))->get_Value();
-	m_uname = eConfig->get_Attribute(__X("uname"))->get_Value();
-	m_pwd = eConfig->get_Attribute(__X("pwd"))->get_Value();
-	m_database = eConfig->get_Attribute(__X("database"))->get_Value();
-
-	ASSERT(m_dburl != NULL);
-	ASSERT(m_uname != NULL);
-	ASSERT(m_pwd != NULL);
-	ASSERT(m_database != NULL);
-
-}
-
-ref<Connection> DbUtil::Conn()
-{
-	m_conn = gc_new<Connection>(m_dburl, m_uname, m_pwd, m_database);
-	return m_conn;
-}
-
-bool DbUtil::Execute(stringx sql)
-{
-    bool retCode = false;
-    try
-    {
-        sql::Statement *stmt = m_conn->m_impl->createStatement();
-        retCode = stmt->execute(Strx2SqlStr(sql));
-        delete stmt;
-    }
-    catch (sql::SQLException &e)
-    {
-        std::cout << "# ERR: SQLException in " << __FILE__;
-        std::cout << "  on line " << __LINE__ << std::endl;
-        std::cout << "# ERR: " << e.what();
-        std::cout << " (MySQL error code: " << e.getErrorCode();
-        std::cout << ", SQLState: " << e.getSQLState() << " )" << std::endl;
-    }
-    return retCode;
-}
-
-int DbUtil::ExecuteUpdate(stringx sql)
-{
-    int rowNum = 0;
-    try
-    {
-        sql::Statement *stmt = m_conn->m_impl->createStatement();
-        rowNum = stmt->executeUpdate(Strx2SqlStr(sql));
-        stmt->close();
-        delete stmt;
-    }
-    catch (sql::SQLException &e)
-    {
-        std::cout << "# ERR: SQLException in " << __FILE__;
-        std::cout << "  on line " << __LINE__ << std::endl;
-        std::cout << "# ERR: " << e.what();
-        std::cout << " (MySQL error code: " << e.getErrorCode();
-        std::cout << ", SQLState: " << e.getSQLState() << " )" << std::endl;
-    }
-    return rowNum;
-}
-
-ref<ResultSet> DbUtil::ExecuteQuery(stringx sql)
-{
-    sql::ResultSet *res;
-    try
-    {
-        sql::Statement *stmt = m_conn->m_impl->createStatement();
-        res = stmt->executeQuery(Strx2SqlStr(sql));
-        stmt->close();
-        delete stmt;
-    }
-    catch (sql::SQLException &e)
-    {
-        std::cout << "# ERR: SQLException in " << __FILE__;
-        std::cout << "  on line " << __LINE__ << std::endl;
-        std::cout << "# ERR: " << e.what();
-        std::cout << " (MySQL error code: " << e.getErrorCode();
-        std::cout << ", SQLState: " << e.getSQLState() << " )" << std::endl;
-    }
-    return gc_new<ResultSet>(res);
-}
-
-void DbUtil::CloseConn()
-{
-	m_conn->Close();
-}
-
-#endif
+CDEC_NS_END
