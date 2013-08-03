@@ -13,6 +13,7 @@
 bool cdec_PrintError = true;
 
 // -------------------------------------------------------------------------- //
+CDEC_NS_BEGIN
 
 // This function returns the length of actual output (uncompressed) data, unless one of the
 //   exceptions below raised.
@@ -57,6 +58,7 @@ ref<ByteArray> ZlibCdecUtility::Uncompress(ref<ByteArray> data, int offset, int 
 	return r;
 }
 
+CDEC_NS_END
 // -------------------------------------------------------------------------- //
 
 #ifdef X_OS_WINDOWS
