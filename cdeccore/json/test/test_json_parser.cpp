@@ -15,6 +15,7 @@ class TestJsonParser : public UnitTestSuite
 	UNITTEST_SUITE(TestJsonParser)
 		UNITTEST_METHOD(TestStringValue)
 		UNITTEST_METHOD(TestIntValue)
+		UNITTEST_METHOD(TestFloatValue)
 		UNITTEST_METHOD(TestBooleanValue)
 		UNITTEST_METHOD(TestNoneValue)
 		UNITTEST_METHOD(TestSimpleDictionary)
@@ -51,6 +52,25 @@ public:
 		s = __X(" 123 ");
 		root = JsonParser::ParseText(s);
 		UNITTEST_ASSERT(root->GetType() == JSN_Integer && root->IntValue() == 123);
+
+		s = __X("-1");
+		root = JsonParser::ParseText(s);
+		UNITTEST_ASSERT(root->GetType() == JSN_Integer && root->IntValue() == -1);
+	}
+
+	void TestFloatValue()
+	{
+		stringx s = __X("3.14159");
+		ref<JsonNode> root = JsonParser::ParseText(s);
+		UNITTEST_ASSERT(root->GetType() == JSN_Float && Math::Equal(root->FloatValue(), 3.14159));
+
+		s = __X("0.0");
+		root = JsonParser::ParseText(s);
+		UNITTEST_ASSERT(root->GetType() == JSN_Float && Math::Equal(root->FloatValue(), 0.0));
+
+		s = __X("-0.003");
+		root = JsonParser::ParseText(s);
+		UNITTEST_ASSERT(root->GetType() == JSN_Float && Math::Equal(root->FloatValue(), -0.003));
 	}
 
 	void TestBooleanValue()
