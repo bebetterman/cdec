@@ -4,8 +4,8 @@
 #error cdeccore Expected
 #endif
 
-#ifndef __CDEC_LZMA__
-#define __CDEC_LZMA__
+#ifndef __CDEC_ZLIB__
+#define __CDEC_ZLIB__
 #endif
 
 // -------------------------------------------------------------------------- //
