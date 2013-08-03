@@ -23,16 +23,16 @@ class Converter: public Object
 	DECLARE_REF_CLASS(Converter)
 
 public:
-	static INT8		ToInt8(stringx value, int n = 10) { return ParseNumberPositive<INT8>(value, n, (INT8)0); }
+	static INT8		ToInt8(stringx value, int n = 10) { return ParseNumber<INT8>(value, n, (INT8)0); }
 	static UINT8	ToUInt8(stringx value, int n = 10) { return ParseNumberPositive<UINT8>(value, n, (UINT8)0); }
 
-	static INT16	ToInt16(stringx value, int n = 10) { return ParseNumberPositive<INT16>(value, n, (INT16)0); }
+	static INT16	ToInt16(stringx value, int n = 10) { return ParseNumber<INT16>(value, n, (INT16)0); }
 	static UINT16	ToUInt16(stringx value, int n = 10) { return ParseNumberPositive<UINT16>(value, n, (UINT16)0); }
 
-	static int		ToInt32(stringx value, int n = 10) { return ParseNumberPositive<INT32>(value, n, (INT32)0); }
+	static int		ToInt32(stringx value, int n = 10) { return ParseNumber<INT32>(value, n, (INT32)0); }
 	static UINT		ToUInt32(stringx value, int n = 10) { return ParseNumberPositive<UINT32>(value, n, (UINT32)0); }
 
-	static INT64	ToInt64(stringx value, int n = 10) { return ParseNumberPositive<INT64>(value, n, (INT64)0); }
+	static INT64	ToInt64(stringx value, int n = 10) { return ParseNumber<INT64>(value, n, (INT64)0); }
 	static UINT64	ToUInt64(stringx value, int n = 10) { return ParseNumberPositive<UINT64>(value, n, (UINT64)0); }
 
 	static stringx	ToString(int value, UINT n = 10) { return FormatNumber<int>(value, n); }
@@ -58,6 +58,9 @@ public:
 	static ref<ByteArray>	FromHexString(stringx str) { return FromHexString(str.c_str(), str.Length()); }
 
 protected:
+	template<typename T>
+	static T ParseNumber(stringx s, UINT n, T);
+
 	template<typename T>
 	static T ParseNumberPositive(stringx s, UINT n, T);
 
@@ -131,6 +134,18 @@ inline WCHAR Converter::ToDigit(UINT d, UINT n)
 }
 
 template<typename T>
+T Converter::ParseNumber(stringx s, UINT n, T)
+{
+	WCHAR ch = s[0];
+	if (ch == '+')
+		return ParseNumberPositive(s.Substring(1), n, T());
+	else if (ch == '-')
+		return -ParseNumberPositive(s.Substring(1), n, T());
+	else
+		return ParseNumberPositive(s, n, T());
+}
+
+template<typename T>
 T Converter::ParseNumberPositive(stringx s, UINT n, T)
 {
 	T value = 0;
@@ -172,7 +187,8 @@ stringx Converter::FormatNumberPositive(T value, UINT n)
 template<typename T>
 stringx Converter::FormatNumberNegative(T value, UINT n)
 {
-	cdec_throw(Exception(EC_NotImplemented));
+	stringx str = FormatNumberPositive(-value, n);
+	return '-' + str;
 }
 
 // -------------------------------------------------------------------------- //
