@@ -27,9 +27,9 @@ public:
 		Console::WriteLine(__X("#\t -------------- Start connector/C++ connction usage unit test -----------"));
 		//UNITTEST_ASSERT(1 == 0);
 		//stringx confPath = TestEnv::get_sample_path(__X("dbconfig_ly.xml"));
-		stringx url = __X("tcp://192.168.137.88:3306");
-		stringx name = __X("root");
-		stringx pwd = __X("openstack");
+		stringx url = __X("tcp://192.168.16.94:3306");
+		stringx name = __X("ekpapi");
+		stringx pwd = __X("ekpapi");
 		stringx db = __X("test");
 		stringx table = __X("testXXX");
 
