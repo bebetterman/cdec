@@ -60,7 +60,7 @@ ref<JsonNode> JsonParserImpl::ParseInnerTextVariant(stringx text, int& pos)
 		return ParseInnerTextList(text, pos);
 	else if (ch == '\"')
 		return ParseInnerTextStringValue(text, pos);
-	else if (ch >= '0' && ch <= '9')
+	else if ((ch >= '0' && ch <= '9') || (ch == '+' || ch == '-'))
 		return ParseInnerTextNumberValue(text, pos);
 	else if (ch == 'T' || ch == 't' || ch == 'F' || ch == 'f')
 		return ParseInnerTextBooleanValue(text, pos);
@@ -79,14 +79,26 @@ ref<JsonNode> JsonParserImpl::ParseInnerTextStringValue(stringx text, int& pos)
 
 ref<JsonNode> JsonParserImpl::ParseInnerTextNumberValue(stringx text, int& pos)
 {
+	bool fPos = true;
+	switch (text[pos])
+	{
+	case '+':
+		++pos;
+		break;
+	case '-':
+		fPos = false;
+		++pos;
+		break;
+	}
+
 	ASSERT(text[pos] >= '0' && text[pos] <= '9');
 	INT64 intV = 0;
 	double dblV = 0.0;
 	bool fFloat = ParseNumberValueToken(text, pos, intV, dblV);
 	if (fFloat)
-		return JsonNode::NewFloatNode(dblV);
+		return JsonNode::NewFloatNode(fPos ? dblV : -dblV);
 	else
-		return JsonNode::NewIntNode(intV);
+		return JsonNode::NewIntNode(fPos ? intV : -intV);
 }
 
 ref<JsonNode> JsonParserImpl::ParseInnerTextBooleanValue(stringx text, int& pos)
