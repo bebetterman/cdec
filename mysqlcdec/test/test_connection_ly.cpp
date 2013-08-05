@@ -27,20 +27,20 @@ public:
 		Console::WriteLine(__X("#\t -------------- Start connector/C++ connction usage unit test -----------"));
 		//UNITTEST_ASSERT(1 == 0);
 		//stringx confPath = TestEnv::get_sample_path(__X("dbconfig_ly.xml"));
-		stringx url = __X("tcp://192.168.16.94:3306");
-		stringx name = __X("ekpapi");
-		stringx pwd = __X("ekpapi");
-		stringx db = __X("test");
 		stringx table = __X("testXXX");
 
 		//connect test database;
-		ref<Connection> conn = gc_new<Connection>();
-		conn->Connect(url, name, pwd);
+		ConnectionManager::Config config;
+		config.Url = __X("tcp://192.168.16.94:3306");
+		config.Username = __X("ekpapi");
+		config.Password = __X("ekpapi");
+		ref<ConnectionManager> cm = gc_new<ConnectionManager>(config);
+		ref<Connection> conn = cm->Take();
 
 		/*create a test table demonstrating the use of cdec::Statement.excute()*/
 		ref<Statement> stmt = conn->CreateStatement();
 		
-		UNITTEST_ASSERT(0 == stmt->Execute(__X("USE ") + db));
+		UNITTEST_ASSERT(0 == stmt->Execute(stringx(__X("USE ")) + __X("ekpapi")));
 		UNITTEST_ASSERT(0 == stmt->Execute(__X("DROP TABLE IF EXISTS ") + table));
 		UNITTEST_ASSERT(0 == stmt->Execute(__X("CREATE TABLE ") + table + __X("(\
 			id CHAR(16), \
@@ -74,7 +74,7 @@ public:
 			++row;
 		}
 		UNITTEST_ASSERT(0 == stmt->Execute(__X("DROP TABLE IF EXISTS ") + table));
-		conn->Close();
+		conn->Return();
 		Console::WriteLine(__X("#\t -------------- End connector/C++ connction usage unit test -----------"));
 	}
 

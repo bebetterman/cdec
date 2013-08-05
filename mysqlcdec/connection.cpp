@@ -6,27 +6,11 @@ CDEC_NS_BEGIN
 // Connection
 // -------------------------------------------------------------------------- //
 
-Connection::Connection()
+Connection::Connection(ref<ConnectionManager> manager, int index, sql::Connection* impl)
 {
-	m_driver = get_driver_instance();
-	m_impl = NULL;
-}
-
-void Connection::Connect(stringx url, stringx user, stringx pass)
-{
-	sql::SQLString url_s = Strx2SqlStr(url);
-	sql::SQLString user_s = Strx2SqlStr(user);
-	sql::SQLString pass_s = Strx2SqlStr(pass);
-
-	Close();
-	m_impl = m_driver->connect(url_s, user_s, pass_s);
-}
-
-void Connection::SetSchema(stringx name)
-{
-	ASSERT(m_impl != NULL);
-	sql::SQLString name_s = Strx2SqlStr(name);
-	m_impl->setSchema(name_s);
+	m_manager = manager;
+	m_index = index;
+	m_impl = impl;
 }
 
 ref<Statement> Connection::CreateStatement()
@@ -52,6 +36,11 @@ ref<PrepareStatement> Connection::CreatePrepareStatement(stringx sql)
     }
     catch (sql::SQLException& e)
     {
+#ifdef _DEBUG
+		puts("MYSQL Exception");
+		printf("Message: %s\n", e.what());
+		printf("State: %s\n", e.getSQLState().c_str());
+#endif
 		cdec_throw(MysqlException(e.getErrorCode(), e.getSQLState(), e.what()));
     }
 }
@@ -99,9 +88,15 @@ ref<ResultSet> Connection::ExecuteQuery(stringx sql)
 	}
 }
 
-void Connection::Close()
+void Connection::Return()
 {
-	DESTORY_MYSQL_OBJECT(m_impl, Connection);
+	if (m_impl != NULL)
+	{
+		m_manager->ReturnByAgent(m_index);
+		m_manager = NULL;
+		m_impl = NULL;
+		m_index = -1;
+	}
 }
 
 // -------------------------------------------------------------------------- //

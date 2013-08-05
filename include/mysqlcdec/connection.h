@@ -1,21 +1,27 @@
 #pragma once
 
 CDEC_NS_BEGIN
+
 // -------------------------------------------------------------------------- //
+// Connection
+// -------------------------------------------------------------------------- //
+
+class ConnectionManager;
 
 class MYSQLCDECEXPORT Connection : public Object
 {
 	DECLARE_REF_CLASS(Connection)
 
 protected:
-	sql::Driver*		m_driver;
+	ref<ConnectionManager>	m_manager;
+	int		m_index;
 	sql::Connection*	m_impl;
 
-public:
-	Connection();
+protected:
+	Connection(ref<ConnectionManager> manager, int index, sql::Connection* impl);
 
-	void Connect(stringx url, stringx user, stringx pass);
-	void SetSchema(stringx database);
+public:
+	int		Index() { return m_index; }
 
 	ref<Statement>			CreateStatement();
 	ref<PrepareStatement>	CreatePrepareStatement(stringx sql);
@@ -25,8 +31,8 @@ public:
 	int		ExecuteUpdate(stringx sql);
 	ref<ResultSet>	ExecuteQuery(stringx sql);
 
-	void Close();
-	~Connection() { Close(); }
+	void Return();
+	~Connection() { Return(); }
 };
 
 // -------------------------------------------------------------------------- //
