@@ -8,6 +8,11 @@
 
 using namespace cdec;
 
+// Set this macro to enable debugging information
+#define ENABLE_MYSQL_DEBUG
+
+#define MYSQL_ASSERT	ASSERT
+
 #include "common.h"
 
 // -------------------------------------------------------------------------- //

@@ -42,4 +42,34 @@ public:
 };
 
 // -------------------------------------------------------------------------- //
+
+class ResourcePool: public IResourcePool
+{
+	DECLARE_REF_CLASS(ResourcePool)
+
+protected:
+	typedef ArrayList<IResource>	ResourceList;
+	typedef std::vector<int>		HoleList;
+
+	ref<CriticalSection>	m_cs;
+	ref<IResourceFactory>	m_factory;
+	ref<ResourceList>		m_rsc;
+	HoleList				m_holes;
+
+#ifdef ENABLE_MYSQL_DEBUG
+	std::vector<int>		m_spins;
+	int						m_spin;
+#endif
+
+public:
+	ResourcePool(ref<IResourceFactory> factory);
+
+	ref<IResource>		Take();
+	ref<IResource>		TakeCreate();
+
+	void	Return(ref<IResource> r);
+	void	Dispose();
+};
+
+// -------------------------------------------------------------------------- //
 CDEC_NS_END

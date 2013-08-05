@@ -55,6 +55,40 @@ namespace cdec
 }
 
 // -------------------------------------------------------------------------- //
+// Resource Pool
+// -------------------------------------------------------------------------- //
+
+namespace cdec
+{
+	interface IResource: public Object
+	{
+		DECLARE_REF_CLASS(IResource)
+
+		virtual int Index() = 0;
+		virtual void Dispose() = 0;
+	};
+
+	interface IResourceFactory: public Object
+	{
+		DECLARE_REF_CLASS(IResourceFactory)
+
+		virtual ref<IResource> Make(int index) = 0;
+		virtual void Dispose() = 0;
+	};
+
+	interface IResourcePool: public Object
+	{
+		DECLARE_REF_CLASS(IResourcePool)
+
+		virtual ref<IResource>	Take() = 0;
+		virtual ref<IResource>	TakeCreate() = 0;
+		virtual void Return(ref<IResource>) = 0;
+
+		virtual void Dispose() = 0;
+	};
+}
+
+// -------------------------------------------------------------------------- //
 // Following headers
 // -------------------------------------------------------------------------- //
 

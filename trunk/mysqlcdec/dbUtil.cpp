@@ -36,12 +36,19 @@ ref<Connection> ConnectionManager::Take()
 {
 	ref<IResource> rs = m_pool->Take();
 	ref<ConnResource> r = ref_cast<ConnResource>(rs);
-	return gc_new<Connection>(this, r->Index(), r->Impl());
+	return gc_new<Connection>(this, r);
 }
 
-void ConnectionManager::ReturnByAgent(int index)
+ref<Connection> ConnectionManager::TakeCreate()
 {
-	m_pool->Return(index);
+	ref<IResource> rs = m_pool->TakeCreate();
+	ref<ConnResource> r = ref_cast<ConnResource>(rs);
+	return gc_new<Connection>(this, r);
+}
+
+void ConnectionManager::ReturnByAgent(ref<IResource> r)
+{
+	m_pool->Return(r);
 }
 
 void ConnectionManager::Close()
