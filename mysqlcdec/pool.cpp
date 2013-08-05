@@ -6,6 +6,8 @@ CDEC_NS_BEGIN
 
 void ConnResource::Dispose()
 {
+	// Refer http://hi.baidu.com/netpet/item/51a8a37806488011d1dcb325
+
 	DESTORY_MYSQL_OBJECT(m_impl, Connection);
 }
 
