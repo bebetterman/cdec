@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "pool.h"
 
 CDEC_NS_BEGIN
 
@@ -25,12 +26,27 @@ void ConnectionManager::LoadXmlConfig(stringx path, ConnectionManager::Config& c
 	config.Database = eConfig->get_Attribute(__X("database"))->get_Value();
 }
 
+void ConnectionManager::Init(Config config)
+{
+	ref<ConnResourceFactory> factory = gc_new<ConnResourceFactory>(config);
+	m_pool = gc_new<ResourcePool>(factory);
+}
+
 ref<Connection> ConnectionManager::Take()
 {
-	ref<Connection> conn = gc_new<Connection>();
-	conn->Connect(m_config.Url, m_config.Username, m_config.Password);
-	conn->SetSchema(m_config.Database);
-	return conn;
+	ref<IResource> rs = m_pool->Take();
+	ref<ConnResource> r = ref_cast<ConnResource>(rs);
+	return gc_new<Connection>(this, r->Index(), r->Impl());
+}
+
+void ConnectionManager::ReturnByAgent(int index)
+{
+	m_pool->Return(index);
+}
+
+void ConnectionManager::Close()
+{
+	m_pool->Dispose();
 }
 
 // -------------------------------------------------------------------------- //
