@@ -14,15 +14,13 @@ class MYSQLCDECEXPORT Connection : public Object
 
 protected:
 	ref<ConnectionManager>	m_manager;
-	int		m_index;
+	ref<IResource>		m_rc;
 	sql::Connection*	m_impl;
 
 protected:
-	Connection(ref<ConnectionManager> manager, int index, sql::Connection* impl);
+	Connection(ref<ConnectionManager> manager, ref<IResource> r);
 
 public:
-	int		Index() { return m_index; }
-
 	ref<Statement>			CreateStatement();
 	ref<PrepareStatement>	CreatePrepareStatement(stringx sql);
 

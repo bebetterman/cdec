@@ -12,7 +12,6 @@ protected:
 
 public:
 	PrepareStatement(sql::PreparedStatement* pstmt): m_impl(pstmt) {}
-	PrepareStatement(stringx sql);
 
 	void	SetString(int index, stringx value);
 	void	SetInt(int index, int value);

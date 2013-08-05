@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "pool.h"
 
 CDEC_NS_BEGIN
 
@@ -6,11 +7,11 @@ CDEC_NS_BEGIN
 // Connection
 // -------------------------------------------------------------------------- //
 
-Connection::Connection(ref<ConnectionManager> manager, int index, sql::Connection* impl)
+Connection::Connection(ref<ConnectionManager> manager, ref<IResource> rc)
 {
 	m_manager = manager;
-	m_index = index;
-	m_impl = impl;
+	m_rc = rc;
+	m_impl = (ref_cast<ConnResource>(rc))->Impl();
 }
 
 ref<Statement> Connection::CreateStatement()
@@ -29,6 +30,9 @@ ref<Statement> Connection::CreateStatement()
 ref<PrepareStatement> Connection::CreatePrepareStatement(stringx sql)
 {
 	sql::SQLString sql_s = Strx2SqlStr(sql);
+#ifdef ENABLE_MYSQL_DEBUG
+	printf("[MYSQL] CreatePreparedStatement SQL: %s\n", sql_s.c_str());
+#endif
     try
     {
 		sql::PreparedStatement* sprstmt = m_impl->prepareStatement(sql_s);
@@ -36,7 +40,7 @@ ref<PrepareStatement> Connection::CreatePrepareStatement(stringx sql)
     }
     catch (sql::SQLException& e)
     {
-#ifdef _DEBUG
+#ifdef ENABLE_MYSQL_DEBUG
 		puts("MYSQL Exception");
 		printf("Message: %s\n", e.what());
 		printf("State: %s\n", e.getSQLState().c_str());
@@ -92,10 +96,10 @@ void Connection::Return()
 {
 	if (m_impl != NULL)
 	{
-		m_manager->ReturnByAgent(m_index);
+		m_manager->ReturnByAgent(m_rc);
 		m_manager = NULL;
+		m_rc = NULL;
 		m_impl = NULL;
-		m_index = -1;
 	}
 }
 
