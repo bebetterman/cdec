@@ -15,4 +15,6 @@ using namespace cdec;
 
 #include "common.h"
 
+#define ENABLE_PROCEDURE_PATCH
+
 // -------------------------------------------------------------------------- //
