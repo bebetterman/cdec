@@ -28,7 +28,7 @@
 
 // -------------------------------------------------------------------------- //
 
-LZMACDECAPI(int) LzmaCdecCompress(
+int LzmaCdecCompress(
 	BYTE* dest, int& destLen, const BYTE* src, int srcLen, BYTE* outProps, int& outPropsSize, 
 	int level, UINT dictSize, int lc, int lp, int pb, int fb, int numThreads
 	)
@@ -46,7 +46,7 @@ LZMACDECAPI(int) LzmaCdecCompress(
 	return ret;
 }
 
-LZMACDECAPI(int) LzmaCdecUncompress(BYTE* dest, int& destLen, const BYTE* src, int& srcLen, const BYTE* props, int propsSize)
+int LzmaCdecUncompress(BYTE* dest, int& destLen, const BYTE* src, int& srcLen, const BYTE* props, int propsSize)
 {
 	size_t destLen_st = destLen;
 	size_t srcLen_st = srcLen;
