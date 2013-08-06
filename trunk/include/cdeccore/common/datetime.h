@@ -1,5 +1,9 @@
 #pragma once
 
+#ifdef X_OS_WINDOWS
+#	include <sys/timeb.h>
+#endif
+
 CDEC_NS_BEGIN
 
 // -------------------------------------------------------------------------- //
@@ -8,7 +12,7 @@ CDEC_NS_BEGIN
 
 struct DateTime;
 
-CDECCOREAPI(stringx) DateTime_Format(const DateTime& dt);
+CDECCOREEXPORT stringx DateTime_Format(const DateTime& dt);
 
 // -------------------------------------------------------------------------- //
 // DateTime Value Type
@@ -17,7 +21,17 @@ CDECCOREAPI(stringx) DateTime_Format(const DateTime& dt);
 // Under linux, DateTime use clock_gettime to obtain the current time. Though it
 // is not widely supported. We may use gettimeofday (or ftime) as alternative.
 //
-// Currently Day-light-saving time is not supported.
+// Currently Day-light-saving time is NOT tested.
+
+// Refer timeb under Windows
+// Refer timeval, timezone under Linux
+struct TimeValue
+{
+	INT64	Time;		// 64-bit time-stamp. Even under 32-bit Windows
+	INT32	Micro;		// micro-seconds (milli-seconds precise under Windows)
+	INT16	TimeZone;	// Time-zone
+	INT16	DstFlag;	// DST flag (NOT tested)
+};
 
 struct DateTime
 {
@@ -30,6 +44,16 @@ protected:
 #endif
 
 public:
+	// This will get the time-stamp, it is the same with time_t
+	// Return 64-bit time-stamp value under Windows 32-bit version
+	inline static INT64 Timestamp();
+
+	// This will get the time-stamp, milli-second, time-zone, and DST information
+	// Refer timeb, ftime under Windows
+	// Refer
+	// Note that DST (day saving time) flags are NOT tested
+	inline static TimeValue NowTime();
+
 	inline static DateTime Now();
 
 	inline static DateTime Set(int year, int month, int day, int hour, int minute, int second, int milliseconds);
@@ -77,6 +101,23 @@ public:
 // -------------------------------------------------------------------------- //
 #ifdef X_OS_WINDOWS
 
+inline INT64 DateTime::Timestamp()
+{
+	return _time64(NULL);
+}
+
+inline TimeValue DateTime::NowTime()
+{
+	TimeValue tv;
+	__timeb64 tb;
+	_ftime64(&tb);
+	tv.Time = tb.time;
+	tv.Micro = tb.millitm * 1000;
+	tv.TimeZone = tb.timezone;
+	tv.DstFlag = tb.dstflag;
+	return tv;
+}
+
 inline DateTime DateTime::Now()
 {
 	SYSTEMTIME st;
@@ -101,6 +142,24 @@ inline DateTime DateTime::Set(int year, int month, int day, int hour, int minute
 }
 
 #else
+
+inline INT64 DateTime::Timestamp()
+{
+	return time(NULL);
+}
+
+inline TimeValue DateTime::NowTime()
+{
+	TimeValue val;
+	timeval tv;
+	timezone tz;
+	gettimeofday(&tv, &tz);
+	val.Time = tv.tv_sec;
+	val.Micro = tv.tv_usec;
+	val.TimeZone = tz.tz_minuteswest;
+	val.DstFlag = tz.tz_dsttime;
+	return val;
+}
 
 inline DateTime DateTime::Now()
 {

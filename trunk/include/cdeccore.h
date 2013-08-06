@@ -15,7 +15,7 @@
 #	define CDECCOREEXPORT		DECLSPEC_IMPORT
 #endif
 
-#define CDECCOREAPI(type)		CDECCOREEXPORT type __stdcall
+#define CDECCOREAPI(type)		CDECCOREEXPORT type
 
 // -------------------------------------------------------------------------- //
 // C-- Essential
