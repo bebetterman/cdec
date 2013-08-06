@@ -2,6 +2,8 @@
 
 #ifdef X_OS_WINDOWS
 #	include <sys/timeb.h>
+#else
+#	include <sys/time.h>
 #endif
 
 CDEC_NS_BEGIN
@@ -151,8 +153,8 @@ inline INT64 DateTime::Timestamp()
 inline TimeValue DateTime::NowTime()
 {
 	TimeValue val;
-	timeval tv;
-	timezone tz;
+	struct timeval tv;
+	struct timezone tz;
 	gettimeofday(&tv, &tz);
 	val.Time = tv.tv_sec;
 	val.Micro = tv.tv_usec;
@@ -164,20 +166,20 @@ inline TimeValue DateTime::NowTime()
 inline DateTime DateTime::Now()
 {
 	timespec tmspec;
-    clock_gettime(CLOCK_REALTIME, &tmspec);
-    return FromTimeSpec(tmspec);
+	clock_gettime(CLOCK_REALTIME, &tmspec);
+	return FromTimeSpec(tmspec);
 }
 
 inline DateTime DateTime::Set(int year, int month, int day, int hour, int minute, int second, int milliseconds)
 {
 	DateTime dt;
-	m_tm.tm_year = year;
-	m_tm.tm_mon = month;
-	m_tm.tm_mday = day;
-	m_tm.tm_hour = hour;
-	m_tm.tm_min = minute;
-	m_tm.tm_sec = second;
-	m_milli = milliseconds;
+	dt.m_tm.tm_year = year;
+	dt.m_tm.tm_mon = month;
+	dt.m_tm.tm_mday = day;
+	dt.m_tm.tm_hour = hour;
+	dt.m_tm.tm_min = minute;
+	dt.m_tm.tm_sec = second;
+	dt.m_milli = milliseconds;
 
 	// todo: set wDayOfWeek
 
