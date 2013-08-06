@@ -28,20 +28,31 @@ void FileStream::Close()
 
 int FileStream::Read(void* buffer, int count)
 {
+	if (count == 0)
+		return 0;
+
 	if (!m_pFile->IsOpen())
 		cdec_throw(IOException(EC_IO_NotOpened));
+
 	return m_pFile->Read(buffer, count);
 }
 
 int FileStream::AtomRead(INT64 pos, void* buffer, int count)
 {
+	if (count == 0)
+		return 0;
+
 	if (!m_pFile->IsOpen())
 		cdec_throw(IOException(EC_IO_NotOpened));
+
 	return m_pFile->AtomRead(pos, buffer, count);
 }
 
 int FileStream::Read2(ref<ByteArray> buffer, int offset, int count)
 {
+	if (count == 0)
+		return 0;
+
 	if (CheckOutOfRange(offset, count, buffer->Count()))
 		cdec_throw(IOException(EC_OutOfRange));
 
@@ -51,20 +62,31 @@ int FileStream::Read2(ref<ByteArray> buffer, int offset, int count)
 
 int FileStream::Write(const void* buffer, int count)
 {
+	if (count == 0)
+		return 0;
+
 	if (!m_pFile->IsOpen())
 		cdec_throw(IOException(EC_IO_NotOpened));
+
 	return m_pFile->Write(buffer, count);
 }
 
 int FileStream::AtomWrite(INT64 pos, const void* buffer, int count)
 {
+	if (count == 0)
+		return 0;
+
 	if (!m_pFile->IsOpen())
 		cdec_throw(IOException(EC_IO_NotOpened));
+
 	return m_pFile->AtomWrite(pos, buffer, count);
 }
 
 int FileStream::Write2(ref<ByteArray> buffer, int offset, int count)
 {
+	if (count == 0)
+		return 0;
+
 	if (CheckOutOfRange(offset, count, buffer->Count()))
 		cdec_throw(IOException(EC_OutOfRange));
 
