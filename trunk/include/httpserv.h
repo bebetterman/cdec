@@ -41,8 +41,6 @@ typedef UINT64 uint64_t;
 #define HTTPSERVEXPORT DECLSPEC_IMPORT
 #endif
 
-#define HTTPSERV_API(type)	EXTERN_C HTTPSERVEXPORT type __stdcall
-
 // Set the DEBUG_HTTPCDEC macro to enable debugging
 #define DEBUG_HTTPCDEC
 

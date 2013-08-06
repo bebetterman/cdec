@@ -21,7 +21,7 @@
 #	define CDECEGGEXPORT		DECLSPEC_IMPORT
 #endif
 
-#define CDECEGGAPI(type)	EXTERN_C CDECEGGEXPORT type __stdcall
+#define CDECEGGAPI(type)		CDECEGGEXPORT type
 
 #include "cdecegg/predef/exception.h"
 #include "cdecegg/predef/wstring16.h"

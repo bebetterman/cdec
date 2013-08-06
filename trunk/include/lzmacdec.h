@@ -18,15 +18,9 @@
 #define LZMACDECEXPORT DECLSPEC_IMPORT
 #endif
 
-#ifdef X_OS_WINDOWS
-#define LZMACDECAPI(type)	EXTERN_C LZMACDECEXPORT type __stdcall
-#else
-#define LZMACDECAPI(type)	EXTERN_C LZMACDECEXPORT type
-#endif
-
 // -------------------------------------------------------------------------- //
 
-LZMACDECAPI(int) LzmaCdecCompress(
+LZMACDECEXPORT int LzmaCdecCompress(
 	BYTE* dest, int& destLen, const BYTE* src, int srcLen,
 	BYTE* outProps, int& outPropsSize, /* *outPropsSize must be = 5 */
 	int level,      /* 0 <= level <= 9, default = 5 */
@@ -38,7 +32,7 @@ LZMACDECAPI(int) LzmaCdecCompress(
 	int numThreads /* 1 or 2, default = 2 */
 );
 
-LZMACDECAPI(int) LzmaCdecUncompress(
+LZMACDECEXPORT int LzmaCdecUncompress(
 	BYTE* dest, int& destLen, const BYTE* src, int& srcLen, const BYTE* props, int propsSize
 );
 
