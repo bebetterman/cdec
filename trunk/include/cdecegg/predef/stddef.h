@@ -13,6 +13,11 @@
 // interface - 定义接口
 #define interface struct
 
+// argument modifiers
+#define IN
+#define OUT
+#define REF
+
 // __novtable
 #ifndef __novtable
 #	if defined(X_CC_VC)
