@@ -15,16 +15,18 @@ public:
 	StringBuilder() {}
 	StringBuilder(int capacity) { m_content.reserve(capacity); }
 
-	int Length() { return m_content.size(); }
-	int Capacity() { return m_content.capacity(); }
+	int		Length() { return m_content.size(); }
+	int		Capacity() { return m_content.capacity(); }
 
-	void Append(WCHAR ch) { m_content.append(1, ch); }
-	void Append(stringx s) { m_content.append(s.c_str(), s.Length()); }
+	WCHAR	CharAt(int i) { return m_content[i]; }
 
-	void Insert(int pos, WCHAR ch) { m_content.insert(m_content.begin() + pos, ch); }
-	void Insert(int pos, stringx s) { m_content.insert(pos, s.c_str(), s.Length()); }
+	StringBuilder*	Append(WCHAR ch) { m_content.append(1, ch); return this; }
+	StringBuilder*	Append(stringx s) { m_content.append(s.c_str(), s.Length()); return this; }
 
-	void Remove(int pos, int len);
+	void	Insert(int pos, WCHAR ch) { m_content.insert(m_content.begin() + pos, ch); }
+	void	Insert(int pos, stringx s) { m_content.insert(pos, s.c_str(), s.Length()); }
+
+	void	Remove(int pos, int len);
 
 	std::wstring16 ToStdString() { return m_content; }
 	stringx ToString() { return stringx(m_content); }
