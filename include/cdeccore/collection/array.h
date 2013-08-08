@@ -111,6 +111,25 @@ public:
 		memcpy(pt, ps, count * sizeof(_Ty));
 	}
 
+	int		MemoryCompare(int offT, const _Ty* ps, int count)
+	{
+		if (CheckOutOfRange(offT, count, m_count))
+			cdec_throw(Exception(EC_OutOfRange));
+
+		_Ty* pt = m_buffer + offT;
+		return memcmp(pt, ps, count * sizeof(_Ty));
+	}
+
+	int		MemoryCompare(int offT, ref<ArrayV<_Ty> > s, int offS, int count)
+	{
+		if (CheckOutOfRange(offT, count, m_count) || CheckOutOfRange(offS, count, s->Count()))
+			cdec_throw(Exception(EC_OutOfRange));
+
+		_Ty* pt = m_buffer + offT;
+		_Ty* ps = s->m_buffer + offS;
+		return memcmp(pt, ps, count * sizeof(_Ty));
+	}
+
 	void	Fill(const _Ty& value, int offset, int count)
 	{
 		if (CheckOutOfRange(offset, count, m_count))
