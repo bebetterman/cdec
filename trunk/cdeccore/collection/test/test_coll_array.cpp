@@ -40,6 +40,7 @@ class TestCdecArray : public UnitTestSuite
 		UNITTEST_METHOD(testEnumArray)
 		UNITTEST_METHOD(testSort)
 		UNITTEST_METHOD(testCopyFrom)
+		UNITTEST_METHOD(testMemoryCompare)
 	UNITTEST_SUITE_END()
 
 public:
@@ -138,6 +139,19 @@ public:
 		UNITTEST_ASSERT(CheckSequence(a, v2r, 4));
 	}
 
+	void testMemoryCompare()
+	{
+		BYTE vs[] = { 1, 2, 3, 4, 5 };
+		ref<ByteArray> a = gc_new<ByteArray>(vs, 5);
+		ref<ByteArray> b = gc_new<ByteArray>(vs, 5);
+		UNITTEST_ASSERT(a != b && a->GetBuffer() != b->GetBuffer());
+		UNITTEST_ASSERT(a->MemoryCompare(1, b, 1, 4) == 0);
+		UNITTEST_ASSERT(a->MemoryCompare(0, b, 1, 4) == -1);
+		UNITTEST_ASSERT(a->MemoryCompare(0, b, 1, 0) == 0);
+
+		UNITTEST_ASSERT(a->MemoryCompare(0, vs, 5) == 0);
+	}
+	
 	static bool CheckSequence(ref<IntArray> arr, const int v[], int n)
 	{
 		if (arr->Count() != n)
