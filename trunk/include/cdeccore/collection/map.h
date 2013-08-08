@@ -45,6 +45,12 @@ public:
 
 	int		Count() { return m_impl.size(); }
 
+	bool	HasKey(const _K& key)
+	{
+		iterator_type it = m_impl.find(key);
+		return it != m_impl.end();
+	}
+
 	// If specified key exists, returns the value. Otherwise, returns a default Value
 	// This method does not modify the collection in any case
 	const _V&	Get(const _K& key)
