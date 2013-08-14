@@ -10,7 +10,7 @@
 
 // -------------------------------------------------------------------------- //
 
-#define _MODULE_NAME	cdeccore
+#define _MODULE_NAME	mysqlcdec
 #include "../../include/unittest.h"
 
 using namespace UnitTest;
