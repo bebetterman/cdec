@@ -44,10 +44,6 @@ public:
 	static stringx	ToString(long value, int n = 10) { return FormatNumber<int>(value, n); }
 	static stringx	ToString(unsigned long value, int n = 10) { return FormatNumberPositive<UINT>(value, n); }
 
-#ifndef X_OS_WINDOWS
-	static stringx	ToString(size_t value, int n = 10) { ASSERT(sizeof(value) == 8); return FormatNumber<UINT64>(value, n); }
-#endif
-
 	static stringx	ToHexString(const BYTE* bytes, int length) { return ConverterToHexStringL(bytes, length); }
 	static stringx	ToHexString(ref<ByteArray> bytes, int offset, int length) { return ConverterToHexStringA(bytes, offset, length); }
 	static stringx	ToHexString(ref<ByteArray> bytes) { return ConverterToHexStringA(bytes, 0, bytes->Count()); }
