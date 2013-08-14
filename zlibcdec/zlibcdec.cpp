@@ -1,6 +1,10 @@
 #include "stdafx.h"
 #include "../include/zlibcdec.h"
+#ifdef X_OS_WINDOWS
 #include "../import-win/zlib128/include/zlib.h"
+#else
+#include <zlib.h>
+#endif
 
 // -------------------------------------------------------------------------- //
 
@@ -26,7 +30,7 @@ CDEC_NS_BEGIN
 //
 int ZlibCdecUtility::Uncompress(const void* pSrc, int lenSrc, void* pDest, int lenDest)
 {
-	ULONG lenDist_l = lenDest;
+	uLongf lenDist_l = lenDest;
 	int code = uncompress((BYTE*)pDest, &lenDist_l, (const BYTE*)pSrc, lenSrc);
 	if (code == Z_OK)
 		return lenDist_l;
