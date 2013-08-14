@@ -35,11 +35,18 @@ public:
 	static INT64	ToInt64(stringx value, int n = 10) { return ParseNumber<INT64>(value, n, (INT64)0); }
 	static UINT64	ToUInt64(stringx value, int n = 10) { return ParseNumberPositive<UINT64>(value, n, (UINT64)0); }
 
-	static stringx	ToString(int value, UINT n = 10) { return FormatNumber<int>(value, n); }
-	static stringx	ToString(UINT value, UINT n = 10) { return FormatNumberPositive<UINT>(value, n); }
+	static stringx	ToString(int value, int n = 10) { return FormatNumber<int>(value, n); }
+	static stringx	ToString(UINT value, int n = 10) { return FormatNumberPositive<UINT>(value, n); }
 
-	static stringx	ToString(INT64 value, UINT n = 10) { return FormatNumber<INT64>(value, n); }
-	static stringx	ToString(UINT64 value, UINT n = 10) { return FormatNumberPositive<UINT64>(value, n); }
+	static stringx	ToString(INT64 value, int n = 10) { return FormatNumber<INT64>(value, n); }
+	static stringx	ToString(UINT64 value, int n = 10) { return FormatNumberPositive<UINT64>(value, n); }
+
+	static stringx	ToString(long value, int n = 10) { return FormatNumber<int>(value, n); }
+	static stringx	ToString(unsigned long value, int n = 10) { return FormatNumberPositive<UINT>(value, n); }
+
+#ifndef X_OS_WINDOWS
+	static stringx	ToString(size_t value, int n = 10) { ASSERT(sizeof(value) == 8); return FormatNumber<UINT64>(value, n); }
+#endif
 
 	static stringx	ToHexString(const BYTE* bytes, int length) { return ConverterToHexStringL(bytes, length); }
 	static stringx	ToHexString(ref<ByteArray> bytes, int offset, int length) { return ConverterToHexStringA(bytes, offset, length); }
