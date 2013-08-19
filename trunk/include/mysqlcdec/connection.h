@@ -30,7 +30,10 @@ public:
 	ref<ResultSet>	ExecuteQuery(stringx sql);
 
 	void Return();
-	~Connection() { Return(); }
+	~Connection() { Return(); }	
+	void Commit();
+	void SetAutoCommit(bool flag);
+
 };
 
 // -------------------------------------------------------------------------- //
