@@ -103,5 +103,35 @@ void Connection::Return()
 	}
 }
 
+
+void Connection::Commit()
+{
+	if (m_impl != NULL)
+	{
+		try
+		{
+			m_impl->commit();
+		}
+		catch (sql::SQLException &e)
+		{
+			cdec_throw(MysqlException(e.getErrorCode(), e.getSQLState(), e.what()));
+		}
+	}
+}
+void Connection::SetAutoCommit(bool flag)
+{ 
+	if (m_impl != NULL)
+	{
+		try
+		{
+			m_impl->setAutoCommit(flag);
+		}
+		catch (sql::SQLException &e)
+		{
+			cdec_throw(MysqlException(e.getErrorCode(), e.getSQLState(), e.what()));
+		}
+	}
+}
+
 // -------------------------------------------------------------------------- //
 CDEC_NS_END
