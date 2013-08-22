@@ -40,7 +40,7 @@ ref<PrepareStatement> Connection::CreatePrepareStatement(stringx sql)
     }
     catch (sql::SQLException& e)
     {
-#ifdef ENABLE_MYSQL_DEBUG
+#ifdef ENABLE_MYSQL_ERROR
 		puts("MYSQL Exception");
 		printf("Message: %s\n", e.what());
 		printf("State: %s\n", e.getSQLState().c_str());
@@ -132,6 +132,22 @@ void Connection::SetAutoCommit(bool flag)
 		}
 	}
 }
+
+void Connection::Rollback()
+{ 
+	if (m_impl != NULL)
+	{
+		try
+		{
+			m_impl->rollback();
+		}
+		catch (sql::SQLException &e)
+		{
+			cdec_throw(MysqlException(e.getErrorCode(), e.getSQLState(), e.what()));
+		}
+	}
+}
+
 
 // -------------------------------------------------------------------------- //
 CDEC_NS_END

@@ -32,6 +32,8 @@ public:
 	// For backward capability
 	void	Return(ref<Connection> conn)
 	{
+		conn->Rollback();
+		conn->SetAutoCommit(true);
 		conn->Return();
 	}
 

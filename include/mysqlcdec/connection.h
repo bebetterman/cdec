@@ -33,6 +33,7 @@ public:
 	~Connection() { Return(); }	
 	void Commit();
 	void SetAutoCommit(bool flag);
+	void Rollback();
 
 };
 
