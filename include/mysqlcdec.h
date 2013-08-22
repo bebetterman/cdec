@@ -50,6 +50,10 @@ namespace cdec
 		MysqlException(int _sqlerr, const std::string& _sqlstat, const std::string& _reason):
 		Exception(EC_Fail), SQLErr(_sqlerr), SQLState(_sqlstat), Reason(_reason)
 		{
+			puts("MYSQL Exception");
+			printf("Error NO: %s\n",_sqlerr);
+			printf("Message: %s\n",_sqlstat);
+			printf("State: %s\n", _reason);
 		}
 	};
 }
