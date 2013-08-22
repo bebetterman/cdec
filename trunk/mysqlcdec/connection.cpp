@@ -40,7 +40,7 @@ ref<PrepareStatement> Connection::CreatePrepareStatement(stringx sql)
     }
     catch (sql::SQLException& e)
     {
-#ifdef ENABLE_MYSQL_ERROR
+#ifdef ENABLE_MYSQL_DEBUG
 		puts("MYSQL Exception");
 		printf("Message: %s\n", e.what());
 		printf("State: %s\n", e.getSQLState().c_str());
