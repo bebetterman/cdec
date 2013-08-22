@@ -56,6 +56,8 @@ CurlEasy::CurlEasy()
 		throw CurlException(EC_CURL_FAILED_INIT);
 
 	m_cWriter = gc_new<CurlByteBufferContentWriter>();
+
+	SetTimeOut(120);	// A default time-out value for 120 seconds
 }
 
 CurlEasy::~CurlEasy()
@@ -73,6 +75,12 @@ void CurlEasy::SetUrl(const char* url)
 void CurlEasy::SetUrl(stringx url)
 {
 	SetUrl(Encoding::get_UTF8()->FromUnicode(url).c_str());
+}
+
+void CurlEasy::SetTimeOut(int seconds)
+{
+	int code = curl_easy_setopt(m_curl, CURLOPT_TIMEOUT, seconds);
+	VERIFY_CURL_CODE(code);
 }
 
 void CurlEasy::AddHeader(stringx key, stringx value)

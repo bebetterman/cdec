@@ -17,12 +17,23 @@ void TestGetPage()
 	Console::WriteLine(__X("TestGetPage"));
 	ref<CurlEasy> curl = gc_new<CurlEasy>();
 	curl->SetUrl(MYURL "get?name=abc&value=123");
-	curl->Request();
+	curl->SetTimeOut(30);
 
-	UNITTEST_ASSERT(curl->GetResponseCode() == 200);
-	ref<ByteArray> data = curl->ReadResponseData();
-	stringx s = Encoding::get_UTF8()->GetString(data);
-	Console::WriteLine(s);
+	try
+	{
+		curl->Request();
+		UNITTEST_ASSERT(curl->GetResponseCode() == 200);
+		ref<ByteArray> data = curl->ReadResponseData();
+		stringx s = Encoding::get_UTF8()->GetString(data);
+		Console::WriteLine(s);
+	}
+	catch (Exception e)
+	{
+		if (e.Code == EC_CURL_OPERATION_TIMEDOUT)
+			Console::WriteLine(__X("Request time out"));
+		else
+			Console::WriteLine(__X("Exception code ") + Converter::ToString(e.Code));
+	}
 }
 
 void TestPostPage()
