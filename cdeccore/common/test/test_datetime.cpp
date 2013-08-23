@@ -23,8 +23,11 @@ public:
 
 	void testFormat()
 	{
-		DateTime dt = DateTime::Set(2005, 5, 3, 22, 5, 2, 50);
-		UNITTEST_ASSERT(dt.Format() == __X("2005-5-3 22:5:2"));
+		DateTime dt = DateTime::Set(2005, 5, 3, 2, 5, 2, 50);
+		UNITTEST_ASSERT(dt.Format() == __X("2005-05-03 02:05:02"));
+
+		dt = DateTime::Set(2005, 12, 23, 22, 15, 12, 50);
+		UNITTEST_ASSERT(dt.Format() == __X("2005-12-23 22:15:12"));
 	}
 
 	void tearDown()
