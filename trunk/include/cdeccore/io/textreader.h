@@ -88,10 +88,12 @@ public:
 
 	// 从给定流中读取文本，使用自动检测的编码
 	TextReader(ref<Stream> pStream) {
+		m_sqb = gc_new<SequenceReadingBuffer>();
 		OpenNoEncoding(pStream);
 	}
 	// 从给定流中读取文本，使用指定的编码。如果编码错误，将导致打开失败
 	TextReader(ref<Stream> pStream, ref<Encoding> encoding) {
+		m_sqb = gc_new<SequenceReadingBuffer>();
 		OpenEncoding(pStream, encoding);
 	}
 

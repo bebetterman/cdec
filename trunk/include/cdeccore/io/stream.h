@@ -43,6 +43,7 @@ public:
 	virtual INT64	Seek(INT64 pos, SeekPosition cp = Stream::SeekBegin) = 0;
 	virtual void	SetLength(INT64 length) = 0;
 	virtual INT64	Length() = 0;
+	virtual void	Flush() {}
 	virtual void	Close() = 0;
 
 	virtual int		AtomRead(INT64 pos, void* buffer, int count) = 0;
@@ -88,6 +89,7 @@ public:
 	void	SetLength(INT64 length);
 	INT64	Length();
 
+	void	Flush();
 	void	Close();
 
 	int		AtomRead(INT64 pos, void* buffer, int count);
