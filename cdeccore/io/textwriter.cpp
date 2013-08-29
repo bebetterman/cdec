@@ -26,6 +26,16 @@ void SequenceWritingBuffer::Open(ref<Stream> stream)
 	m_iob = 0;
 }
 
+void SequenceWritingBuffer::Flush()
+{
+	if (m_iob != 0)
+	{
+		m_stream->Write(m_pBuffer, m_iob);
+		m_iob = 0;
+		m_stream->Flush();
+	}
+}
+
 void SequenceWritingBuffer::Close()
 {
 	if (m_stream != NULL)

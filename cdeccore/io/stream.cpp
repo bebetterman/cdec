@@ -17,6 +17,11 @@ void FileStream::Open(stringx filename, AccessMode access, ShareMode share, bool
 	m_pFile->Open(filename.c_str(), (FileWrapper::AccessMode)access, (FileWrapper::ShareMode)share, fCreate);
 }
 
+void FileStream::Flush()
+{
+	m_pFile->Flush();
+}
+
 void FileStream::Close()
 {
 	if (m_pFile != NULL)

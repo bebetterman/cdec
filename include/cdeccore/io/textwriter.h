@@ -22,8 +22,9 @@ public:
 	SequenceWritingBuffer(ref<Stream> pStream);
 	~SequenceWritingBuffer() { Close(); }
 
-	void Open(ref<Stream> pStream);
-	void Close();
+	void	Open(ref<Stream> pStream);
+	void	Flush();
+	void	Close();
 
 	void	Write(const void* buffer, UINT cb);
 
@@ -49,6 +50,7 @@ protected:
 public:
 	virtual void Write(stringx value) = 0;
 	virtual void WriteChar(WCHAR value) = 0;
+	virtual void Flush() = 0;
 	virtual void Close() = 0;
 
 	void	WriteLine(stringx value) { Write(value); WriteChar('\n'); }
@@ -71,6 +73,7 @@ public:
 
 	void Write(stringx value) { m_sb->Append(value); }
 	void WriteChar(WCHAR value) { m_sb->Append(value); }
+	void Flush() {}
 	void Close() {}
 
 	ref<StringBuilder> GetStringBuilder() { return m_sb; }
@@ -105,6 +108,7 @@ public:
 	ref<Encoding> get_Encoding() const { return m_encoding; }
 	void ChangeEncoding(ref<Encoding> encoding) { m_encoding = encoding; }
 
+	void Flush() { m_sqb->Flush(); }
 	void Close();
 };
 
