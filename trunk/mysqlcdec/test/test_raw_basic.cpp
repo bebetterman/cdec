@@ -15,6 +15,7 @@ class TestRawBasic : public UnitTestSuite
 	UNITTEST_SUITE(TestRawBasic)
 		UNITTEST_METHOD(testSimpleConn)
 		UNITTEST_METHOD(testDbUtil)
+		UNITTEST_METHOD(testCatchException)
 	UNITTEST_SUITE_END()
 public:
 	void setUp()
@@ -63,6 +64,29 @@ public:
 		UNITTEST_ASSERT(resu->RowsCount() == 10);
 
 		cm->Return(conn);
+	}
+
+
+
+	void testCatchException()
+	{
+		int cacheException = 0;
+		stringx confPath = TestEnv::get_sample_path(__X("dbconfig.xml"));
+		try{
+			ref<ConnectionManager> cm = gc_new<ConnectionManager>(confPath);
+			ref<Connection> conn = cm->Take();		
+			conn->Execute(__X("drop table if exists stu"));
+			conn->Execute(__X("create table stu(idd int(4),name varchar(20),primary key(idd))"));
+			conn->Execute(__X("delete from stu"));
+			conn->Execute(__X("insert into stu values(1,'test')"));\
+			conn->Execute(__X("insert into stu values(1,'test')"));
+			cm->Return(conn);
+
+		}catch(MysqlException & e){
+			if(e.SQLErr == 1062)
+				cacheException = 1;
+		}
+		UNITTEST_ASSERT(cacheException == 1);
 	}
 
 	void testSimpleConn()

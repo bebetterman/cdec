@@ -51,9 +51,9 @@ namespace cdec
 		Exception(EC_Fail), SQLErr(_sqlerr), SQLState(_sqlstat), Reason(_reason)
 		{
 			puts("MYSQL Exception");
-			printf("Error NO: %s\n",_sqlerr);
-			printf("Message: %s\n",_sqlstat);
-			printf("State: %s\n", _reason);
+			printf("Error NO: %d\n",_sqlerr);
+			printf("Message: %s\n",_sqlstat.c_str());
+			printf("State: %s\n", _reason.c_str());
 		}
 	};
 }
