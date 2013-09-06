@@ -75,6 +75,7 @@
 // C-- Library - Crypto
 // -------------------------------------------------------------------------- //
 
+#include "cdeccore/crypto/base64.h"
 #include "cdeccore/crypto/hash.h"
 #include "cdeccore/crypto/crypto.h"
 

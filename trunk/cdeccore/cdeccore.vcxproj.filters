@@ -243,6 +243,12 @@
     <ClCompile Include="common\test\test_datetime.cpp">
       <Filter>cdec\common\test</Filter>
     </ClCompile>
+    <ClCompile Include="crypto\base64.cpp">
+      <Filter>cdec\crypto</Filter>
+    </ClCompile>
+    <ClCompile Include="crypto\test\test_crypto_base64.cpp">
+      <Filter>cdec\crypto\test</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -367,6 +373,9 @@
     </ClInclude>
     <ClInclude Include="..\include\cdeccore\essential\variant.h">
       <Filter>cdec\essential\export</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\cdeccore\crypto\base64.h">
+      <Filter>cdec\crypto\export</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
