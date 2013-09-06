@@ -11,7 +11,7 @@ stringx Base64Encode(const BYTE* p, int len)
 	while (len >= 3)
 	{
 		// aaaaaabb bbbbcccc ccdddddd
-		char c1 = p[0], c2 = p[1], c3 = p[2];
+		BYTE c1 = p[0], c2 = p[1], c3 = p[2];
 		s.push_back(BASE64_CHAR_MAP[c1 >> 2]);
 		s.push_back(BASE64_CHAR_MAP[((c1 & 3) << 4) | (c2 >> 4)]);
 		s.push_back(BASE64_CHAR_MAP[((c2 & 15) << 2) | (c3 >> 6)]);
@@ -22,7 +22,7 @@ stringx Base64Encode(const BYTE* p, int len)
 
 	if (len == 1)
 	{
-		char c1 = p[0];
+		BYTE c1 = p[0];
 		s.push_back(BASE64_CHAR_MAP[c1 >> 2]);
 		s.push_back(BASE64_CHAR_MAP[(c1 & 3) << 4]);
 		s.push_back('=');
@@ -30,7 +30,7 @@ stringx Base64Encode(const BYTE* p, int len)
 	}
 	else if (len == 2)
 	{
-		char c1 = p[0], c2 = p[1];
+		BYTE c1 = p[0], c2 = p[1];
 		s.push_back(BASE64_CHAR_MAP[c1 >> 2]);
 		s.push_back(BASE64_CHAR_MAP[((c1 & 3) << 4) | (c2 >> 4)]);
 		s.push_back(BASE64_CHAR_MAP[(c2 & 15) << 2]);
