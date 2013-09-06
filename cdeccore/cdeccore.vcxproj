@@ -160,6 +160,7 @@
     <ClInclude Include="..\include\cdeccore\common\datetime.h" />
     <ClInclude Include="..\include\cdeccore\common\math.h" />
     <ClInclude Include="..\include\cdeccore\common\stringbuilder.h" />
+    <ClInclude Include="..\include\cdeccore\crypto\base64.h" />
     <ClInclude Include="..\include\cdeccore\crypto\crypto.h" />
     <ClInclude Include="..\include\cdeccore\crypto\hash.h" />
     <ClInclude Include="..\include\cdeccore\essential\foreach.h" />
@@ -204,10 +205,12 @@
     <ClCompile Include="common\test\test_converter.cpp" />
     <ClCompile Include="common\test\test_datetime.cpp" />
     <ClCompile Include="crypto\aesalg.cpp" />
+    <ClCompile Include="crypto\base64.cpp" />
     <ClCompile Include="crypto\crypto.cpp" />
     <ClCompile Include="crypto\md5.cpp" />
     <ClCompile Include="crypto\sha1.cpp" />
     <ClCompile Include="crypto\test\test_crypto_aes.cpp" />
+    <ClCompile Include="crypto\test\test_crypto_base64.cpp" />
     <ClCompile Include="crypto\test\test_crypto_hash.cpp" />
     <ClCompile Include="essential\string.cpp" />
     <ClCompile Include="essential\test\test_ess_interop.cpp" />
