@@ -83,7 +83,7 @@ class HTTPSERVEXPORT HandlerContext: public Object
 public:
 	enum Method
 	{
-		HTTP_NONE, HTTP_GET, HTTP_POST
+		HTTP_NONE, HTTP_GET, HTTP_POST, HTTP_DELETE
 	};
 
 	typedef std::map<stringx, stringx> StringPairMap;

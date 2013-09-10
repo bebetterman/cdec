@@ -165,7 +165,8 @@ class CURLCDECEXPORT CurlEasy: public Object
 	void*	m_curl;
 	std::vector<std::string>	m_headers;
 
-	ref<ICurlContentWriter>		m_cWriter;
+	ref<Stream>					m_istream;	// PUT
+	ref<ICurlContentWriter>		m_cWriter;	// Response reader
 
 public:
 	static void GlobalInit();
@@ -191,6 +192,9 @@ public:
 	void	SetPostText(stringx str, int offset, int length);
 	void	SetPostText(stringx str) { SetPostText(str, 0, str.Length()); }
 
+	void	SetPutStream(ref<Stream> istream);
+	void	SetPutBytes(ref<ByteArray> data, int offset, int length);
+
 	void	Request();
 
 	long	GetResponseCode();
@@ -200,7 +204,18 @@ public:
 
 private:
 	static size_t CurlDataReceiveCallback(void *buffer, size_t size, size_t nmemb, void *user_p);
+
+	static size_t CurlDataReadCallback(void *ptr, size_t size, size_t nmemb, void *userdata);
+
 };
+
+// -------------------------------------------------------------------------- //
+
+inline void CurlEasy::SetPutBytes(ref<ByteArray> data, int offset, int count)
+{
+	ref<MemoryStream> stream = gc_new<MemoryStream>(data, offset, count);
+	SetPutStream(stream);
+}
 
 // -------------------------------------------------------------------------- //
 CDEC_NS_END

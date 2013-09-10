@@ -10,6 +10,7 @@
 #	ifdef _DEBUG
 #		pragma comment(lib, "libcurl_vc10_static_debug")
 #	else
+#		pragma comment(lib, "libcurl_vc10_static_release")
 #	endif
 #elif defined(X_OS_WIN64)
 #endif

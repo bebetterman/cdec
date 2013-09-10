@@ -163,12 +163,7 @@ int Server::OnRequestHandler(void* hdctx, MHD_Connection* connection, const char
 		ref<IRequestHandler> handler = server->m_dispatcher->Dispatch(ctx->m_url);
 		ctx->m_handler = handler;
 
-		if (strcmp(method, MHD_HTTP_METHOD_GET) == 0)
-		{
-			ctx->m_method = HandlerContext::HTTP_GET;
-			ctx->m_postprocessor = NULL;
-		}
-		else if (strcmp(method, MHD_HTTP_METHOD_POST) == 0)
+		if (strcmp(method, MHD_HTTP_METHOD_POST) == 0)
 		{
 			ctx->m_method = HandlerContext::HTTP_POST;
 			// Hotfix: Non-form post
@@ -178,7 +173,23 @@ int Server::OnRequestHandler(void* hdctx, MHD_Connection* connection, const char
 				ctx->m_postprocessor = MHD_create_post_processor(connection, 1024, OnPostDataIterator, ctx.__GetPointer());
 		}
 		else
-			return MHD_NO;
+		{
+			if (strcmp(method, MHD_HTTP_METHOD_GET) == 0)
+			{
+				ctx->m_method = HandlerContext::HTTP_GET;
+			}
+			else if (strcmp(method, MHD_HTTP_METHOD_DELETE) == 0)
+			{
+				ctx->m_method = HandlerContext::HTTP_DELETE;
+			}
+			else
+			{
+				ASSERT(false);
+				return MHD_NO;
+			}
+				
+			ctx->m_postprocessor = NULL;
+		}
 
 		// The first time only the headers are valid, do not respond in the first round.
 		*reqctx = ctx.__GetPointer();
@@ -229,8 +240,19 @@ int Server::OnRequestHandler(void* hdctx, MHD_Connection* connection, const char
 				return ctx->m_handler->Handle(ctx);
 			}
 		}
+		else if (ctx->m_method == HandlerContext::HTTP_DELETE)
+		{
+			ASSERT(strcmp(method, MHD_HTTP_METHOD_DELETE) == 0);
+			ASSERT(*upload_data_size == 0);
+
+			// Do not call "*reqctx = NULL;" because a request completed callback would be called instead
+			return ctx->m_handler->Handle(ctx);
+		}
 		else
+		{
+			ASSERT(false);
 			return MHD_NO;
+		}
 	}
 }
 
