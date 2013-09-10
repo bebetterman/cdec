@@ -3,6 +3,8 @@
 
 #include "stdafx.h"
 
+#pragma comment(lib, "cdecegg")
+#pragma comment(lib, "cdeccore")
 #pragma comment(lib, "mysqlcppconn")
 
 bool cdec_PrintError = true;

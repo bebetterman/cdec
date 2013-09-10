@@ -123,6 +123,21 @@ void CurlEasy::SetPostText(stringx s, int offset, int length)
 	ss.clear();
 }
 
+void CurlEasy::SetPutStream(ref<Stream> istream)
+{
+	m_istream = istream;
+	m_istream->Seek(0, Stream::SeekBegin);
+
+	int code = curl_easy_setopt(m_curl, CURLOPT_UPLOAD, 1);
+	VERIFY_CURL_CODE(code);
+
+	code = curl_easy_setopt(m_curl, CURLOPT_READFUNCTION, CurlDataReadCallback);
+	VERIFY_CURL_CODE(code);
+
+	code = curl_easy_setopt(m_curl, CURLOPT_READDATA, m_istream.__GetPointer());
+	VERIFY_CURL_CODE(code);
+}
+
 //size_t xxx(size_t, void*, void*, size_t) { return 0; }
 void CurlEasy::Request()
 {
@@ -164,6 +179,14 @@ long CurlEasy::GetResponseCode()
 	int code = curl_easy_getinfo(m_curl, CURLINFO_RESPONSE_CODE, &responseCode);
 	VERIFY_CURL_CODE(code);
 	return responseCode;
+}
+
+size_t CurlEasy::CurlDataReadCallback(void *buffer, size_t size, size_t nmemb, void *user_p)
+{
+	Stream* pStream = (Stream*)user_p;
+	size_t cbop = size * nmemb;
+	cbop = pStream->Read(buffer, cbop);
+	return cbop;
 }
 
 size_t CurlEasy::CurlDataReceiveCallback(void *buffer, size_t size, size_t nmemb, void *user_p)
