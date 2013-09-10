@@ -106,6 +106,13 @@ INT64 FileStream::Seek(INT64 pos, SeekPosition cp)
 	return m_pFile->Seek(pos, (FileWrapper::SeekOrigin)cp);
 }
 
+INT64 FileStream::Position()
+{
+	if (!m_pFile->IsOpen())
+		cdec_throw(IOException(EC_IO_NotOpened));
+	return m_pFile->Pos();
+}
+
 INT64 FileStream::Length()
 {
 	if (!m_pFile->IsOpen())

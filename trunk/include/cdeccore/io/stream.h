@@ -42,14 +42,13 @@ public:
 	virtual int		Write2(ref<ByteArray> buffer, int offset, int count) = 0;
 	virtual INT64	Seek(INT64 pos, SeekPosition cp = Stream::SeekBegin) = 0;
 	virtual void	SetLength(INT64 length) = 0;
+	virtual INT64	Position() = 0;
 	virtual INT64	Length() = 0;
 	virtual void	Flush() {}
 	virtual void	Close() = 0;
 
 	virtual int		AtomRead(INT64 pos, void* buffer, int count) = 0;
 	virtual int		AtomWrite(INT64 pos, const void* buffer, int count) = 0;
-
-	INT64 Pos() { return Seek(0, SeekCurrent); }
 };
 
 class CDECCOREEXPORT FileStream: public Stream
@@ -87,6 +86,7 @@ public:
 	int		Write2(ref<ByteArray> buffer, int offset, int count);
 	INT64	Seek(INT64 pos, SeekPosition cp = Stream::SeekBegin);
 	void	SetLength(INT64 length);
+	INT64	Position();
 	INT64	Length();
 
 	void	Flush();

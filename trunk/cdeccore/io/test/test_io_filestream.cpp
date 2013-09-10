@@ -52,7 +52,7 @@ public:
 
 		INT64 length = pStrm->Length();
 		UNITTEST_ASSERT(length == 30);
-		INT64 pos = pStrm->Pos();
+		INT64 pos = pStrm->Position();
 		UNITTEST_ASSERT(pos == 4);
 	}
 
@@ -67,7 +67,7 @@ public:
 		stringx sampleFile = TestEnv::get_sample_path(__X("txtr_samp_1.txt"));
 		ref<FileStream> pStrm = gc_new<FileStream>(sampleFile, FileStream::AccessRead, false);
 		INT64 length = pStrm->Length();
-		UNITTEST_ASSERT(pStrm->Pos() == 0);
+		UNITTEST_ASSERT(pStrm->Position() == 0);
 
 		const UINT cbBuf = 8;
 		BYTE	buf[cbBuf];
@@ -78,7 +78,7 @@ public:
 			length -= cbRead;
 		}
 		UNITTEST_ASSERT(length == 0);
-		UNITTEST_ASSERT(pStrm->Pos() == pStrm->Length());
+		UNITTEST_ASSERT(pStrm->Position() == pStrm->Length());
 	}
 
 	void testReadStreamToBytes()
@@ -86,7 +86,7 @@ public:
 		stringx sampleFile = TestEnv::get_sample_path(__X("txtr_samp_1.txt"));
 		ref<FileStream> pStrm = gc_new<FileStream>(sampleFile, FileStream::AccessRead, false);
 		INT64 length = pStrm->Length();
-		UNITTEST_ASSERT(pStrm->Pos() == 0);
+		UNITTEST_ASSERT(pStrm->Position() == 0);
 
 		ref<ByteArray> buffer = gc_new<ByteArray>(8);
 		int bufferSize = buffer->Count();
@@ -97,7 +97,7 @@ public:
 			length -= cbRead;
 		}
 		UNITTEST_ASSERT(length == 0);
-		UNITTEST_ASSERT(pStrm->Pos() == pStrm->Length());
+		UNITTEST_ASSERT(pStrm->Position() == pStrm->Length());
 	}
 
 	void testAtomReadStream()
@@ -106,7 +106,7 @@ public:
 		stringx sampleFile = TestEnv::get_sample_path(__X("txtr_samp_1.txt"));
 		ref<FileStream> pStrm = gc_new<FileStream>(sampleFile, FileStream::AccessRead, false);
 		INT64 length = pStrm->Length();
-		UNITTEST_ASSERT(pStrm->Pos() == 0);
+		UNITTEST_ASSERT(pStrm->Position() == 0);
 		//printf("length=%d",length);
 		int cbBuf = 1;
 		BYTE	buf[1];
@@ -268,7 +268,7 @@ public:
 		pStrm->Write(&o, sizeof(o));			// @0
 		UNITTEST_ASSERT(pStrm->Length() == 4100);
 
-		UNITTEST_ASSERT(pStrm->Pos() == 4);
+		UNITTEST_ASSERT(pStrm->Position() == 4);
 		pStrm->SetLength(4);
 		UNITTEST_ASSERT(pStrm->Length() == 4);
 
@@ -277,7 +277,7 @@ public:
 		// 重新打开一次
 		pStrm = gc_new<FileStream>(sampleFile, FileStream::AccessReadWrite, true);
 		UNITTEST_ASSERT(pStrm->Length() == 4);
-		UNITTEST_ASSERT(pStrm->Pos() == 0);
+		UNITTEST_ASSERT(pStrm->Position() == 0);
 		pStrm->SetLength(0);
 		UNITTEST_ASSERT(pStrm->Length() == 0);
 

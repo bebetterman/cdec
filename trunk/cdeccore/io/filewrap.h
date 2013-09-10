@@ -54,6 +54,7 @@ public:
 	int		AtomRead(INT64 pos, void* buffer, int cbToRead);
 	int		AtomWrite(INT64 pos, const void* buffer, int cbToWrite);
 	INT64	Seek(INT64 offset, SeekOrigin origin);
+	INT64	Pos() { return Seek(0, SeekCurrent); }
 	INT64	Size();
 	void	SetLength(INT64);
 	void	Flush();

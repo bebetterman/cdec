@@ -44,9 +44,9 @@ void SequenceReadingBuffer::ValidateBuffer(INT64 pos)
 	if (pos_n != m_pos)
 	{
 		m_pos = pos_n;
-		if (m_pStream->Pos() != pos_n)
+		if (m_pStream->Position() != pos_n)
 			m_pStream->Seek(pos_n, Stream::SeekBegin);
-		ASSERT(m_pStream->Pos() == m_pos);
+		ASSERT(m_pStream->Position() == m_pos);
 
 		m_eob = m_pStream->Read(m_pBuffer, BufferSize);
 	}
