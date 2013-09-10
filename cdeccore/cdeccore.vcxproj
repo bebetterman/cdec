@@ -172,6 +172,7 @@
     <ClInclude Include="..\include\cdeccore\essential\variant.h" />
     <ClInclude Include="..\include\cdeccore\io\directory.h" />
     <ClInclude Include="..\include\cdeccore\io\mapping.h" />
+    <ClInclude Include="..\include\cdeccore\io\memstream.h" />
     <ClInclude Include="..\include\cdeccore\io\stream.h" />
     <ClInclude Include="..\include\cdeccore\io\textreader.h" />
     <ClInclude Include="..\include\cdeccore\io\textwriter.h" />
@@ -223,10 +224,12 @@
     <ClCompile Include="io\filewrap_stdc.cpp" />
     <ClCompile Include="io\filewrap_win.cpp" />
     <ClCompile Include="io\mapping.cpp" />
+    <ClCompile Include="io\memstream.cpp" />
     <ClCompile Include="io\stream.cpp" />
     <ClCompile Include="io\test\test_io_directory.cpp" />
     <ClCompile Include="io\test\test_io_filestream.cpp" />
     <ClCompile Include="io\test\test_io_mapping.cpp" />
+    <ClCompile Include="io\test\test_io_memstream.cpp" />
     <ClCompile Include="io\test\test_io_textrw.cpp" />
     <ClCompile Include="io\textreader.cpp" />
     <ClCompile Include="io\textwriter.cpp" />

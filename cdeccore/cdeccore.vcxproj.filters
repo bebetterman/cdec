@@ -249,6 +249,12 @@
     <ClCompile Include="crypto\test\test_crypto_base64.cpp">
       <Filter>cdec\crypto\test</Filter>
     </ClCompile>
+    <ClCompile Include="io\memstream.cpp">
+      <Filter>cdec\io</Filter>
+    </ClCompile>
+    <ClCompile Include="io\test\test_io_memstream.cpp">
+      <Filter>cdec\io\test</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -376,6 +382,9 @@
     </ClInclude>
     <ClInclude Include="..\include\cdeccore\crypto\base64.h">
       <Filter>cdec\crypto\export</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\cdeccore\io\memstream.h">
+      <Filter>cdec\io\export</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

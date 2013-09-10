@@ -67,6 +67,7 @@
 
 #include "cdeccore/io/directory.h"
 #include "cdeccore/io/stream.h"
+#include "cdeccore/io/memstream.h"
 #include "cdeccore/io/textreader.h"
 #include "cdeccore/io/textwriter.h"
 #include "cdeccore/io/mapping.h"
