@@ -58,6 +58,10 @@ public:
 		s->Seek(0, Stream::SeekBegin);
 		UNITTEST_ASSERT(s->Read(&v, 4) == 2);
 		UNITTEST_ASSERT(v == 0x5678);
+
+		ref<ByteArray> data = s->GetBytes();
+		UNITTEST_ASSERT(data->Count() == 2);
+		UNITTEST_ASSERT(data->at(0) == 0x78 && data->at(1) == 0x56);
 	}
 
 	void testWriteExtend()
