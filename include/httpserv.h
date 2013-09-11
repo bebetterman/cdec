@@ -76,6 +76,27 @@ CDEC_NS_BEGIN
 
 interface IRequestHandler;
 
+class HTTPSERVEXPORT ServerResponse: public Object
+{
+	DECLARE_REF_CLASS(ServerResponse)
+
+protected:
+	int		m_state;
+	struct MHD_Response *m_inner;
+
+public:
+	ServerResponse(UINT state, const void* data, int count, bool fConstance);
+
+	void	Close();
+	inline ~ServerResponse() { Close(); }
+
+	void	AddHeader(PCSTR key, PCSTR value);
+
+	void	RemoveHeader(PCSTR key, PCSTR value);
+
+	friend class HandlerContext;
+};
+
 class HTTPSERVEXPORT HandlerContext: public Object
 {
 	DECLARE_REF_CLASS(HandlerContext)
@@ -110,6 +131,8 @@ protected:
 	PostRaw			m_postRaw;
 
 public:
+	int SendResponse(ref<ServerResponse> response);
+
 	int SendResponse(UINT statusCode, const void* message, UINT length, bool fConstance);
 
 	inline int SendResponse(UINT statusCode, const std::string& value)

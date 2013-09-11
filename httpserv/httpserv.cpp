@@ -3,6 +3,10 @@
 
 #include "stdafx.h"
 
+#ifdef _DEBUG
+#define new DEBUG_NEW
+#endif
+
 #pragma comment(lib, "cdecegg.lib")
 #pragma comment(lib, "cdeccore.lib")
 #pragma comment(lib, "../import-win/libmicrohttpd-0.9.17-w32/lib/libmicrohttpd.dll.a")
@@ -15,6 +19,13 @@ CDEC_NS_BEGIN
 // -------------------------------------------------------------------------- //
 // HandleContext
 // -------------------------------------------------------------------------- //
+
+int HandlerContext::SendResponse(ref<ServerResponse> response)
+{
+	int ret = MHD_queue_response(m_conn, response->m_state, response->m_inner);
+	response->Close();
+	return ret;
+}
 
 int HandlerContext::SendResponse(UINT statusCode, const void* message, UINT length, bool fConstance)
 {

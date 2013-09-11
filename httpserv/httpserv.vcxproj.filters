@@ -7,5 +7,6 @@
   <ItemGroup>
     <ClCompile Include="httpserv.cpp" />
     <ClCompile Include="stdafx.cpp" />
+    <ClCompile Include="response.cpp" />
   </ItemGroup>
 </Project>
