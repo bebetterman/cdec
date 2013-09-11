@@ -164,15 +164,33 @@ enum CurlOption
 	CCO_ResponseHeaders	= 1,
 };
 
-class ResponseHeaders: public Object
+class CurlResponse: public Object
 {
+	DECLARE_REF_CLASS(Response)
+
 public:
 	typedef SortedMapVV<stringx, stringx> Map;
 
-	stringx		HttpState;	// HTTP/1.1 200 OK	
-	ref<Map>	Values;
+	int					HttpCode;		// 200
+	stringx				HttpState;		// HTTP/1.1 200 OK	
+	ref<Map>			Headers;		// CCO_ResponseHeaders required
+	ref<MemoryStream>	Stream;
 
-	inline ResponseHeaders() { Values = gc_new<Map>(); }
+	inline CurlResponse(): HttpCode(0)
+	{
+		Stream = gc_new<MemoryStream>();
+	}
+
+	inline ref<ByteArray> GetBytes()
+	{
+		return Stream->GetBytes();
+	}
+
+	inline stringx GetString()
+	{
+		ref<ByteArray> data = GetBytes();
+		return Encoding::get_UTF8()->GetString(data);
+	}
 };
 
 class CURLCDECEXPORT CurlEasy: public Object
@@ -184,8 +202,7 @@ class CURLCDECEXPORT CurlEasy: public Object
 	std::vector<std::string>	m_headers;
 
 	ref<Stream>					m_istream;	// PUT
-	ref<ResponseHeaders>		m_resphd;	// Response headers
-	ref<ICurlContentWriter>		m_cWriter;	// Response reader
+	ref<CurlResponse>			m_response;
 
 public:
 	static void GlobalInit();
@@ -200,7 +217,8 @@ public:
 	void	SetConnectionTimeOut(int seconds);
 	void	SetTimeOut(int seconds);
 
-	void	SetContentWriter(ref<ICurlContentWriter> cWriter) { m_cWriter = cWriter; }
+	// SetOutputStream will be supported as an alternative
+//	void	SetContentWriter(ref<ICurlContentWriter> cWriter) { m_cWriter = cWriter; }
 
 	void	AddHeader(stringx key, stringx value);
 
@@ -216,18 +234,20 @@ public:
 
 	void	Request();
 
-	long	GetResponseCode();
-	ref<ResponseHeaders>	GetResponseHeaders() { return m_resphd; }
+	ref<CurlResponse>	GetResponse() { return m_response; }
+	int		GetResponseCode() { return m_response->HttpCode; }
 	
-	ref<ByteArray>	ReadResponseData();
-	stringx			ReadResponseText();
+	inline ref<ByteArray>	ReadResponseData() { return m_response->GetBytes(); }
+	inline stringx			ReadResponseText() { return m_response->GetString(); }
 
 private:
-	static size_t CurlDataReceiveCallback(void *buffer, size_t size, size_t nmemb, void *user_p);
-
 	static size_t CurlDataReadCallback(void *ptr, size_t size, size_t nmemb, void *userdata);
 
+	// callback for writing response headers
 	static size_t CurlHeaderWriteCallback(void *ptr, size_t size, size_t nmemb, void *userdata);
+
+	// callback for writing response body data (stream)
+	static size_t CurlDataWriteCallback(void *buffer, size_t size, size_t nmemb, void *user_p);
 };
 
 // -------------------------------------------------------------------------- //

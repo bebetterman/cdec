@@ -5,34 +5,6 @@
 CDEC_NS_BEGIN
 // -------------------------------------------------------------------------- //
 
-class CurlByteBufferContentWriter: public ICurlContentWriter
-{
-	DECLARE_REF_CLASS(CurlByteBufferContentWriter)
-
-	typedef std::vector<unsigned char> ByteBuffer;
-	ByteBuffer	m_buffer;
-
-public:
-	void	Reserve(int size) { m_buffer.reserve(size); }
-
-	void	OnCurlReset() { m_buffer.clear(); }
-	void	OnCurlReceive(const void* buffer, int size);
-
-	int		GetDataLength() { return m_buffer.size(); }
-	const void*	GetData() { return m_buffer.size() != 0 ? &m_buffer[0] : NULL; }
-
-};
-
-void CurlByteBufferContentWriter::OnCurlReceive(const void* buffer, int size)
-{
-	size_t rcOld = m_buffer.size();
-	size_t rcNew = rcOld + size;
-	m_buffer.resize(rcNew);
-	memcpy(&m_buffer[rcOld], buffer, size);
-}
-
-// -------------------------------------------------------------------------- //
-
 void CurlEasy::GlobalInit()
 {
 #if defined(X_OS_WINDOWS)
@@ -55,7 +27,7 @@ CurlEasy::CurlEasy(CurlOption ops): m_ops(ops)
 	if ((m_curl = curl_easy_init()) == NULL)
 		throw CurlException(EC_CURL_FAILED_INIT);
 
-	m_cWriter = gc_new<CurlByteBufferContentWriter>();
+	m_response = gc_new<CurlResponse>();
 
 	// Default time-out values
 	SetConnectionTimeOut(60);
@@ -63,12 +35,12 @@ CurlEasy::CurlEasy(CurlOption ops): m_ops(ops)
 
 	if (ops & CCO_ResponseHeaders)
 	{
-		m_resphd = gc_new<ResponseHeaders>();
+		m_response->Headers = gc_new<CurlResponse::Map>();
 
 		int code = curl_easy_setopt(m_curl, CURLOPT_HEADERFUNCTION, CurlHeaderWriteCallback);
 		VERIFY_CURL_CODE(code);
 
-		code = curl_easy_setopt(m_curl, CURLOPT_WRITEHEADER, m_resphd.__GetPointer());
+		code = curl_easy_setopt(m_curl, CURLOPT_WRITEHEADER, m_response.__GetPointer());
 		VERIFY_CURL_CODE(code);
 	}
 }
@@ -167,29 +139,28 @@ void CurlEasy::Request()
 	}
 
 	// Set response receiver
-	m_cWriter->OnCurlReset();
+	m_response->Stream->SetLength(0);
+	m_response->Stream->Seek(0, Stream::SeekBegin);
 
-	code = curl_easy_setopt(m_curl, CURLOPT_WRITEFUNCTION, CurlDataReceiveCallback);
+	code = curl_easy_setopt(m_curl, CURLOPT_WRITEFUNCTION, CurlDataWriteCallback);
 	VERIFY_CURL_CODE(code);
 
-	code = curl_easy_setopt(m_curl, CURLOPT_WRITEDATA, m_cWriter.__GetPointer());
+	code = curl_easy_setopt(m_curl, CURLOPT_WRITEDATA, m_response.__GetPointer());
 	VERIFY_CURL_CODE(code);
 
 	// Perform action
 	code = curl_easy_perform(m_curl);
 	VERIFY_CURL_CODE(code);
 
+	// Read response information
+	long responseCode = 0;
+	code = curl_easy_getinfo(m_curl, CURLINFO_RESPONSE_CODE, &responseCode);
+	VERIFY_CURL_CODE(code);
+	m_response->HttpCode = (int)responseCode;
+
 	// Clean up
 	if (headers != NULL)
 		curl_slist_free_all(headers); // free the header list
-}
-
-long CurlEasy::GetResponseCode()
-{
-	long responseCode = 0;
-	int code = curl_easy_getinfo(m_curl, CURLINFO_RESPONSE_CODE, &responseCode);
-	VERIFY_CURL_CODE(code);
-	return responseCode;
 }
 
 size_t CurlEasy::CurlDataReadCallback(void *buffer, size_t size, size_t nmemb, void *user_p)
@@ -200,24 +171,24 @@ size_t CurlEasy::CurlDataReadCallback(void *buffer, size_t size, size_t nmemb, v
 	return cbop;
 }
 
-size_t CurlEasy::CurlDataReceiveCallback(void *buffer, size_t size, size_t nmemb, void *user_p)
+size_t CurlEasy::CurlDataWriteCallback(void *buffer, size_t size, size_t nmemb, void *user_p)
 {
-	ICurlContentWriter*	pWriter = (ICurlContentWriter*)user_p;
-	size_t cbTotal = size * nmemb;
-	pWriter->OnCurlReceive(buffer, cbTotal);
-	return cbTotal;
+	CurlResponse*	response = (CurlResponse*)user_p;
+	size_t cbop = size * nmemb;
+	response->Stream->Write(buffer, cbop);
+	return cbop;
 }
 
 size_t CurlEasy::CurlHeaderWriteCallback(void* buffer, size_t size, size_t nmemb, void* user_p)
 {
-	ResponseHeaders* rsphd = (ResponseHeaders*)user_p;
+	CurlResponse*	response = (CurlResponse*)user_p;
 	size_t cbop = size * nmemb;
 	stringx s = Encoding::get_UTF8()->GetString((BYTE*)buffer, cbop);
 	s = s.TrimRight();
 
-	if (rsphd->HttpState == NULL && s.StartsWith(__X("HTTP")))
+	if (response->HttpState == NULL && s.StartsWith(__X("HTTP")))
 	{
-		rsphd->HttpState = s;
+		response->HttpState = s;
 		// Console::WriteLine(__X("[HTTP State] ") + s);
 	}
 	else if (s.Length() != 0)
@@ -226,25 +197,11 @@ size_t CurlEasy::CurlHeaderWriteCallback(void* buffer, size_t size, size_t nmemb
 		ASSERT(pos > 0);
 		stringx key = s.Substring(0, pos).TrimRight();
 		stringx value = s.Substring(pos + 1).TrimLeft();
-		rsphd->Values->Insert(key, value);
+		response->Headers->Insert(key, value);
 		// Console::WriteLine(__X("[Header] Key=\"") + key + __X("\" Value=\"") + value + '\"');
 	}
 
 	return cbop;
-}
-
-ref<ByteArray> CurlEasy::ReadResponseData()
-{
-	ref<CurlByteBufferContentWriter> cwr = ref_cast<CurlByteBufferContentWriter>(m_cWriter);
-	ref<ByteArray> data = gc_new<ByteArray>((const BYTE*)cwr->GetData(), cwr->GetDataLength());
-	return data;
-}
-
-stringx CurlEasy::ReadResponseText()
-{
-	ref<CurlByteBufferContentWriter> cwr = ref_cast<CurlByteBufferContentWriter>(m_cWriter);
-	stringx text = Encoding::get_UTF8()->GetString((const BYTE*)cwr->GetData(), cwr->GetDataLength());
-	return text;
 }
 
 // -------------------------------------------------------------------------- //
