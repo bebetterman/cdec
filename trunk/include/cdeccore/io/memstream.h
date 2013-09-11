@@ -32,6 +32,8 @@ public:
 
 	int		AtomRead(INT64 pos, void* buffer, int count);
 	int		AtomWrite(INT64 pos, const void* buffer, int count);
+
+	ref<ByteArray>	GetBytes();
 };
 
 // -------------------------------------------------------------------------- //
@@ -65,6 +67,11 @@ inline INT64 MemoryStream::Seek(INT64 pos, SeekPosition cp)
 	else
 		cdec_throw(Exception(EC_InvalidArg));
 	return m_pos;
+}
+
+inline ref<ByteArray> MemoryStream::GetBytes()
+{
+	return gc_new<ByteArray>(&m_buffer[0], m_buffer.size());
 }
 
 // -------------------------------------------------------------------------- //
