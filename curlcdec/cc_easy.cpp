@@ -50,7 +50,7 @@ void CurlEasy::GlobalTerm()
 	curl_global_cleanup();
 }
 
-CurlEasy::CurlEasy()
+CurlEasy::CurlEasy(CurlOption ops): m_ops(ops)
 {
 	if ((m_curl = curl_easy_init()) == NULL)
 		throw CurlException(EC_CURL_FAILED_INIT);
@@ -60,6 +60,17 @@ CurlEasy::CurlEasy()
 	// Default time-out values
 	SetConnectionTimeOut(60);
 	SetTimeOut(120);
+
+	if (ops & CCO_ResponseHeaders)
+	{
+		m_resphd = gc_new<ResponseHeaders>();
+
+		int code = curl_easy_setopt(m_curl, CURLOPT_HEADERFUNCTION, CurlHeaderWriteCallback);
+		VERIFY_CURL_CODE(code);
+
+		code = curl_easy_setopt(m_curl, CURLOPT_WRITEHEADER, m_resphd.__GetPointer());
+		VERIFY_CURL_CODE(code);
+	}
 }
 
 CurlEasy::~CurlEasy()
@@ -195,6 +206,31 @@ size_t CurlEasy::CurlDataReceiveCallback(void *buffer, size_t size, size_t nmemb
 	size_t cbTotal = size * nmemb;
 	pWriter->OnCurlReceive(buffer, cbTotal);
 	return cbTotal;
+}
+
+size_t CurlEasy::CurlHeaderWriteCallback(void* buffer, size_t size, size_t nmemb, void* user_p)
+{
+	ResponseHeaders* rsphd = (ResponseHeaders*)user_p;
+	size_t cbop = size * nmemb;
+	stringx s = Encoding::get_UTF8()->GetString((BYTE*)buffer, cbop);
+	s = s.TrimRight();
+
+	if (rsphd->HttpState == NULL && s.StartsWith(__X("HTTP")))
+	{
+		rsphd->HttpState = s;
+		// Console::WriteLine(__X("[HTTP State] ") + s);
+	}
+	else if (s.Length() != 0)
+	{
+		int pos = s.IndexOf(':');
+		ASSERT(pos > 0);
+		stringx key = s.Substring(0, pos).TrimRight();
+		stringx value = s.Substring(pos + 1).TrimLeft();
+		rsphd->Values->Insert(key, value);
+		// Console::WriteLine(__X("[Header] Key=\"") + key + __X("\" Value=\"") + value + '\"');
+	}
+
+	return cbop;
 }
 
 ref<ByteArray> CurlEasy::ReadResponseData()
