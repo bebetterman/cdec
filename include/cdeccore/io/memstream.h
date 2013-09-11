@@ -71,6 +71,8 @@ inline INT64 MemoryStream::Seek(INT64 pos, SeekPosition cp)
 
 inline ref<ByteArray> MemoryStream::GetBytes()
 {
+	if (m_buffer.size() == 0)
+		return gc_new<ByteArray>(0);
 	return gc_new<ByteArray>(&m_buffer[0], m_buffer.size());
 }
 
