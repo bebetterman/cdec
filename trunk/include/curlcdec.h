@@ -158,21 +158,40 @@ interface ICurlContentWriter: public Object
 	virtual void OnCurlReceive(const void* buffer, int size) = 0;
 };
 
+enum CurlOption
+{
+	CCO_None = 0,
+	CCO_ResponseHeaders	= 1,
+};
+
+class ResponseHeaders: public Object
+{
+public:
+	typedef SortedMapVV<stringx, stringx> Map;
+
+	stringx		HttpState;	// HTTP/1.1 200 OK	
+	ref<Map>	Values;
+
+	inline ResponseHeaders() { Values = gc_new<Map>(); }
+};
+
 class CURLCDECEXPORT CurlEasy: public Object
 {
 	DECLARE_REF_CLASS(CurlEasy)
 
-	void*	m_curl;
+	CurlOption					m_ops;
+	void*						m_curl;
 	std::vector<std::string>	m_headers;
 
 	ref<Stream>					m_istream;	// PUT
+	ref<ResponseHeaders>		m_resphd;	// Response headers
 	ref<ICurlContentWriter>		m_cWriter;	// Response reader
 
 public:
 	static void GlobalInit();
 	static void GlobalTerm();
 
-	CurlEasy();
+	CurlEasy(CurlOption ops = CCO_None);
 	~CurlEasy();
 
 	void	SetUrl(const char* url);
@@ -198,6 +217,7 @@ public:
 	void	Request();
 
 	long	GetResponseCode();
+	ref<ResponseHeaders>	GetResponseHeaders() { return m_resphd; }
 	
 	ref<ByteArray>	ReadResponseData();
 	stringx			ReadResponseText();
@@ -207,6 +227,7 @@ private:
 
 	static size_t CurlDataReadCallback(void *ptr, size_t size, size_t nmemb, void *userdata);
 
+	static size_t CurlHeaderWriteCallback(void *ptr, size_t size, size_t nmemb, void *userdata);
 };
 
 // -------------------------------------------------------------------------- //
