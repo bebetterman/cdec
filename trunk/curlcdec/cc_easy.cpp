@@ -121,6 +121,18 @@ void CurlEasy::SetPutStream(ref<Stream> istream)
 	VERIFY_CURL_CODE(code);
 }
 
+void CurlEasy::SetCustomRequest(PCSTR method)
+{
+	int code = curl_easy_setopt(m_curl, CURLOPT_CUSTOMREQUEST, method);
+	VERIFY_CURL_CODE(code);
+}
+
+void CurlEasy::SetCustomRequest(stringx method)
+{
+	std::string method_cs = Encoding::get_UTF8()->FromUnicode(method);
+	SetCustomRequest(method_cs.c_str());
+}
+
 //size_t xxx(size_t, void*, void*, size_t) { return 0; }
 void CurlEasy::Request()
 {

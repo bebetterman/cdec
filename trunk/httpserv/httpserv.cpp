@@ -193,6 +193,10 @@ int Server::OnRequestHandler(void* hdctx, MHD_Connection* connection, const char
 			{
 				ctx->m_method = HandlerContext::HTTP_DELETE;
 			}
+			else if (strcmp(method, MHD_HTTP_METHOD_HEAD) == 0)
+			{
+				ctx->m_method = HandlerContext::HTTP_HEAD;
+			}
 			else
 			{
 				ASSERT(false);
@@ -217,9 +221,9 @@ int Server::OnRequestHandler(void* hdctx, MHD_Connection* connection, const char
 		// Parse headers
 		MHD_get_connection_values(connection, MHD_HEADER_KIND, OnParseKeyValuePairs, ctx);
 
-		if (ctx->m_method == HandlerContext::HTTP_GET)
+		if (ctx->m_method == HandlerContext::HTTP_GET || ctx->m_method == HandlerContext::HTTP_DELETE ||
+			ctx->m_method == HandlerContext::HTTP_HEAD)
 		{
-			ASSERT(strcmp(method, MHD_HTTP_METHOD_GET) == 0);
 			ASSERT(*upload_data_size == 0);
 
 			// Do not call "*reqctx = NULL;" because a request completed callback would be called instead
@@ -250,14 +254,6 @@ int Server::OnRequestHandler(void* hdctx, MHD_Connection* connection, const char
 				// Do not call "*reqctx = NULL;" because a request completed callback would be called instead
 				return ctx->m_handler->Handle(ctx);
 			}
-		}
-		else if (ctx->m_method == HandlerContext::HTTP_DELETE)
-		{
-			ASSERT(strcmp(method, MHD_HTTP_METHOD_DELETE) == 0);
-			ASSERT(*upload_data_size == 0);
-
-			// Do not call "*reqctx = NULL;" because a request completed callback would be called instead
-			return ctx->m_handler->Handle(ctx);
 		}
 		else
 		{

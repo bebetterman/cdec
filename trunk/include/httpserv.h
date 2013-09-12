@@ -104,7 +104,8 @@ class HTTPSERVEXPORT HandlerContext: public Object
 public:
 	enum Method
 	{
-		HTTP_NONE, HTTP_GET, HTTP_POST, HTTP_DELETE
+		HTTP_NONE, HTTP_GET, HTTP_POST, HTTP_DELETE, HTTP_HEAD, HTTP_PUT,
+//		HTTP_CONNECT, HTTP_OPTIONS, HTTP_TRACE
 	};
 
 	typedef std::map<stringx, stringx> StringPairMap;
