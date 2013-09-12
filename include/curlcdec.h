@@ -232,6 +232,9 @@ public:
 	void	SetPutStream(ref<Stream> istream);
 	void	SetPutBytes(ref<ByteArray> data, int offset, int length);
 
+	void	SetCustomRequest(PCSTR method);
+	void	SetCustomRequest(stringx method);
+
 	void	Request();
 
 	ref<CurlResponse>	GetResponse() { return m_response; }
