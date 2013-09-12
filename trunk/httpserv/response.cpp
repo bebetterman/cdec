@@ -30,6 +30,21 @@ void ServerResponse::AddHeader(PCSTR key, PCSTR value)
 		cdec_throw(Exception(EC_Fail));
 }
 
+void ServerResponse::AddHeader(PCSTR key, stringx value)
+{
+	ref<Encoding> e = Encoding::get_UTF8();
+	std::string valuea = e->FromUnicode(value);
+	AddHeader(key, valuea.c_str());
+}
+
+void ServerResponse::AddHeader(stringx key, stringx value)
+{
+	ref<Encoding> e = Encoding::get_UTF8();
+	std::string keya = e->FromUnicode(key);
+	std::string valuea = e->FromUnicode(value);
+	AddHeader(keya.c_str(), valuea.c_str());
+}
+
 void ServerResponse::RemoveHeader(PCSTR key, PCSTR value)
 {
 	if (MHD_del_response_header(m_inner, key, value) != MHD_YES)
