@@ -91,6 +91,8 @@ public:
 	inline ~ServerResponse() { Close(); }
 
 	void	AddHeader(PCSTR key, PCSTR value);
+	void	AddHeader(PCSTR key, stringx value);
+	void	AddHeader(stringx key, stringx value);
 
 	void	RemoveHeader(PCSTR key, PCSTR value);
 
