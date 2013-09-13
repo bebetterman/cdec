@@ -50,7 +50,7 @@ int	MemoryStream::Read(void* pv, int count)
 	if (m_pos >= m_buffer.size())
 		return 0;	// No more data to read
 
-	int cbop = (int)Math::Min(m_buffer.size() - m_pos, (INT64)count);
+	int cbop = (int)Math::Min((INT64)m_buffer.size() - m_pos, (INT64)count);
 	memcpy(pv, &m_buffer[m_pos], cbop);
 	m_pos += cbop;
 	return cbop;

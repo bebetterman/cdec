@@ -25,14 +25,14 @@ public:
 
 	void testNormalRW()
 	{
-		INT bf = 0x12345678;
+		int bf = 0x12345678;
 		ref<MemoryStream> s = gc_new<MemoryStream>();
 		UNITTEST_ASSERT(s->Length() == 0);
 		UNITTEST_ASSERT(s->Write(&bf, 4) == 4);
 		UNITTEST_ASSERT(s->Length() == 4);
 		UNITTEST_ASSERT(s->Position() == 4);
 		
-		INT v = 0;
+		int v = 0;
 		UNITTEST_ASSERT(s->Seek(2, Stream::SeekBegin) == 2);
 		UNITTEST_ASSERT(s->Read(&v, 4) == 2);
 		UNITTEST_ASSERT(v == 0x1234 && s->Position() == 4);
@@ -40,7 +40,7 @@ public:
 
 	void testSetLength()
 	{
-		INT bf = 0x12345678;
+		int bf = 0x12345678;
 		ref<MemoryStream> s = gc_new<MemoryStream>();
 		s->Write(&bf, 4);
 
@@ -66,7 +66,7 @@ public:
 
 	void testWriteExtend()
 	{
-		INT bf = 0x12345678;
+		int bf = 0x12345678;
 		ref<MemoryStream> s = gc_new<MemoryStream>();
 		UNITTEST_ASSERT(s->Seek(2, Stream::SeekBegin) == 2);
 		UNITTEST_ASSERT(s->Write(&bf, 4) == 4);
