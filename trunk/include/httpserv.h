@@ -107,7 +107,8 @@ public:
 	enum Method
 	{
 		HTTP_NONE, HTTP_GET, HTTP_POST, HTTP_DELETE, HTTP_HEAD, HTTP_PUT,
-//		HTTP_CONNECT, HTTP_OPTIONS, HTTP_TRACE
+		HTTP_CONNECT, HTTP_OPTIONS, HTTP_TRACE,
+		HTTP_CUSTOM
 	};
 
 	typedef std::map<stringx, stringx> StringPairMap;
@@ -121,6 +122,7 @@ protected:
 
 	MHD_Connection*		m_conn;
 	Method				m_method;
+	stringx				m_customMethod;
 	stringx				m_url;
 
 	MHD_PostProcessor*	m_postprocessor;
