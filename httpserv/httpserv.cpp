@@ -162,6 +162,7 @@ int Server::OnPostDataIterator(void *cls, enum MHD_ValueKind kind, const char *k
 
 int Server::OnRequestHandler(void* hdctx, MHD_Connection* connection, const char* url, const char* method, const char* version, const char* upload_data, size_t* upload_data_size, void** reqctx)
 {
+	ref<Encoding> utf8 = Encoding::get_UTF8();
 	Server* server = (Server*)hdctx;
 
 	if (*reqctx == NULL)
@@ -169,14 +170,35 @@ int Server::OnRequestHandler(void* hdctx, MHD_Connection* connection, const char
 		ASSERT(upload_data == NULL && *upload_data_size == 0);
 		ref<HandlerContext> ctx = gc_new<HandlerContext>();
 		ctx->m_conn = connection;
-		ctx->m_url = Encoding::get_UTF8()->ToUnicode(url);
+		ctx->m_url = utf8->ToUnicode(url);
 
 		ref<IRequestHandler> handler = server->m_dispatcher->Dispatch(ctx->m_url);
 		ctx->m_handler = handler;
 
-		if (strcmp(method, MHD_HTTP_METHOD_POST) == 0)
-		{
+		if (strcmp(method, MHD_HTTP_METHOD_GET) == 0)
+			ctx->m_method = HandlerContext::HTTP_GET;
+		else if (strcmp(method, MHD_HTTP_METHOD_POST) == 0)
 			ctx->m_method = HandlerContext::HTTP_POST;
+		else if (strcmp(method, MHD_HTTP_METHOD_DELETE) == 0)
+			ctx->m_method = HandlerContext::HTTP_DELETE;
+		else if (strcmp(method, MHD_HTTP_METHOD_HEAD) == 0)
+			ctx->m_method = HandlerContext::HTTP_HEAD;
+		else if (strcmp(method, MHD_HTTP_METHOD_PUT) == 0)
+			ctx->m_method = HandlerContext::HTTP_PUT;
+		else if (strcmp(method, MHD_HTTP_METHOD_CONNECT) == 0)
+			ctx->m_method = HandlerContext::HTTP_CONNECT;
+		else if (strcmp(method, MHD_HTTP_METHOD_OPTIONS) == 0)
+			ctx->m_method = HandlerContext::HTTP_OPTIONS;
+		else if (strcmp(method, MHD_HTTP_METHOD_TRACE) == 0)
+			ctx->m_method = HandlerContext::HTTP_TRACE;
+		else
+		{
+			ctx->m_method = HandlerContext::HTTP_CUSTOM;
+			ctx->m_customMethod = utf8->ToUnicode(method);
+		}
+
+		if (ctx->m_method == HandlerContext::HTTP_POST || ctx->m_method == HandlerContext::HTTP_PUT)
+		{
 			// Hotfix: Non-form post
 			ctx->m_keepPostData = ctx->m_handler->KeepPostData();
 			ctx->m_postprocessor = NULL;
@@ -184,25 +206,7 @@ int Server::OnRequestHandler(void* hdctx, MHD_Connection* connection, const char
 				ctx->m_postprocessor = MHD_create_post_processor(connection, 1024, OnPostDataIterator, ctx.__GetPointer());
 		}
 		else
-		{
-			if (strcmp(method, MHD_HTTP_METHOD_GET) == 0)
-			{
-				ctx->m_method = HandlerContext::HTTP_GET;
-			}
-			else if (strcmp(method, MHD_HTTP_METHOD_DELETE) == 0)
-			{
-				ctx->m_method = HandlerContext::HTTP_DELETE;
-			}
-			else if (strcmp(method, MHD_HTTP_METHOD_HEAD) == 0)
-			{
-				ctx->m_method = HandlerContext::HTTP_HEAD;
-			}
-			else
-			{
-				ASSERT(false);
-				return MHD_NO;
-			}
-				
+		{				
 			ctx->m_postprocessor = NULL;
 		}
 
@@ -221,15 +225,14 @@ int Server::OnRequestHandler(void* hdctx, MHD_Connection* connection, const char
 		// Parse headers
 		MHD_get_connection_values(connection, MHD_HEADER_KIND, OnParseKeyValuePairs, ctx);
 
-		if (ctx->m_method == HandlerContext::HTTP_GET || ctx->m_method == HandlerContext::HTTP_DELETE ||
-			ctx->m_method == HandlerContext::HTTP_HEAD)
+		if (ctx->m_method != HandlerContext::HTTP_POST && ctx->m_method != HandlerContext::HTTP_PUT)
 		{
 			ASSERT(*upload_data_size == 0);
 
 			// Do not call "*reqctx = NULL;" because a request completed callback would be called instead
 			return ctx->m_handler->Handle(ctx);
 		}
-		else if (ctx->m_method == HandlerContext::HTTP_POST)
+		else
 		{
 			if (*upload_data_size != 0)
 			{
@@ -254,11 +257,6 @@ int Server::OnRequestHandler(void* hdctx, MHD_Connection* connection, const char
 				// Do not call "*reqctx = NULL;" because a request completed callback would be called instead
 				return ctx->m_handler->Handle(ctx);
 			}
-		}
-		else
-		{
-			ASSERT(false);
-			return MHD_NO;
 		}
 	}
 }
