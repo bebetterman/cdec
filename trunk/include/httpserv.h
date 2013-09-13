@@ -164,7 +164,13 @@ public:
 	inline const StringPairMap& GetArgs() { return m_getArgs; }
 	inline const StringPairMap& GetHeaders() { return m_headers; }
 	inline const PostMap& PostArgs() { return m_postArgs; }
-	inline ref<ByteArray> PostData() { return gc_new<ByteArray>(&m_postRaw[0], m_postRaw.size()); }
+	inline ref<ByteArray> PostData()
+	{
+		if (m_postRaw.size() != 0)
+			return gc_new<ByteArray>(&m_postRaw[0], m_postRaw.size());
+		else
+			return gc_new<ByteArray>(0);
+	}
 
 	void Dispose();
 
