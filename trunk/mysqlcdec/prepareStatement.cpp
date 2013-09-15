@@ -14,13 +14,22 @@ void PrepareStatement::SetString(int index, stringx value)
 
 void PrepareStatement::SetInt(int index ,int value)
 {
-	m_impl->setInt(index,value);
-	
+	m_impl->setInt(index,value);	
+}
+
+void PrepareStatement::SetUInt(int index, UINT value)
+{
+	m_impl->setUInt(index, value);
 }
 
 void PrepareStatement::SetInt64(int index ,INT64 value)
 {
 	m_impl->setInt64(index,value);
+}
+
+void PrepareStatement::SetUInt64(int index, UINT64 value)
+{
+	m_impl->setUInt64(index, value);
 }
 
 int PrepareStatement::ExecuteUpdate()
