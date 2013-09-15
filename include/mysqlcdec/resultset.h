@@ -22,8 +22,14 @@ public:
 	int		GetInt(int index);
 	int		GetInt(stringx key);
 
+	UINT	GetUInt(int index);
+	UINT	GetUInt(stringx key);
+
 	INT64	GetInt64(int index);
 	INT64	GetInt64(stringx key);
+
+	UINT64	GetUInt64(int index);
+	UINT64	GetUInt64(stringx key);
 
 	stringx	GetString(int index);
 	stringx	GetString(stringx key);

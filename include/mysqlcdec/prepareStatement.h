@@ -15,7 +15,9 @@ public:
 
 	void	SetString(int index, stringx value);
 	void	SetInt(int index, int value);
+	void	SetUInt(int index, UINT value);
 	void	SetInt64(int index, INT64 value);
+	void	SetUInt64(int index, UINT64 value);
 	
 	int		ExecuteUpdate();
 	ref<ResultSet> ExecuteQuery();
