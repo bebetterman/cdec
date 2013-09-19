@@ -35,6 +35,10 @@ public:
 		md5->Update(digest, 20, 20);
 		digest = md5->Final();
 		UNITTEST_ASSERT(digest->Count() == 16 && digest->at(0) == 0xfd && digest->at(15) == 0x10);
+
+		ref<Stream> istream = gc_new<MemoryStream>("hello", 5);
+		digest = md5->Compute(istream);
+		UNITTEST_ASSERT(digest->Count() == 16 && digest->at(0) == 0x5d && digest->at(15) == 0x92);
 	}
 
 	void testSHA1()
