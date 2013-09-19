@@ -5,6 +5,21 @@
 CDEC_NS_BEGIN
 // -------------------------------------------------------------------------- //
 
+ref<ByteArray> HashAlgorithmCompute(interface HashAlgorithm* pThis, ref<Stream> istream)
+{
+	const int BufferSize = 0x100000;
+	void* buffer = CoreAllocLC(BufferSize);
+	istream->Seek(0, Stream::SeekBegin);
+	pThis->Reset();
+	int cbop;
+	while ((cbop = istream->Read(buffer, BufferSize)) != 0)
+		pThis->Update(buffer, cbop);
+	CoreFreeLC(buffer, BufferSize);
+	return pThis->Final();
+}
+
+// -------------------------------------------------------------------------- //
+
 MD5::MD5() { m_impl = new kfcimpl::MD5(); }
 
 MD5::~MD5() { delete m_impl; }

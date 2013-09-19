@@ -9,6 +9,8 @@ namespace kfcimpl
 CDEC_NS_BEGIN
 // -------------------------------------------------------------------------- //
 
+CDECCOREEXPORT ref<ByteArray> HashAlgorithmCompute(interface HashAlgorithm* pThis, ref<Stream> istream);
+
 interface HashAlgorithm: Object
 {
 	DECLARE_REF_CLASS(HashAlgorithm)
@@ -24,8 +26,10 @@ interface HashAlgorithm: Object
 	inline void		Update(ref<ByteArray> input, int offset, int size);
 	inline ref<ByteArray>	Final();
 
+	inline ref<ByteArray>	Compute(const void* input, int size);
 	inline ref<ByteArray>	Compute(ref<ByteArray> data, int offset, int size);
 	inline ref<ByteArray>	Compute(ref<ByteArray> data) { return Compute(data, 0, data->Count()); }
+	inline ref<ByteArray>	Compute(ref<Stream> istream) { return HashAlgorithmCompute(this, istream); }
 };
 
 class CDECCOREEXPORT MD5: public HashAlgorithm
@@ -91,6 +95,13 @@ inline ref<ByteArray> HashAlgorithm::Final()
 	pin_ptr<BYTE> pinOutput = digest->GetBuffer();
 	Final(pinOutput.ptr());
 	return digest;
+}
+
+inline ref<ByteArray> HashAlgorithm::Compute(const void* input, int size)
+{
+	Reset();
+	Update(input, size);
+	return Final();
 }
 
 inline ref<ByteArray> HashAlgorithm::Compute(ref<ByteArray> data, int offset, int size)
