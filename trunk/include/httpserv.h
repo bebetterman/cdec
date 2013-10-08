@@ -161,8 +161,21 @@ public:
 
 	inline stringx GetUrl() { return m_url; }
 	inline Method GetMethod() { return m_method; }
+
 	inline const StringPairMap& GetArgs() { return m_getArgs; }
+	inline stringx	GetArg(stringx key, stringx defValue = NULL)
+	{
+		StringPairMap::iterator it = m_getArgs.find(key);
+		return it != m_getArgs.end() ? it->second : defValue;
+	}
+
 	inline const StringPairMap& GetHeaders() { return m_headers; }
+	inline stringx	GetHeader(stringx key, stringx defValue = NULL)
+	{
+		StringPairMap::iterator it = m_headers.find(key);
+		return it != m_headers.end() ? it->second : defValue;
+	}
+
 	inline const PostMap& PostArgs() { return m_postArgs; }
 	inline ref<ByteArray> PostData()
 	{
