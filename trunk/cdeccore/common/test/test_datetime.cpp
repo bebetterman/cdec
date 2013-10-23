@@ -14,6 +14,7 @@ class TestDateTime: public UnitTestSuite
 {
 	UNITTEST_SUITE(TestDateTime)
 		UNITTEST_METHOD(testFormat)
+		UNITTEST_METHOD(testTimestamp)
 	UNITTEST_SUITE_END()
 
 public:
@@ -23,11 +24,25 @@ public:
 
 	void testFormat()
 	{
-		DateTime dt = DateTime::Set(2005, 5, 3, 2, 5, 2, 50);
+		DateTime dt;
+		dt.Set(2005, 5, 3, 2, 5, 2, 50);
 		UNITTEST_ASSERT(dt.Format() == __X("2005-05-03 02:05:02"));
 
-		dt = DateTime::Set(2005, 12, 23, 22, 15, 12, 50);
+		dt.Set(2005, 12, 23, 22, 15, 12, 50);
 		UNITTEST_ASSERT(dt.Format() == __X("2005-12-23 22:15:12"));
+	}
+
+	void testTimestamp()
+	{
+		// Local 2013-10-23 17:18:58
+		// UTC 2013-10-23 09:18:58
+		// Timestamp 1382519938
+
+		DateTime dt;
+		dt.SetUtc(1382519938, 0);
+		UNITTEST_ASSERT(dt.Format() == __X("2013-10-23 09:18:58"));
+		UNITTEST_ASSERT(dt.ToTimestamp() == 1382519938);
+		
 	}
 
 	void tearDown()
