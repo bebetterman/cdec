@@ -5,31 +5,27 @@ CDEC_NS_BEGIN
 
 void DateTime::Set(int year, int month, int day, int hour, int minute, int second, int milliseconds)
 {
-	DateTime dt;
-
 #ifdef X_OS_WINDOWS
-	dt.m_st.wYear = year;
-	dt.m_st.wMonth = month;
-	dt.m_st.wDay = day;
-	dt.m_st.wHour = hour;
-	dt.m_st.wMinute = minute;
-	dt.m_st.wSecond = second;
-	dt.m_st.wMilliseconds = milliseconds;
+	m_st.wYear = year;
+	m_st.wMonth = month;
+	m_st.wDay = day;
+	m_st.wHour = hour;
+	m_st.wMinute = minute;
+	m_st.wSecond = second;
+	m_st.wMilliseconds = milliseconds;
 
 	// todo: set wDayOfWeek
 #else
-	dt.m_tm.tm_year = year;
-	dt.m_tm.tm_mon = month;
-	dt.m_tm.tm_mday = day;
-	dt.m_tm.tm_hour = hour;
-	dt.m_tm.tm_min = minute;
-	dt.m_tm.tm_sec = second;
-	dt.m_milli = milliseconds;
+	m_tm.tm_year = year;
+	m_tm.tm_mon = month;
+	m_tm.tm_mday = day;
+	m_tm.tm_hour = hour;
+	m_tm.tm_min = minute;
+	m_tm.tm_sec = second;
+	m_milli = milliseconds;
 
 	// todo: set wDayOfWeek
 #endif
-
-	return dt;
 }
 
 void DateTime::SetLocal(INT64 timestamp, int milli)
@@ -84,7 +80,9 @@ DateTime DateTime::Now()
 #ifdef X_OS_WINDOWS
 	SYSTEMTIME st;
 	GetLocalTime(&st);
-	return FromSystemTime(st);
+	DateTime dt;
+	dt.SetSystemTime(st);
+	return dt;
 #else
 	timespec tmspec;
 	clock_gettime(CLOCK_REALTIME, &tmspec);
@@ -99,7 +97,9 @@ DateTime DateTime::NowUtc()
 #ifdef X_OS_WINDOWS
 	SYSTEMTIME st;
 	GetSystemTime(&st);
-	return FromSystemTime(st);
+	DateTime dt;
+	dt.SetSystemTime(st);
+	return dt;
 #else
 	timespec tmspec;
 	clock_gettime(CLOCK_REALTIME, &tmspec);
@@ -133,24 +133,24 @@ TimeValue DateTime::NowTimeValue()
 #endif
 }
 
-stringx DateTime_Format(const DateTime& dt)
+stringx DateTime::Format()
 {
 	ref<StringBuilder> sb = gc_new<StringBuilder>();
-	sb->Append(Converter::ToString(dt.GetYear()));
+	sb->Append(Converter::ToString(this->GetYear()));
 	sb->Append('-');
-	stringx format = Converter::ToString(dt.GetMonth());
+	stringx format = Converter::ToString(this->GetMonth());
 	sb->Append(format.Length() == 2 ? format : __X("0") + format);
 	sb->Append('-');
-	format = Converter::ToString(dt.GetDay());
+	format = Converter::ToString(this->GetDay());
 	sb->Append(format.Length() == 2 ? format : __X("0") + format);
 	sb->Append(' ');
-	format = Converter::ToString(dt.GetHour());
+	format = Converter::ToString(this->GetHour());
 	sb->Append(format.Length() == 2 ? format : __X("0") + format);
 	sb->Append(':');
-	format = Converter::ToString(dt.GetMinute());
+	format = Converter::ToString(this->GetMinute());
 	sb->Append(format.Length() == 2 ? format : __X("0") + format);
 	sb->Append(':');
-	format = Converter::ToString(dt.GetSecond());
+	format = Converter::ToString(this->GetSecond());
 	sb->Append(format.Length() == 2 ? format : __X("0") + format);
 	return sb->ToString();
 }
