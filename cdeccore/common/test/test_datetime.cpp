@@ -43,6 +43,9 @@ public:
 		UNITTEST_ASSERT(dt.Format() == __X("2013-10-23 09:18:58"));
 		UNITTEST_ASSERT(dt.ToTimestamp() == 1382519938);
 		
+		dt.SetLocal(1382519938, 0);
+		UNITTEST_ASSERT(dt.Format() == __X("2013-10-23 17:18:58"));
+		UNITTEST_ASSERT(dt.ToTimestamp() == 1382519938 + 8 * 3600);
 	}
 
 	void tearDown()
