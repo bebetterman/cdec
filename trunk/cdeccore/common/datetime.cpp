@@ -41,7 +41,7 @@ void DateTime::SetLocal(INT64 timestamp, int milli)
 	if (!FileTimeToSystemTime(&ftl, &m_st))
 		cdec_throw_win32_lasterr(Exception);
 #else
-	m_tm = *localtime(&timestamp);
+	m_tm = *localtime((time_t*)&timestamp);
 	m_milli = milli;
 #endif
 }
@@ -56,7 +56,7 @@ void DateTime::SetUtc(INT64 timestamp, int milli)
 	if (!FileTimeToSystemTime(&ft, &m_st))
 		cdec_throw_win32_lasterr(Exception);
 #else
-	m_tm = *gmtime(&timestamp);
+	m_tm = *gmtime((time_t*)&timestamp);
 	m_milli = milli;
 #endif
 }
