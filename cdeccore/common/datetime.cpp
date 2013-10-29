@@ -16,13 +16,14 @@ void DateTime::Set(int year, int month, int day, int hour, int minute, int secon
 
 	// todo: set wDayOfWeek
 #else
-	m_tm.tm_year = year;
-	m_tm.tm_mon = month;
+	m_tm.tm_year = year - 1900;
+	m_tm.tm_mon = month - 1;
 	m_tm.tm_mday = day;
 	m_tm.tm_hour = hour;
 	m_tm.tm_min = minute;
 	m_tm.tm_sec = second;
 	m_milli = milliseconds;
+	m_tm.tm_gmtoff = 0;	// UTC
 
 	// todo: set wDayOfWeek
 #endif
@@ -71,7 +72,7 @@ INT64 DateTime::ToTimestamp()
 	INT64 nll = (INT64&)ft;
 	return (nll - 116444736000000000) / 10000000;
 #else
-	cdec_throw(Exception(EC_NotImplemented));
+	return mktime(&m_tm) + 3600 * 8;
 #endif
 }
 
@@ -136,9 +137,14 @@ TimeValue DateTime::NowTimeValue()
 stringx DateTime::Format()
 {
 	ref<StringBuilder> sb = gc_new<StringBuilder>();
-	sb->Append(Converter::ToString(this->GetYear()));
+	int year = GetYear(), month = GetMonth();
+#ifndef X_OS_WINDOWS
+	year += 1900;
+	month += 1;
+#endif
+	sb->Append(Converter::ToString(year));
 	sb->Append('-');
-	stringx format = Converter::ToString(this->GetMonth());
+	stringx format = Converter::ToString(month);
 	sb->Append(format.Length() == 2 ? format : __X("0") + format);
 	sb->Append('-');
 	format = Converter::ToString(this->GetDay());
