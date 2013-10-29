@@ -44,4 +44,4 @@ ENDFOREACH(cpp)
 SET_SOURCE_FILES_PROPERTIES(
 	PROPERTIES HEADER_FILE_ONLY true 
 	)
-TARGET_LINK_LIBRARIES(cdeccore cdecegg dl iconv)
+TARGET_LINK_LIBRARIES(cdeccore cdecegg dl rt iconv)
