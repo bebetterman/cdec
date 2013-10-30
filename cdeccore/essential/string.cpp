@@ -189,7 +189,7 @@ bool stringx::_Equal(stringx s) const
 	if (m_pContent == pContent2)
 		return true;
 
-	if (m_pContent == NULL)
+	if (m_pContent == NULL || pContent2 == NULL)
 		return false;
 
 	if (m_pContent->Length() != pContent2->Length())
