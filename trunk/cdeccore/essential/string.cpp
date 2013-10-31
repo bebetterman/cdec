@@ -20,7 +20,7 @@ void stringx::_Append(PCWSTR pwszRhs, size_t lenRhs)
 	pcontNew->Release();
 }
 
-bool stringx::StartsWith(stringx subs)
+bool stringx::StartsWith(stringx subs) const
 {
 	if (subs.Length() == 0)
 		return true;
@@ -31,7 +31,7 @@ bool stringx::StartsWith(stringx subs)
 	return wstrncmp16(m_pContent->Content(), subs.m_pContent->Content(), subs.Length()) == 0;
 }
 
-bool stringx::EndsWith(stringx subs)
+bool stringx::EndsWith(stringx subs) const
 {
 	if (subs.Length() == 0)
 		return true;
@@ -43,7 +43,7 @@ bool stringx::EndsWith(stringx subs)
 	return wstrcmp16(m_pContent->Content() + index, subs.m_pContent->Content()) == 0;
 }
 
-stringx stringx::ToUpper()
+stringx stringx::ToUpper() const
 {
 	size_t len = Length();
 	stringx result;
@@ -67,7 +67,7 @@ stringx stringx::ToUpper()
 	return result;
 }
 
-stringx stringx::ToLower()
+stringx stringx::ToLower() const
 {
 	size_t len = Length();
 	stringx result;
@@ -284,7 +284,7 @@ bool stringx::_Less(const std::wstring16& s) const
 	return wstrcmp16(m_pContent->Content(), s.c_str()) < 0;
 }
 
-int stringx::IndexOf(WCHAR ch, int pos)
+int stringx::IndexOf(WCHAR ch, int pos) const
 {
 	if (m_pContent == NULL)
 		return -1;
@@ -297,7 +297,7 @@ int stringx::IndexOf(WCHAR ch, int pos)
 	return -1;
 }
 
-int stringx::IndexOfAny(const WCHAR chs[], int cch, int pos)
+int stringx::IndexOfAny(const WCHAR chs[], int cch, int pos) const
 {
 	if (m_pContent == NULL)
 		return -1;
@@ -314,13 +314,13 @@ int stringx::IndexOfAny(const WCHAR chs[], int cch, int pos)
 	return -1;
 }
 
-int stringx::IndexOfAny(ref<ArrayV<WCHAR> > chs, int pos)
+int stringx::IndexOfAny(ref<ArrayV<WCHAR> > chs, int pos) const
 {
 	pin_ptr<WCHAR> pin = chs->GetBuffer();
 	return IndexOfAny(pin.ptr(), chs->Count(), pos);
 }
 
-int stringx::LastIndexOf(WCHAR ch, int pos)
+int stringx::LastIndexOf(WCHAR ch, int pos) const
 {
 	if (m_pContent == NULL)
 		return -1;
@@ -335,7 +335,7 @@ int stringx::LastIndexOf(WCHAR ch, int pos)
 	return -1;
 }
 
-int stringx::LastIndexOfAny(const WCHAR chs[], int cch, int pos)
+int stringx::LastIndexOfAny(const WCHAR chs[], int cch, int pos) const
 {
 	if (m_pContent == NULL)
 		return -1;
@@ -354,7 +354,7 @@ int stringx::LastIndexOfAny(const WCHAR chs[], int cch, int pos)
 	return -1;
 }
 
-int stringx::LastIndexOfAny(ref<ArrayV<WCHAR> > chs, int pos)
+int stringx::LastIndexOfAny(ref<ArrayV<WCHAR> > chs, int pos) const
 {
 	pin_ptr<WCHAR> pin = chs->GetBuffer();
 	return LastIndexOfAny(pin.ptr(), chs->Count(), pos);
@@ -432,7 +432,7 @@ stringx stringx::TrimRight()
 		return Substring(0, l);
 }
 
-ref<ArrayListV<stringx> > stringx::Split(WCHAR seperator)
+ref<ArrayListV<stringx> > stringx::Split(WCHAR seperator) const
 {
 	size_t lastPos = 0;
 	size_t length = Length();
@@ -458,7 +458,7 @@ ref<ArrayListV<stringx> > stringx::Split(WCHAR seperator)
 	return result;
 }
 
-ref<ArrayListV<stringx> > stringx::Split(stringx separators)
+ref<ArrayListV<stringx> > stringx::Split(stringx separators) const
 {
 	size_t lastPos = 0;
 	size_t length = Length(), lengthSeparators = separators.Length();
@@ -489,7 +489,7 @@ ref<ArrayListV<stringx> > stringx::Split(stringx separators)
 	return result;
 }
 
-ref<IEnumerator<WCHAR> > stringx::GetEnumerator()
+ref<IEnumerator<WCHAR> > stringx::GetEnumerator() const
 {
 	return gc_new<StringEnumerator>(*this);
 }

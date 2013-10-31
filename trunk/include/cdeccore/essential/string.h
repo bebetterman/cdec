@@ -90,111 +90,111 @@ protected:
 
 public:
 	// Constructors and destructors
-	stringx(): m_pContent(NULL) {}
-	stringx(const stringx& r): m_pContent(NULL) { _Assign(r.m_pContent); }
-	stringx(PCWSTR pwszText): m_pContent(NULL) { _Assign(pwszText); }
-	stringx(PCWSTR pwszText, int count): m_pContent(NULL) { _Assign(pwszText, count); }
-	stringx(WCHAR ch, int count): m_pContent(NULL) { _Assign(std::wstring16(count, ch)); }
-	explicit stringx(const std::wstring16& s): m_pContent(NULL) { _Assign(s); }
-	~stringx() { Clear(); }
+	inline stringx(): m_pContent(NULL) {}
+	inline stringx(const stringx& r): m_pContent(NULL) { _Assign(r.m_pContent); }
+	inline stringx(PCWSTR pwszText): m_pContent(NULL) { _Assign(pwszText); }
+	inline stringx(PCWSTR pwszText, int count): m_pContent(NULL) { _Assign(pwszText, count); }
+	inline stringx(WCHAR ch, int count): m_pContent(NULL) { _Assign(std::wstring16(count, ch)); }
+	inline explicit stringx(const std::wstring16& s): m_pContent(NULL) { _Assign(s); }
+	inline ~stringx() { Clear(); }
 
 	// Assignments
-	stringx& operator=(const stringx& r)
+	inline stringx& operator=(const stringx& r)
 	{
 		if (&r != this) { Clear(); _Assign(r.m_pContent); }
 		return *this;
 	}
-	stringx& operator=(PCWSTR pwszText) { Clear(); _Assign(pwszText); return *this; }
-	stringx& operator=(const std::wstring16& s) { Clear(); _Assign(s); return *this; }
+	inline stringx& operator=(PCWSTR pwszText) { Clear(); _Assign(pwszText); return *this; }
+	inline stringx& operator=(const std::wstring16& s) { Clear(); _Assign(s); return *this; }
 
 	// Attributes
-	size_t Length() const { return m_pContent != NULL ? m_pContent->Length() : 0; }
+	inline size_t Length() const { return m_pContent != NULL ? m_pContent->Length() : 0; }
 
 	// Compare
-	bool StartsWith(stringx subs);
-	bool EndsWith(stringx subs);
+	bool StartsWith(stringx subs) const;
+	bool EndsWith(stringx subs) const;
 
-	stringx Substring(unsigned int pos) { ASSERT(pos <= Length()); return Substring(pos, Length() - pos); }
-	stringx Substring(unsigned int pos, unsigned int len)
+	inline stringx Substring(unsigned int pos) const { ASSERT(pos <= Length()); return Substring(pos, Length() - pos); }
+	inline stringx Substring(unsigned int pos, unsigned int len) const
 	{
 		ASSERT(pos <= Length() && pos + len <= Length());
 		return stringx(c_str() + pos, len);
 	}
 
-	stringx	ToLower();
-	stringx ToUpper();
+	stringx	ToLower() const;
+	stringx ToUpper() const;
 
-	int		IndexOf(WCHAR ch, int pos = 0);
-	int		IndexOfAny(ref<ArrayV<WCHAR> > chs, int pos = 0);
-	int		IndexOfAny(const WCHAR chs[], int cch, int pos = 0);
+	int		IndexOf(WCHAR ch, int pos = 0) const;
+	int		IndexOfAny(ref<ArrayV<WCHAR> > chs, int pos = 0) const;
+	int		IndexOfAny(const WCHAR chs[], int cch, int pos = 0) const;
 
-	int		LastIndexOf(WCHAR ch, int pos = -1);
-	int		LastIndexOfAny(ref<ArrayV<WCHAR> > chs, int pos = -1);
-	int		LastIndexOfAny(const WCHAR chs[], int cch, int pos = -1);
+	int		LastIndexOf(WCHAR ch, int pos = -1) const;
+	int		LastIndexOfAny(ref<ArrayV<WCHAR> > chs, int pos = -1) const;
+	int		LastIndexOfAny(const WCHAR chs[], int cch, int pos = -1) const;
 
 	stringx	Trim();
 	stringx	TrimLeft();
 	stringx	TrimRight();
 
-	ref<ArrayListV<stringx> > Split(WCHAR separator);
-	ref<ArrayListV<stringx> > Split(stringx separators);
+	ref<ArrayListV<stringx> > Split(WCHAR separator) const;
+	ref<ArrayListV<stringx> > Split(stringx separators) const;
 
 	stringx& Append(const stringx&);
 	stringx& Append(PCWSTR, int);
-	stringx& Append(PCWSTR p) { return Append(p, -1); }
-	stringx& Append(WCHAR ch) { return Append(&ch, 1); }
+	inline stringx& Append(PCWSTR p) { return Append(p, -1); }
+	inline stringx& Append(WCHAR ch) { return Append(&ch, 1); }
 	
 	stringx		PadLeft(WCHAR ch, int n);
 	stringx		PadRight(WCHAR ch, int n);
 
-	stringx& operator+=(const stringx& s) { return Append(s); }
-	stringx& operator+=(PCWSTR p) { return Append(p); }
-	stringx& operator+=(WCHAR ch) { return Append(ch); }
+	inline stringx& operator+=(const stringx& s) { return Append(s); }
+	inline stringx& operator+=(PCWSTR p) { return Append(p); }
+	inline stringx& operator+=(WCHAR ch) { return Append(ch); }
 
-	stringx	operator+(const stringx& s) const
+	inline stringx	operator+(const stringx& s) const
 	{
 		stringx r = *this;
 		return r += s;
 	}
 
-	stringx operator+(PCWSTR p) const
+	inline stringx operator+(PCWSTR p) const
 	{
 		stringx r = *this;
 		return r += p;
 	}
 
-	stringx operator+(WCHAR ch) const
+	inline stringx operator+(WCHAR ch) const
 	{
 		stringx r = *this;
 		return r += ch;
 	}
 
-	bool operator==(const stringx& rhs) const { return _Equal(rhs); }
-	bool operator==(PCWSTR rhs) const { return _Equal(rhs); }
-	bool operator==(const std::wstring16& rhs) const { return _Equal(rhs); }
+	inline bool operator==(const stringx& rhs) const { return _Equal(rhs); }
+	inline bool operator==(PCWSTR rhs) const { return _Equal(rhs); }
+	inline bool operator==(const std::wstring16& rhs) const { return _Equal(rhs); }
 
-	bool operator>(const stringx& rhs) const { return _Greater(rhs); }
-	bool operator>(PCWSTR rhs) const { return _Greater(rhs); }
-	bool operator>(const std::wstring16& rhs) const { return _Greater(rhs); }
+	inline bool operator>(const stringx& rhs) const { return _Greater(rhs); }
+	inline bool operator>(PCWSTR rhs) const { return _Greater(rhs); }
+	inline bool operator>(const std::wstring16& rhs) const { return _Greater(rhs); }
 
-	bool operator<(const stringx& rhs) const { return _Less(rhs); }
-	bool operator<(PCWSTR rhs) const { return _Less(rhs); }
-	bool operator<(const std::wstring16& rhs) const { return _Less(rhs); }
+	inline bool operator<(const stringx& rhs) const { return _Less(rhs); }
+	inline bool operator<(PCWSTR rhs) const { return _Less(rhs); }
+	inline bool operator<(const std::wstring16& rhs) const { return _Less(rhs); }
 
-	bool operator!=(const stringx& rhs) const { return !_Equal(rhs); }
-	bool operator!=(PCWSTR rhs) const { return !_Equal(rhs); }
-	bool operator!=(const std::wstring16& rhs) const { return !_Equal(rhs); }
+	inline bool operator!=(const stringx& rhs) const { return !_Equal(rhs); }
+	inline bool operator!=(PCWSTR rhs) const { return !_Equal(rhs); }
+	inline bool operator!=(const std::wstring16& rhs) const { return !_Equal(rhs); }
 
-	bool operator>=(const stringx& rhs) const { return !_Less(rhs); }
-	bool operator>=(PCWSTR rhs) const { return !_Less(rhs); }
-	bool operator>=(const std::wstring16& rhs) const { return !_Less(rhs); }
+	inline bool operator>=(const stringx& rhs) const { return !_Less(rhs); }
+	inline bool operator>=(PCWSTR rhs) const { return !_Less(rhs); }
+	inline bool operator>=(const std::wstring16& rhs) const { return !_Less(rhs); }
 
-	bool operator<=(const stringx& rhs) const { return !_Greater(rhs); }
-	bool operator<=(PCWSTR rhs) const { return !_Greater(rhs); }
-	bool operator<=(const std::wstring16& rhs) const { return !_Greater(rhs); }
+	inline bool operator<=(const stringx& rhs) const { return !_Greater(rhs); }
+	inline bool operator<=(PCWSTR rhs) const { return !_Greater(rhs); }
+	inline bool operator<=(const std::wstring16& rhs) const { return !_Greater(rhs); }
 
 	// Interoperability
-	pin_ptr<WCHAR> ContentBuffer()
+	inline pin_ptr<WCHAR> ContentBuffer()
 	{
 		PWSTR p = m_pContent != NULL ? m_pContent->Content() : NULL;
 		return pin_ptr<WCHAR>::CreatePinptr(p);
@@ -202,14 +202,14 @@ public:
 
 	// This pointer returned is unsafe for no pin_ptr instance are guarding.
 	// So it should only be used instantly.
-	PCWSTR c_str() const { return m_pContent != NULL ? m_pContent->Content() : NULL; }
+	inline PCWSTR c_str() const { return m_pContent != NULL ? m_pContent->Content() : NULL; }
 
-	WCHAR operator[](size_t index) const
+	inline WCHAR operator[](size_t index) const
 	{
 		return m_pContent->Content()[index];
 	}
 
-	std::wstring16 ToStdString() const
+	inline std::wstring16 ToStdString() const
 	{
 		if (m_pContent == NULL)
 			return std::wstring16();
@@ -217,27 +217,27 @@ public:
 	}
 
 	// Clear
-	void Clear() { if (m_pContent != NULL) { m_pContent->Release(); m_pContent = NULL; } }
+	inline void Clear() { if (m_pContent != NULL) { m_pContent->Release(); m_pContent = NULL; } }
 
 	// Enumerator
-	ref<IEnumerator<WCHAR> > GetEnumerator();
+	ref<IEnumerator<WCHAR> > GetEnumerator() const;
 
 protected:
 	// Assignment
-	void _Assign(PCWSTR pwszText)
+	inline void _Assign(PCWSTR pwszText)
 	{
 		ASSERT(m_pContent == NULL);
 		size_t length = pwszText != NULL ? wstrlen16(pwszText) : 0;
 		_Assign(pwszText, length);
 	}
-	void _Assign(PCWSTR pwszText, size_t length)
+	inline void _Assign(PCWSTR pwszText, size_t length)
 	{
 		ASSERT(m_pContent == NULL);
 		if (pwszText != NULL)
 			m_pContent = StringContent::CreateInstanceFromString(pwszText, length);
 	}
-	void _Assign(const std::wstring16& s) { _Assign(s.data(), s.length()); }
-	void _Assign(StringContent* pContent)
+	inline void _Assign(const std::wstring16& s) { _Assign(s.data(), s.length()); }
+	inline void _Assign(StringContent* pContent)
 	{
 		ASSERT(m_pContent == NULL);
 		m_pContent = pContent;
@@ -247,7 +247,7 @@ protected:
 
 	// Appending
 	void _Append(PCWSTR pwszText, size_t length);
-	void _Append(PCWSTR pwszText)
+	inline void _Append(PCWSTR pwszText)
 	{
 		if (pwszText != NULL)
 			_Append(pwszText, wstrlen16(pwszText));
