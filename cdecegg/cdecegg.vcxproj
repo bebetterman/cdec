@@ -140,6 +140,7 @@
     <ClInclude Include="..\include\cdecegg\intern\collection\masshashset-impl.h" />
     <ClInclude Include="..\include\cdecegg\intern\collection\masshashset.h" />
     <ClInclude Include="..\include\cdecegg\intern\collection\vector_provider.h" />
+    <ClInclude Include="..\include\cdecegg\predef\diagnostics.h" />
     <ClInclude Include="..\include\cdecegg\predef\exception.h" />
     <ClInclude Include="..\include\cdecegg\predef\platform.h" />
     <ClInclude Include="..\include\cdecegg\predef\stddef.h" />
@@ -155,6 +156,7 @@
     <ClCompile Include="common\basic\test\test_rtl_bitop.cpp" />
     <ClCompile Include="common\basic\test\test_rtl_bitorg.cpp" />
     <ClCompile Include="intern\algorithm\test\test_search.cpp" />
+    <ClCompile Include="predef\diagnostics.cpp" />
     <ClCompile Include="predef\exception.cpp" />
     <ClCompile Include="predef\test\test_stdtypes.cpp" />
     <ClCompile Include="predef\test\test_wstring16.cpp" />
