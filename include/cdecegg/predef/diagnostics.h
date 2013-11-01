@@ -4,13 +4,13 @@
 // Assertion
 // -------------------------------------------------------------------------- //
 
-CDECEGGEXPORT void CdecDiagAssertReport(bool expr, char* file, int line, char* msg);
+CDECEGGEXPORT void CdecDiagAssertReport(char* file, int line, char* msg);
 
 #if defined(X_CC_VC)
 #	define ASSERT _ASSERTE
 #else
 
-inline void _cdec_assert(char* file, int line, char* msg)
+inline void _cdec_assert(bool expr, char* file, int line, char* msg)
 {
 	if (!expr)
 		CdecDiagAssertReport(file, line, msg);
