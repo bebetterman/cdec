@@ -52,6 +52,9 @@
     <ClInclude Include="..\include\cdecegg\intern\algorithm\search.h">
       <Filter>intern\algorithm\export</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\cdecegg\predef\diagnostics.h">
+      <Filter>predef\export</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="common\basic\bitorg.cpp">
@@ -83,6 +86,9 @@
     </ClCompile>
     <ClCompile Include="intern\algorithm\test\test_search.cpp">
       <Filter>intern\algorithm\test</Filter>
+    </ClCompile>
+    <ClCompile Include="predef\diagnostics.cpp">
+      <Filter>predef</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

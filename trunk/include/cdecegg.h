@@ -23,6 +23,7 @@
 
 #define CDECEGGAPI(type)		CDECEGGEXPORT type
 
+#include "cdecegg/predef/diagnostics.h"
 #include "cdecegg/predef/exception.h"
 #include "cdecegg/predef/wstring16.h"
 

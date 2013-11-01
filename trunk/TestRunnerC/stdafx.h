@@ -10,6 +10,9 @@
 #include "../include/cdecegg/predef/stdtypes.h"
 #include "../include/cdecegg/predef/stddef.h"
 
+#include <cassert>
+#define ASSERT assert
+
 #include <stdio.h>
 #include <string.h>
 
