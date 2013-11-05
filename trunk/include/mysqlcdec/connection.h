@@ -22,7 +22,7 @@ protected:
 
 public:
 	ref<Statement>			CreateStatement();
-	ref<PrepareStatement>	CreatePrepareStatement(stringx sql);
+	ref<PreparedStatement>	CreatePreparedStatement(stringx sql);
 
 	// Easy operations
 	bool	Execute(stringx sql);

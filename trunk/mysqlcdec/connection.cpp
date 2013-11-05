@@ -27,7 +27,7 @@ ref<Statement> Connection::CreateStatement()
     }
 }
 
-ref<PrepareStatement> Connection::CreatePrepareStatement(stringx sql)
+ref<PreparedStatement> Connection::CreatePreparedStatement(stringx sql)
 {
 	sql::SQLString sql_s = Strx2SqlStr(sql);
 #ifdef ENABLE_MYSQL_DEBUG
@@ -36,7 +36,7 @@ ref<PrepareStatement> Connection::CreatePrepareStatement(stringx sql)
     try
     {
 		sql::PreparedStatement* sprstmt = m_impl->prepareStatement(sql_s);
-		return gc_new<PrepareStatement>(sprstmt);
+		return gc_new<PreparedStatement>(sprstmt);
     }
     catch (sql::SQLException& e)
     {
