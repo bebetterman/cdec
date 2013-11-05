@@ -45,7 +45,7 @@ public:
 
 	void testInsert()
 	{
-		ref<PrepareStatement> prestmt = m_conn->CreatePrepareStatement(__X("insert into class values(?,?)"));
+		ref<PreparedStatement> prestmt = m_conn->CreatePreparedStatement(__X("insert into class values(?,?)"));
 		for(int i=0;i<4;i++){
 			prestmt->SetInt(1,i);
 			prestmt->SetString(2,__X("class"));
@@ -77,7 +77,7 @@ public:
 
 	void testPrepare()
 	{
-		ref<PrepareStatement> prestmt = m_conn->CreatePrepareStatement(__X("insert into class values(?,?)"));
+		ref<PreparedStatement> prestmt = m_conn->CreatePreparedStatement(__X("insert into class values(?,?)"));
 		for(int i=4;i<10;i++){
 			prestmt->SetInt(1,i);
 			 prestmt->SetString(2,__X("prepare"));

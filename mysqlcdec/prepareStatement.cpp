@@ -3,36 +3,48 @@
 CDEC_NS_BEGIN
 
 // -------------------------------------------------------------------------- //
-// PrepareStatement
+// PreparedStatement
 // -------------------------------------------------------------------------- //
 
-void PrepareStatement::SetString(int index, stringx value)
+void PreparedStatement::SetString(int index, stringx value)
 {
 	sql::SQLString value_s = Strx2SqlStr(value);
 	m_impl->setString(index, value_s);
 }
 
-void PrepareStatement::SetInt(int index ,int value)
+void PreparedStatement::SetInt(int index ,int value)
 {
 	m_impl->setInt(index,value);	
 }
 
-void PrepareStatement::SetUInt(int index, UINT value)
+void PreparedStatement::SetUInt(int index, UINT value)
 {
 	m_impl->setUInt(index, value);
 }
 
-void PrepareStatement::SetInt64(int index ,INT64 value)
+void PreparedStatement::SetInt64(int index ,INT64 value)
 {
 	m_impl->setInt64(index,value);
 }
 
-void PrepareStatement::SetUInt64(int index, UINT64 value)
+void PreparedStatement::SetUInt64(int index, UINT64 value)
 {
 	m_impl->setUInt64(index, value);
 }
 
-int PrepareStatement::ExecuteUpdate()
+bool PreparedStatement::Execute()
+{
+	try
+	{
+		return m_impl->execute();
+	}
+	catch (sql::SQLException& e)
+	{
+		cdec_throw(MysqlException(e.getErrorCode(), e.getSQLState(), e.what()));
+	}
+}
+
+int PreparedStatement::ExecuteUpdate()
 {
     try
     {
@@ -44,23 +56,23 @@ int PrepareStatement::ExecuteUpdate()
     }
 }
 
-ref<ResultSet> PrepareStatement::ExecuteQuery()
+ref<ResultSet> PreparedStatement::ExecuteQuery()
 {
 	sql::ResultSet* rs = NULL;
     try
     {
         rs = m_impl->executeQuery();
+	    return gc_new<ResultSet>(rs);
     }
     catch (sql::SQLException& e)
     {
 		cdec_throw(MysqlException(e.getErrorCode(), e.getSQLState(), e.what()));
     }
-    return gc_new<ResultSet>(rs);
 }
 
-void PrepareStatement::Close()
+void PreparedStatement::Close()
 {
-	DESTORY_MYSQL_OBJECT(m_impl, PrepareStatement);
+	DESTORY_MYSQL_OBJECT(m_impl, PreparedStatement);
 }
 
 // -------------------------------------------------------------------------- //

@@ -42,7 +42,7 @@ public:
 			UNITTEST_ASSERT(s == w);
 		}
 
-		ref<PrepareStatement> prstmt  = conn->CreatePrepareStatement(__X("select * from stu where idd=?"));
+		ref<PreparedStatement> prstmt  = conn->CreatePreparedStatement(__X("select * from stu where idd=?"));
 		prstmt->SetInt(1,1);
 		ref<ResultSet> res = prstmt->ExecuteQuery();
 		UNITTEST_ASSERT(res->RowsCount() == 1);
@@ -53,7 +53,7 @@ public:
 			UNITTEST_ASSERT(s == w);
 		}
 
-		prstmt = conn->CreatePrepareStatement(__X("insert into stu values(? ,?)"));
+		prstmt = conn->CreatePreparedStatement(__X("insert into stu values(? ,?)"));
 		for( int i=2; i<=10; i++)
 		{	
 			prstmt->SetInt(1,i);
