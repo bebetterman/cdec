@@ -173,6 +173,7 @@ int Server::OnRequestHandler(void* hdctx, MHD_Connection* connection, const char
 		ctx->m_url = utf8->ToUnicode(url);
 
 		ref<IRequestHandler> handler = server->m_dispatcher->Dispatch(ctx->m_url);
+		ASSERT(handler != NULL);
 		ctx->m_handler = handler;
 
 		if (strcmp(method, MHD_HTTP_METHOD_GET) == 0)
