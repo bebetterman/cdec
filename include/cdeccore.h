@@ -40,6 +40,7 @@
 #include "cdeccore/common/math.h"
 #include "cdeccore/common/converter.h"
 #include "cdeccore/common/bitconverter.h"
+#include "cdeccore/common/dynamiclib.h"
 
 // -------------------------------------------------------------------------- //
 // C-- Library - Collections
