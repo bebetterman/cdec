@@ -1,5 +1,9 @@
 #include "stdafx.h"
 
+#ifndef X_OS_WINDOWS
+#include "dlfcn.h"
+#endif
+
 CDEC_NS_BEGIN
 // -------------------------------------------------------------------------- //
 
