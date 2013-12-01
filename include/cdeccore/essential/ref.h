@@ -21,7 +21,7 @@ class Object
 #define DECLARE_REF_CLASS(type)			\
 public:									\
     virtual void	AddRef() = 0;		\
-	virtual void	Release() = 0;
+	virtual void	Release() {}
 
 // -------------------------------------------------------------------------- //
 
