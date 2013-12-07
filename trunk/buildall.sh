@@ -13,4 +13,5 @@ fi
 ./build.sh mysqlcdec   $TYPE
 ./build.sh curlcdec    $TYPE
 ./build.sh httpserv    $TYPE
+./build.sh stavlcommon $TYPE
 ./build.sh TestRunnerC $TYPE
