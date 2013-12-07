@@ -59,6 +59,7 @@ MakeDir()
 
 proj=(
 	"cdecegg" "cdeccore" "curlcdec" "httpserv" "mysqlcdec" "lzmacdec" "zlibcdec"
+	"stavlcommon"
 	"TestRunnerC" "testers/TestHttpServer" "testers/TestCurl" "testers/TestCurlCdec"
 	"testers/HttpTransport"
 )
