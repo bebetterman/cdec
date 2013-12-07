@@ -17,7 +17,7 @@ protected:
 	UINT	m_offset, m_size1, m_size2;
 
 public:
-	inline FastLogReader(ref<Stream> istream);	
+	FastLogReader(ref<Stream> istream);	
 	inline ~FastLogReader() { Close(); }
 
 	inline bool	IsEof() { return m_offset == m_size1 && m_size2 == 0; }
