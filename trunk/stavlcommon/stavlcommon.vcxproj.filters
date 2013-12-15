@@ -8,6 +8,9 @@
     <ClInclude Include="..\include\stavlcommon\fastlogreader.h">
       <Filter>export</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\stavlcommon\logwriter.h">
+      <Filter>export</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp" />
