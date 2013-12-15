@@ -18,5 +18,6 @@
 #endif
 
 #include "stavlcommon/fastlogreader.h"
+#include "stavlcommon/logwriter.h"
 
 #endif
