@@ -233,6 +233,7 @@
     <ClCompile Include="io\test\test_io_mapping.cpp" />
     <ClCompile Include="io\test\test_io_memstream.cpp" />
     <ClCompile Include="io\test\test_io_textrw.cpp" />
+    <ClCompile Include="io\test\test_io_textwriter.cpp" />
     <ClCompile Include="io\textreader.cpp" />
     <ClCompile Include="io\textwriter.cpp" />
     <ClCompile Include="json\jsonparser.cpp" />

@@ -18,6 +18,13 @@ using namespace cdec;
 
 // -------------------------------------------------------------------------- //
 
+// String constants avoiding code page dependent
+// See test_support.cpp for contents
+extern WCHAR TEXT_ChsLine2[];
+extern WCHAR TEXT_Chs[];
+
+// -------------------------------------------------------------------------- //
+
 template<class _Ty>
 struct ObjectRefSpy: _Ty
 {
