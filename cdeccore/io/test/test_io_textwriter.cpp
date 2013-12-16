@@ -79,11 +79,29 @@ public:
 
 	void testBufferEnabled()
 	{
-		ref<Stream> os = ref<MemoryStream>();
-
-		ref<SequenceWritingBuffer> swb = gc_new<SequenceWritingBuffer>(os, 4);
+		ref<MemoryStream> os = gc_new<MemoryStream>();
+		ref<SequenceWritingBuffer> swb = gc_new<SequenceWritingBuffer>(os, 8);
 		ref<_SequenceWritingBuffer> _swb = ref_cast<_SequenceWritingBuffer>(swb);
 		
+		UNITTEST_ASSERT(_swb->m_iob == 0 && os->Length() == 0);
+
+		_swb->WriteByte(0x30);
+		UNITTEST_ASSERT(_swb->m_iob == 1 && os->Length() == 0);
+
+		_swb->WriteInt16(0x3231);
+		UNITTEST_ASSERT(_swb->m_iob == 3 && os->Length() == 0);
+
+		_swb->WriteInt32(0x36353433);
+		UNITTEST_ASSERT(_swb->m_iob == 7 && os->Length() == 0);
+		UNITTEST_ASSERT(memcmp(_swb->m_pBuffer, "0123456", 7) == 0);
+		
+		UINT value = 0x41393837;
+		_swb->Write(&value, 4);
+		UNITTEST_ASSERT(_swb->m_iob == 3 && os->Length() == 8);
+		UNITTEST_ASSERT(strncmp((const char*)_swb->m_pBuffer, "89A", 3) == 0);
+		UNITTEST_ASSERT(os->Length() == 8 && memcmp(os->GetRawBuffer(), "01234567", 8) == 0);
+
+		_swb->Close();
 	}
 
 #if 0

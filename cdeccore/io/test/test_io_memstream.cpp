@@ -62,6 +62,7 @@ public:
 		ref<ByteArray> data = s->GetBytes();
 		UNITTEST_ASSERT(data->Count() == 2);
 		UNITTEST_ASSERT(data->at(0) == 0x78 && data->at(1) == 0x56);
+		UNITTEST_ASSERT(memcmp(s->GetRawBuffer(), "\x78\x56", 2) == 0);
 	}
 
 	void testWriteExtend()
