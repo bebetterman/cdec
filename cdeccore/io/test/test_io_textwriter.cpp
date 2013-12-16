@@ -125,7 +125,7 @@ public:
 		
 		UINT value = 0x41393837;
 		_swb->Write(&value, 4);
-		UNITTEST_ASSERT(os->Length() == 11 && memcmp(os->GetRawBuffer(), "0123456789A", 8) == 0);
+		UNITTEST_ASSERT(os->Length() == 11 && memcmp(os->GetRawBuffer(), "0123456789A", 11) == 0);
 
 		_swb->Close();
 	}
