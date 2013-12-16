@@ -258,6 +258,9 @@
     <ClCompile Include="common\dynamiclib.cpp">
       <Filter>cdec\common</Filter>
     </ClCompile>
+    <ClCompile Include="io\test\test_io_textwriter.cpp">
+      <Filter>cdec\io\test</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">

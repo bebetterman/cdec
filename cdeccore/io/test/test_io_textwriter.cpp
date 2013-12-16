@@ -18,24 +18,22 @@ static char THIS_FILE[] = __FILE__;
 #if ENABLE_TEST
 // -------------------------------------------------------------------------- //
 
-struct _SequenceReadingBuffer: SequenceReadingBuffer
+struct _SequenceWritingBuffer : SequenceWritingBuffer
 {
-	typedef SequenceReadingBuffer base;
-	using base::m_pos;
+	typedef SequenceWritingBuffer base;
+	using base::m_bufferSize;
+	using base::m_pBuffer;
 	using base::m_iob;
-	using base::m_eob;
 };
 
-struct _TextReader: TextReader
-{
-	typedef TextReader base;
-	using base::m_encoding;
-	using base::m_sqb;
-};
+// -------------------------------------------------------------------------- //
 
-class TestTextReader: public UnitTestSuite
+class TestTextWriter: public UnitTestSuite
 {
-	UNITTEST_SUITE(TestTextReader)
+	UNITTEST_SUITE(TestTextWriter)
+		UNITTEST_METHOD(testBufferInit)
+		UNITTEST_METHOD(testBufferEnabled)
+#if 0
 		UNITTEST_METHOD(testSqbAlignFile)
 		UNITTEST_METHOD(testSqbOddFile)
 		UNITTEST_METHOD(testSqbReadMethods)
@@ -46,6 +44,7 @@ class TestTextReader: public UnitTestSuite
 		UNITTEST_METHOD(testOpenTextUtf8Ns)
 		UNITTEST_METHOD(testReadChar)
 		UNITTEST_METHOD(testReset)
+#endif
 	UNITTEST_SUITE_END()
 
 public:
@@ -53,6 +52,41 @@ public:
 	{
 	}
 
+	void tearDown()
+	{
+	}
+
+	void testBufferInit()
+	{
+		ref<SequenceWritingBuffer> swb = gc_new<SequenceWritingBuffer>();
+		ref<_SequenceWritingBuffer> _swb = ref_cast<_SequenceWritingBuffer>(swb);
+		
+		ref<Stream> os = gc_new<MemoryStream>();
+		_swb->Open(os, 0);
+		UNITTEST_ASSERT(_swb->m_bufferSize == 0 && _swb->m_pBuffer == NULL);
+		
+		for (int i = 1; i <= 8; ++i)
+		{
+			os = gc_new<MemoryStream>();
+			_swb->Open(os, i);
+			UNITTEST_ASSERT(_swb->m_bufferSize == 8 && _swb->m_pBuffer != NULL);
+		}
+
+		os = gc_new<MemoryStream>();
+		_swb->Open(os, 9);
+		UNITTEST_ASSERT(_swb->m_bufferSize == 9 && _swb->m_pBuffer != NULL);
+	}
+
+	void testBufferEnabled()
+	{
+		ref<Stream> os = ref<MemoryStream>();
+
+		ref<SequenceWritingBuffer> swb = gc_new<SequenceWritingBuffer>(os, 4);
+		ref<_SequenceWritingBuffer> _swb = ref_cast<_SequenceWritingBuffer>(swb);
+		
+	}
+
+#if 0
 	void testSqbAlignFile()
 	{
 		// 初始化环境
@@ -197,7 +231,7 @@ public:
 		UNITTEST_ASSERT(pReader->ReadLine(s));
 		UNITTEST_ASSERT(s == __X("Hello, KFC"));
 		UNITTEST_ASSERT(pReader->ReadLine(s));
-		UNITTEST_ASSERT(s == TEXT_ChsLine2);
+		UNITTEST_ASSERT(s == pwszChsLine2);
 		UNITTEST_ASSERT(pReader->ReadLine(s));
 		UNITTEST_ASSERT(s == __X(""));
 		UNITTEST_ASSERT(pReader->ReadLine(s));
@@ -215,7 +249,7 @@ public:
 		UNITTEST_ASSERT(s == __X("Hello, KFC"));
 #ifdef X_OS_WINDOWS
 		UNITTEST_ASSERT(pReader->ReadLine(s));
-		UNITTEST_ASSERT(s == TEXT_ChsLine2);
+		UNITTEST_ASSERT(s == pwszChsLine2);
 #endif
 
 		pReader->Close();
@@ -235,7 +269,7 @@ public:
 		UNITTEST_ASSERT(pReader->ReadLine(s));
 		UNITTEST_ASSERT(s == __X("Encoding: Unicode"));
 		UNITTEST_ASSERT(pReader->ReadLine(s));
-		UNITTEST_ASSERT(s == TEXT_Chs);
+		UNITTEST_ASSERT(s == pwszChs);
 		UNITTEST_ASSERT(!pReader->ReadLine(s));
 
 		pReader->Close();
@@ -248,7 +282,7 @@ public:
 		UNITTEST_ASSERT(pReader->ReadLine(s));
 		UNITTEST_ASSERT(s == __X("Encoding: Unicode"));
 		UNITTEST_ASSERT(pReader->ReadLine(s));
-		UNITTEST_ASSERT(s == TEXT_Chs);
+		UNITTEST_ASSERT(s == pwszChs);
 
 		pReader->Close();
 
@@ -271,7 +305,7 @@ public:
 		UNITTEST_ASSERT(pReader->ReadLine(s));
 		UNITTEST_ASSERT(s == __X("Encoding: Unicode"));
 		UNITTEST_ASSERT(pReader->ReadLine(s));
-		UNITTEST_ASSERT(s == TEXT_Chs);
+		UNITTEST_ASSERT(s == pwszChs);
 		UNITTEST_ASSERT(!pReader->ReadLine(s));
 
 		pReader->Close();
@@ -284,7 +318,7 @@ public:
 		UNITTEST_ASSERT(pReader->ReadLine(s));
 		UNITTEST_ASSERT(s == __X("Encoding: Unicode"));
 		UNITTEST_ASSERT(pReader->ReadLine(s));
-		UNITTEST_ASSERT(s == TEXT_Chs);
+		UNITTEST_ASSERT(s == pwszChs);
 
 		pReader->Close();
 
@@ -304,7 +338,7 @@ public:
 		UNITTEST_ASSERT(pReader->ReadLine(s));
 		UNITTEST_ASSERT(s == __X("Encoding: UTF-8"));
 		UNITTEST_ASSERT(pReader->ReadLine(s));
-		UNITTEST_ASSERT(s == TEXT_Chs);
+		UNITTEST_ASSERT(s == pwszChs);
 		UNITTEST_ASSERT(!pReader->ReadLine(s));
 
 		pReader->Close();
@@ -317,7 +351,7 @@ public:
 		UNITTEST_ASSERT(pReader->ReadLine(s));
 		UNITTEST_ASSERT(s == __X("Encoding: UTF-8"));
 		UNITTEST_ASSERT(pReader->ReadLine(s));
-		UNITTEST_ASSERT(s == TEXT_Chs);
+		UNITTEST_ASSERT(s == pwszChs);
 
 		pReader->Close();
 
@@ -337,7 +371,7 @@ public:
 		UNITTEST_ASSERT(pReader->ReadLine(s));
 		UNITTEST_ASSERT(s == __X("Encoding: UTF-8"));
 		UNITTEST_ASSERT(pReader->ReadLine(s));
-		UNITTEST_ASSERT(s == TEXT_Chs);
+		UNITTEST_ASSERT(s == pwszChs);
 		UNITTEST_ASSERT(!pReader->ReadLine(s));
 
 		pReader->Close();
@@ -351,7 +385,7 @@ public:
 		UNITTEST_ASSERT(pReader->ReadLine(s));
 		UNITTEST_ASSERT(s == __X("Encoding: UTF-8"));
 		UNITTEST_ASSERT(pReader->ReadLine(s));
-		UNITTEST_ASSERT(s == TEXT_Chs);
+		UNITTEST_ASSERT(s == pwszChs);
 
 		pReader->Close();
 
@@ -371,8 +405,8 @@ public:
 		UNITTEST_ASSERT(pReader->ReadChar() == 'e');
 		UNITTEST_ASSERT(pReader->ReadChar() == 'l');
 		UNITTEST_ASSERT(pReader->ReadLine(s));
-		UNITTEST_ASSERT(pReader->ReadChar() == TEXT_Chs[0]);
-		UNITTEST_ASSERT(pReader->ReadChar() == TEXT_Chs[1]);
+		UNITTEST_ASSERT(pReader->ReadChar() == pwszChs[0]);
+		UNITTEST_ASSERT(pReader->ReadChar() == pwszChs[1]);
 
 		pReader->Close();
 
@@ -383,8 +417,8 @@ public:
 		UNITTEST_ASSERT(pReader->ReadChar() == 'E');
 		UNITTEST_ASSERT(pReader->ReadChar() == 'n');
 		UNITTEST_ASSERT(pReader->ReadLine(s));		
-		UNITTEST_ASSERT(pReader->ReadChar() == TEXT_Chs[0]);
-		UNITTEST_ASSERT(pReader->ReadChar() == TEXT_Chs[1]);
+		UNITTEST_ASSERT(pReader->ReadChar() == pwszChs[0]);
+		UNITTEST_ASSERT(pReader->ReadChar() == pwszChs[1]);
 
 		pReader->Close();
 
@@ -395,8 +429,8 @@ public:
 		UNITTEST_ASSERT(pReader->ReadChar() == 'E');
 		UNITTEST_ASSERT(pReader->ReadChar() == 'n');
 		UNITTEST_ASSERT(pReader->ReadLine(s));		
-		UNITTEST_ASSERT(pReader->ReadChar() == TEXT_Chs[0]);
-		UNITTEST_ASSERT(pReader->ReadChar() == TEXT_Chs[1]);
+		UNITTEST_ASSERT(pReader->ReadChar() == pwszChs[0]);
+		UNITTEST_ASSERT(pReader->ReadChar() == pwszChs[1]);
 
 		pReader->Close();
 	}
@@ -434,10 +468,6 @@ public:
 		pReader->Close();
 	}
 
-	void tearDown()
-	{
-	}
-
 private:
 	void MakeFillFile(stringx sampleFile, ref<Stream>& ppStream, UINT len)
 	{
@@ -459,15 +489,16 @@ private:
 		{
 			for (UINT i = 0; i < 256; ++i)
 				buffer[i] = sk++;
-			UINT cbToWrite = Math::Min(cbTotal, 512U);
+			UINT cbToWrite = std::min(cbTotal, 512U);
 			UNITTEST_ASSERT(pStrm->Write(buffer, cbToWrite) == cbToWrite);
 			cbTotal -= cbToWrite;
 		}
 		UNITTEST_ASSERT(pStrm->Length() == len && cbTotal == 0);
 	}
+#endif
 };
 
-UNITTEST_SUITE_REGISTRATION(TestTextReader);
+UNITTEST_SUITE_REGISTRATION(TestTextWriter);
 
 // -------------------------------------------------------------------------- //
 #endif
