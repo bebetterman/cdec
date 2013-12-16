@@ -34,6 +34,7 @@ public:
 	int		AtomWrite(INT64 pos, const void* buffer, int count);
 
 	ref<ByteArray>	GetBytes();
+	inline const BYTE*	GetRawBuffer() { return &m_buffer[0]; }
 };
 
 // -------------------------------------------------------------------------- //
