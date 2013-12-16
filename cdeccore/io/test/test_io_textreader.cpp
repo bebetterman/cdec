@@ -26,16 +26,16 @@ struct _SequenceReadingBuffer: SequenceReadingBuffer
 	using base::m_eob;
 };
 
-struct _TextReader: TextReader
+struct _StreamReader: StreamReader
 {
-	typedef TextReader base;
+	typedef StreamReader base;
 	using base::m_encoding;
 	using base::m_sqb;
 };
 
-class TestTextReader: public UnitTestSuite
+class TestStreamReader: public UnitTestSuite
 {
-	UNITTEST_SUITE(TestTextReader)
+	UNITTEST_SUITE(TestStreamReader)
 		UNITTEST_METHOD(testSqbAlignFile)
 		UNITTEST_METHOD(testSqbOddFile)
 		UNITTEST_METHOD(testSqbReadMethods)
@@ -191,30 +191,30 @@ public:
 	{
 		// 指定编码打开
 		stringx sampleFile = TestEnv::get_sample_path(__X("txtr_samp_1.txt"));
-		ref<TextReader> pReader = gc_new<TextReader>(sampleFile, gc_new<Encoding>(936));
+		ref<StreamReader> pReader = gc_new<StreamReader>(sampleFile, gc_new<Encoding>(936));
 
 		stringx s;
-		UNITTEST_ASSERT(pReader->ReadLine(s));
+		s = pReader->ReadLine();
 		UNITTEST_ASSERT(s == __X("Hello, KFC"));
-		UNITTEST_ASSERT(pReader->ReadLine(s));
+		s = pReader->ReadLine();
 		UNITTEST_ASSERT(s == TEXT_ChsLine2);
-		UNITTEST_ASSERT(pReader->ReadLine(s));
+		s = pReader->ReadLine();
 		UNITTEST_ASSERT(s == __X(""));
-		UNITTEST_ASSERT(pReader->ReadLine(s));
+		s = pReader->ReadLine();
 		UNITTEST_ASSERT(s == __X("END"));
-		UNITTEST_ASSERT(!pReader->ReadLine(s));
+		UNITTEST_ASSERT(pReader->ReadLine() == NULL);
 
 		pReader->Close();
 
 		// 重新打开一次，不指定编码
-		pReader = gc_new<TextReader>(sampleFile);
-		_TextReader* _pReader = (_TextReader*)(pReader.__GetPointer());
+		pReader = gc_new<StreamReader>(sampleFile);
+		_StreamReader* _pReader = (_StreamReader*)(pReader.__GetPointer());
 		UNITTEST_ASSERT(_pReader->m_encoding->IsEqual( Encoding::get_Default() ));
 
-		UNITTEST_ASSERT(pReader->ReadLine(s));
+		s = pReader->ReadLine();
 		UNITTEST_ASSERT(s == __X("Hello, KFC"));
 #ifdef X_OS_WINDOWS
-		UNITTEST_ASSERT(pReader->ReadLine(s));
+		s = pReader->ReadLine();
 		UNITTEST_ASSERT(s == TEXT_ChsLine2);
 #endif
 
@@ -222,40 +222,40 @@ public:
 
 		// 指定错误编码会导致异常
 		// TODO pure virtual function call
-	//	UNITTEST_ASSERT_EXCEPTION(gc_new<TextReader>(sampleFile, Encoding::get_Unicode()));
+	//	UNITTEST_ASSERT_EXCEPTION(gc_new<StreamReader>(sampleFile, Encoding::get_Unicode()));
 	}
 
 	void testOpenTextUnicode()
 	{
 		// 指定编码打开
 		stringx sampleFile = TestEnv::get_sample_path(__X("txtr_samp_unicode.txt"));
-		ref<TextReader> pReader = gc_new<TextReader>(sampleFile, Encoding::get_Unicode());
+		ref<StreamReader> pReader = gc_new<StreamReader>(sampleFile, Encoding::get_Unicode());
 
 		stringx s;
-		UNITTEST_ASSERT(pReader->ReadLine(s));
+		s = pReader->ReadLine();
 		UNITTEST_ASSERT(s == __X("Encoding: Unicode"));
-		UNITTEST_ASSERT(pReader->ReadLine(s));
+		s = pReader->ReadLine();
 		UNITTEST_ASSERT(s == TEXT_Chs);
-		UNITTEST_ASSERT(!pReader->ReadLine(s));
+		UNITTEST_ASSERT(pReader->ReadLine() == NULL);
 
 		pReader->Close();
 
 		// 不指定编码打开
-		pReader = gc_new<TextReader>(sampleFile);
-		_TextReader* _pReader = (_TextReader*)(pReader.__GetPointer());
+		pReader = gc_new<StreamReader>(sampleFile);
+		_StreamReader* _pReader = (_StreamReader*)(pReader.__GetPointer());
 		UNITTEST_ASSERT(_pReader->m_encoding->IsEqual( Encoding::get_Unicode() ));
 
-		UNITTEST_ASSERT(pReader->ReadLine(s));
+		s = pReader->ReadLine();
 		UNITTEST_ASSERT(s == __X("Encoding: Unicode"));
-		UNITTEST_ASSERT(pReader->ReadLine(s));
+		s = pReader->ReadLine();
 		UNITTEST_ASSERT(s == TEXT_Chs);
 
 		pReader->Close();
 
 		// 指定错误编码会导致异常
 		// TODO pure virtual function call
-	//	UNITTEST_ASSERT_EXCEPTION(gc_new<TextReader>(sampleFile, Encoding::get_UTF8()));
-	//	UNITTEST_ASSERT_EXCEPTION(gc_new<TextReader>(sampleFile, Encoding::get_Default()));
+	//	UNITTEST_ASSERT_EXCEPTION(gc_new<StreamReader>(sampleFile, Encoding::get_UTF8()));
+	//	UNITTEST_ASSERT_EXCEPTION(gc_new<StreamReader>(sampleFile, Encoding::get_Default()));
 	}
 
 	void testOpenTextUnicodeNs()
@@ -265,112 +265,112 @@ public:
 
 		// 指定编码打开
 		stringx sampleFile = TestEnv::get_sample_path(__X("txtr_samp_unicode_ns.txt"));
-		ref<TextReader> pReader = gc_new<TextReader>(sampleFile, Encoding::get_Unicode());
+		ref<StreamReader> pReader = gc_new<StreamReader>(sampleFile, Encoding::get_Unicode());
 
 		stringx s;
-		UNITTEST_ASSERT(pReader->ReadLine(s));
+		s = pReader->ReadLine();
 		UNITTEST_ASSERT(s == __X("Encoding: Unicode"));
-		UNITTEST_ASSERT(pReader->ReadLine(s));
+		s = pReader->ReadLine();
 		UNITTEST_ASSERT(s == TEXT_Chs);
-		UNITTEST_ASSERT(!pReader->ReadLine(s));
+		UNITTEST_ASSERT(pReader->ReadLine() == NULL);
 
 		pReader->Close();
 
 		// 不指定编码打开
-		pReader = gc_new<TextReader>(sampleFile);
-		_TextReader* _pReader = (_TextReader*)(pReader.__GetPointer());
+		pReader = gc_new<StreamReader>(sampleFile);
+		_StreamReader* _pReader = (_StreamReader*)(pReader.__GetPointer());
 		UNITTEST_ASSERT(_pReader->m_encoding->IsEqual( Encoding::get_Unicode() ));
 
-		UNITTEST_ASSERT(pReader->ReadLine(s));
+		s = pReader->ReadLine();
 		UNITTEST_ASSERT(s == __X("Encoding: Unicode"));
-		UNITTEST_ASSERT(pReader->ReadLine(s));
+		s = pReader->ReadLine();
 		UNITTEST_ASSERT(s == TEXT_Chs);
 
 		pReader->Close();
 
 		// 指定错误编码会导致异常
 		// TODO pure virtual function call
-	//	UNITTEST_ASSERT_EXCEPTION(gc_new<TextReader>(sampleFile, Encoding::get_UTF8()));
-	//	UNITTEST_ASSERT_EXCEPTION(gc_new<TextReader>(sampleFile, Encoding::get_Default()));
+	//	UNITTEST_ASSERT_EXCEPTION(gc_new<StreamReader>(sampleFile, Encoding::get_UTF8()));
+	//	UNITTEST_ASSERT_EXCEPTION(gc_new<StreamReader>(sampleFile, Encoding::get_Default()));
 	}
 
 	void testOpenTextUtf8()
 	{
 		// 指定编码打开
 		stringx sampleFile = TestEnv::get_sample_path(__X("txtr_samp_utf8.txt"));
-		ref<TextReader> pReader = gc_new<TextReader>(sampleFile, Encoding::get_UTF8());
+		ref<StreamReader> pReader = gc_new<StreamReader>(sampleFile, Encoding::get_UTF8());
 
 		stringx s;
-		UNITTEST_ASSERT(pReader->ReadLine(s));
+		s = pReader->ReadLine();
 		UNITTEST_ASSERT(s == __X("Encoding: UTF-8"));
-		UNITTEST_ASSERT(pReader->ReadLine(s));
+		s = pReader->ReadLine();
 		UNITTEST_ASSERT(s == TEXT_Chs);
-		UNITTEST_ASSERT(!pReader->ReadLine(s));
+		UNITTEST_ASSERT(pReader->ReadLine() == NULL);
 
 		pReader->Close();
 
 		// 重新打开一次，不指定编码
-		pReader = gc_new<TextReader>(sampleFile);
-		_TextReader* _pReader = (_TextReader*)(pReader.__GetPointer());
+		pReader = gc_new<StreamReader>(sampleFile);
+		_StreamReader* _pReader = (_StreamReader*)(pReader.__GetPointer());
 		UNITTEST_ASSERT(_pReader->m_encoding->IsEqual( Encoding::get_UTF8() ));
 
-		UNITTEST_ASSERT(pReader->ReadLine(s));
+		s = pReader->ReadLine();
 		UNITTEST_ASSERT(s == __X("Encoding: UTF-8"));
-		UNITTEST_ASSERT(pReader->ReadLine(s));
+		s = pReader->ReadLine();
 		UNITTEST_ASSERT(s == TEXT_Chs);
 
 		pReader->Close();
 
 		// 指定错误编码会导致异常
 		// TODO pure virtual function call
-	//	UNITTEST_ASSERT_EXCEPTION(gc_new<TextReader>(sampleFile, Encoding::get_Default()));
-	//	UNITTEST_ASSERT_EXCEPTION(gc_new<TextReader>(sampleFile, Encoding::get_Unicode()));
+	//	UNITTEST_ASSERT_EXCEPTION(gc_new<StreamReader>(sampleFile, Encoding::get_Default()));
+	//	UNITTEST_ASSERT_EXCEPTION(gc_new<StreamReader>(sampleFile, Encoding::get_Unicode()));
 	}
 
 	void testOpenTextUtf8Ns()
 	{
 		// 指定编码打开
 		stringx sampleFile = TestEnv::get_sample_path(__X("txtr_samp_utf8_ns.txt"));
-		ref<TextReader> pReader = gc_new<TextReader>(sampleFile, Encoding::get_UTF8());
+		ref<StreamReader> pReader = gc_new<StreamReader>(sampleFile, Encoding::get_UTF8());
 
 		stringx s;
-		UNITTEST_ASSERT(pReader->ReadLine(s));
+		s = pReader->ReadLine();
 		UNITTEST_ASSERT(s == __X("Encoding: UTF-8"));
-		UNITTEST_ASSERT(pReader->ReadLine(s));
+		s = pReader->ReadLine();
 		UNITTEST_ASSERT(s == TEXT_Chs);
-		UNITTEST_ASSERT(!pReader->ReadLine(s));
+		UNITTEST_ASSERT(pReader->ReadLine() == NULL);
 
 		pReader->Close();
 
 		// 重新打开一次，不指定编码
-		pReader = gc_new<TextReader>(sampleFile);
-		_TextReader* _pReader = (_TextReader*)(pReader.__GetPointer());
+		pReader = gc_new<StreamReader>(sampleFile);
+		_StreamReader* _pReader = (_StreamReader*)(pReader.__GetPointer());
 		UNITTEST_ASSERT(_pReader->m_encoding->IsEqual( Encoding::get_Default() ));
 		pReader->ChangeEncoding(Encoding::get_UTF8());
 
-		UNITTEST_ASSERT(pReader->ReadLine(s));
+		s = pReader->ReadLine();
 		UNITTEST_ASSERT(s == __X("Encoding: UTF-8"));
-		UNITTEST_ASSERT(pReader->ReadLine(s));
+		s = pReader->ReadLine();
 		UNITTEST_ASSERT(s == TEXT_Chs);
 
 		pReader->Close();
 
 		// 指定错误编码会导致异常
 		// TODO pure virtual function call
-	//	UNITTEST_ASSERT_EXCEPTION(gc_new<TextReader>(sampleFile, Encoding::get_Unicode()));
+	//	UNITTEST_ASSERT_EXCEPTION(gc_new<StreamReader>(sampleFile, Encoding::get_Unicode()));
 	}
 
 	void testReadChar()
 	{
 		// MBCS
 		stringx sampleFile = TestEnv::get_sample_path(__X("txtr_samp_1.txt"));
-		ref<TextReader> pReader = gc_new<TextReader>(sampleFile, gc_new<Encoding>(936));
+		ref<StreamReader> pReader = gc_new<StreamReader>(sampleFile, gc_new<Encoding>(936));
 
 		stringx s;
 		UNITTEST_ASSERT(pReader->ReadChar() == 'H');
 		UNITTEST_ASSERT(pReader->ReadChar() == 'e');
 		UNITTEST_ASSERT(pReader->ReadChar() == 'l');
-		UNITTEST_ASSERT(pReader->ReadLine(s));
+		s = pReader->ReadLine();
 		UNITTEST_ASSERT(pReader->ReadChar() == TEXT_Chs[0]);
 		UNITTEST_ASSERT(pReader->ReadChar() == TEXT_Chs[1]);
 
@@ -378,11 +378,11 @@ public:
 
 		// Unicode
 		sampleFile = TestEnv::get_sample_path(__X("txtr_samp_unicode.txt"));
-		pReader = gc_new<TextReader>(sampleFile, Encoding::get_Unicode());
+		pReader = gc_new<StreamReader>(sampleFile, Encoding::get_Unicode());
 
 		UNITTEST_ASSERT(pReader->ReadChar() == 'E');
 		UNITTEST_ASSERT(pReader->ReadChar() == 'n');
-		UNITTEST_ASSERT(pReader->ReadLine(s));		
+		s = pReader->ReadLine();		
 		UNITTEST_ASSERT(pReader->ReadChar() == TEXT_Chs[0]);
 		UNITTEST_ASSERT(pReader->ReadChar() == TEXT_Chs[1]);
 
@@ -390,11 +390,11 @@ public:
 
 		// UTF-8
 		sampleFile = TestEnv::get_sample_path(__X("txtr_samp_utf8.txt"));
-		pReader = gc_new<TextReader>(sampleFile, Encoding::get_UTF8());
+		pReader = gc_new<StreamReader>(sampleFile, Encoding::get_UTF8());
 
 		UNITTEST_ASSERT(pReader->ReadChar() == 'E');
 		UNITTEST_ASSERT(pReader->ReadChar() == 'n');
-		UNITTEST_ASSERT(pReader->ReadLine(s));		
+		s = pReader->ReadLine();		
 		UNITTEST_ASSERT(pReader->ReadChar() == TEXT_Chs[0]);
 		UNITTEST_ASSERT(pReader->ReadChar() == TEXT_Chs[1]);
 
@@ -407,8 +407,8 @@ public:
 
 		// ANSI
 		stringx sampleFile = TestEnv::get_sample_path(__X("txtr_samp_1.txt"));
-		ref<TextReader> pReader = gc_new<TextReader>(sampleFile, Encoding::get_Default());
-		_TextReader* _pReader = (_TextReader*)(pReader.__GetPointer());
+		ref<StreamReader> pReader = gc_new<StreamReader>(sampleFile, Encoding::get_Default());
+		_StreamReader* _pReader = (_StreamReader*)(pReader.__GetPointer());
 		pReader->ReadChar();
 		UNITTEST_ASSERT(_pReader->m_sqb->Pos() == 1);		// 0 字节头 + 一个 char 字符
 		pReader->Reset();
@@ -416,8 +416,8 @@ public:
 		pReader->Close();
 
 		sampleFile = TestEnv::get_sample_path(__X("txtr_samp_unicode.txt"));
-		pReader = gc_new<TextReader>(sampleFile);
-		_pReader = (_TextReader*)(pReader.__GetPointer());
+		pReader = gc_new<StreamReader>(sampleFile);
+		_pReader = (_StreamReader*)(pReader.__GetPointer());
 		pReader->ReadChar();
 		UNITTEST_ASSERT(_pReader->m_sqb->Pos() == 4);		// 2 字节头 + 一个 WIDE 字符
 		pReader->Reset();
@@ -425,8 +425,8 @@ public:
 		pReader->Close();
 
 		sampleFile = TestEnv::get_sample_path(__X("txtr_samp_utf8.txt"));
-		pReader = gc_new<TextReader>(sampleFile, Encoding::get_UTF8());
-		_pReader = (_TextReader*)(pReader.__GetPointer());
+		pReader = gc_new<StreamReader>(sampleFile, Encoding::get_UTF8());
+		_pReader = (_StreamReader*)(pReader.__GetPointer());
 		pReader->ReadChar();
 		UNITTEST_ASSERT(_pReader->m_sqb->Pos() == 4);		// 3 字节头 + 一个 char 字符
 		pReader->Reset();
@@ -467,7 +467,7 @@ private:
 	}
 };
 
-UNITTEST_SUITE_REGISTRATION(TestTextReader);
+UNITTEST_SUITE_REGISTRATION(TestStreamReader);
 
 // -------------------------------------------------------------------------- //
 #endif

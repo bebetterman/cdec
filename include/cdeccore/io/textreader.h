@@ -11,6 +11,7 @@ CDEC_NS_BEGIN
 // 用于顺序读取的文件。
 // 虽然 SequenceReadingBuffer 支持定位（Seeking），但是其缓存策略并没有为此优化，
 // 因此应当避免使用。
+// -------------------------------------------------------------------------- //
 
 class CDECCOREEXPORT SequenceReadingBuffer : public Object
 {
@@ -56,15 +57,40 @@ protected:
 	void	PeekValue(DWORD* pValue, UINT typeSize);
 };
 
-class CDECCOREEXPORT TextReader : public Object
+// -------------------------------------------------------------------------- //
+// TextReader
+// -------------------------------------------------------------------------- //
+
+interface TextReader : public Object
 {
 	DECLARE_REF_CLASS(TextReader)
+
+	virtual void Reset() = 0;
+	virtual bool IsEnd() = 0;
+
+	// Exception raised when exceeding the end, to avoid exception, use IsEnd before
+	virtual WCHAR ReadChar() = 0;
+
+	virtual stringx ReadLine() = 0;
+	virtual stringx ReadToEnd() = 0;
+
+	virtual void Close() = 0;
+};
+
+// -------------------------------------------------------------------------- //
+// StreamReader
+// -------------------------------------------------------------------------- //
+
+class CDECCOREEXPORT StreamReader : public TextReader
+{
+	DECLARE_REF_CLASS(StreamReader)
 
 protected:
 	ref<SequenceReadingBuffer>	m_sqb;
 	ref<Encoding>	m_encoding;
 	UINT	m_posText;	// 文本正式开始的位置
 
+protected:
 	void	OpenNoEncoding(ref<Stream> pStream);
 	void	OpenEncoding(ref<Stream> pStream, ref<Encoding> encoding);
 
@@ -81,33 +107,32 @@ protected:
 
 public:
 	// 打开文本文件，使用自动检测的编码
-	TextReader(stringx filename);
+	explicit StreamReader(stringx filename);
 
 	// 打开文本文件，使用指定的编码。如果编码错误，将导致打开失败。
-	TextReader(stringx filename, ref<Encoding> encoding);
+	StreamReader(stringx filename, ref<Encoding> encoding);
 
 	// 从给定流中读取文本，使用自动检测的编码
-	TextReader(ref<Stream> pStream) {
+	explicit StreamReader(ref<Stream> pStream) {
 		m_sqb = gc_new<SequenceReadingBuffer>();
 		OpenNoEncoding(pStream);
 	}
+
 	// 从给定流中读取文本，使用指定的编码。如果编码错误，将导致打开失败
-	TextReader(ref<Stream> pStream, ref<Encoding> encoding) {
+	StreamReader(ref<Stream> pStream, ref<Encoding> encoding) {
 		m_sqb = gc_new<SequenceReadingBuffer>();
 		OpenEncoding(pStream, encoding);
 	}
 
-	~TextReader() { Close(); }
+	~StreamReader() { Close(); }
 	void Close();
 
 	bool IsEnd() { return m_sqb->IsEnd(); }
 	void Reset() { m_sqb->Seek(m_posText, Stream::SeekBegin); }
-	bool ReadLine(stringx&);
-	stringx ReadToEnd();
 
-	// 如果读取越过文件末尾，将会触发异常
-	// 由于 IsEnd 效率较高，为避免触发异常，请在每次读取之前使用 IsEnd 查询。
 	WCHAR ReadChar() { return m_encoding->IsWideChar() ? ReadCharWide() : ReadCharMultiBytes(); }
+	stringx ReadLine();
+	stringx ReadToEnd();
 
 	ref<Encoding> get_Encoding() const { return m_encoding; }
 	void ChangeEncoding(ref<Encoding> encoding) { m_encoding = encoding; }
@@ -115,4 +140,3 @@ public:
 
 // -------------------------------------------------------------------------- //
 CDEC_NS_END
-

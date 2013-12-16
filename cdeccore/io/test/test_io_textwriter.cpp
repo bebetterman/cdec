@@ -153,11 +153,11 @@ public:
 		tw->WriteChar('\n');
 		tw->Close();
 
-		ref<TextReader> tr = gc_new<TextReader>(filename, Encoding::get_UTF8());
+		ref<TextReader> tr = gc_new<StreamReader>(filename, Encoding::get_UTF8());
 		stringx line;
-		UNITTEST_ASSERT(tr->ReadLine(line) && line == __X("Line 1"));
-		UNITTEST_ASSERT(tr->ReadLine(line) && line == TEXT_ChsEng_Wide);
-		UNITTEST_ASSERT(!tr->ReadLine(line));
+		UNITTEST_ASSERT((line = tr->ReadLine()) == __X("Line 1"));
+		UNITTEST_ASSERT((line = tr->ReadLine()) == TEXT_ChsEng_Wide);
+		UNITTEST_ASSERT((line = tr->ReadLine()) == NULL);
 		tr->Close();
 	}
 };
