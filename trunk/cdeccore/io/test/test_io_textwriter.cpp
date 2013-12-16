@@ -33,6 +33,7 @@ class TestTextWriter: public UnitTestSuite
 	UNITTEST_SUITE(TestTextWriter)
 		UNITTEST_METHOD(testBufferInit)
 		UNITTEST_METHOD(testBufferEnabled)
+		UNITTEST_METHOD(testBufferDisabled)
 #if 0
 		UNITTEST_METHOD(testSqbAlignFile)
 		UNITTEST_METHOD(testSqbOddFile)
@@ -100,6 +101,31 @@ public:
 		UNITTEST_ASSERT(_swb->m_iob == 3 && os->Length() == 8);
 		UNITTEST_ASSERT(strncmp((const char*)_swb->m_pBuffer, "89A", 3) == 0);
 		UNITTEST_ASSERT(os->Length() == 8 && memcmp(os->GetRawBuffer(), "01234567", 8) == 0);
+
+		_swb->Close();
+	}
+
+	void testBufferDisabled()
+	{
+		ref<MemoryStream> os = gc_new<MemoryStream>();
+		ref<SequenceWritingBuffer> swb = gc_new<SequenceWritingBuffer>(os, 0);
+		ref<_SequenceWritingBuffer> _swb = ref_cast<_SequenceWritingBuffer>(swb);
+		
+		UNITTEST_ASSERT(os->Length() == 0);
+
+		_swb->WriteByte(0x30);
+		UNITTEST_ASSERT(os->Length() == 1);
+
+		_swb->WriteInt16(0x3231);
+		UNITTEST_ASSERT(os->Length() == 3);
+
+		_swb->WriteInt32(0x36353433);
+		UNITTEST_ASSERT(os->Length() == 7);
+		UNITTEST_ASSERT(memcmp(os->GetRawBuffer(), "0123456", 7) == 0);
+		
+		UINT value = 0x41393837;
+		_swb->Write(&value, 4);
+		UNITTEST_ASSERT(os->Length() == 11 && memcmp(os->GetRawBuffer(), "0123456789A", 8) == 0);
 
 		_swb->Close();
 	}
