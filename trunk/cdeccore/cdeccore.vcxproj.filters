@@ -150,9 +150,6 @@
     <ClCompile Include="io\test\test_io_filestream.cpp">
       <Filter>cdec\io\test</Filter>
     </ClCompile>
-    <ClCompile Include="io\test\test_io_textrw.cpp">
-      <Filter>cdec\io\test</Filter>
-    </ClCompile>
     <ClCompile Include="text\test\test_text_encoding.cpp">
       <Filter>cdec\text\test</Filter>
     </ClCompile>
@@ -259,6 +256,9 @@
       <Filter>cdec\common</Filter>
     </ClCompile>
     <ClCompile Include="io\test\test_io_textwriter.cpp">
+      <Filter>cdec\io\test</Filter>
+    </ClCompile>
+    <ClCompile Include="io\test\test_io_textreader.cpp">
       <Filter>cdec\io\test</Filter>
     </ClCompile>
   </ItemGroup>
