@@ -10,7 +10,7 @@
 CDEC_NS_BEGIN
 // -------------------------------------------------------------------------- //
 
-void XmlReader::VerifyEncoding(ref<TextReader> tr)
+void XmlReader::VerifyEncoding(ref<StreamReader> tr)
 {
 	WCHAR ch = 0;
 	while (!tr->IsEnd())
@@ -80,8 +80,6 @@ void XmlReader::ParseText(ref<ISaxAccepter> pAccpt, stringx xmlText)
 
 void XmlReader::Parse(ref<ISaxAccepter> accpt, ref<TextReader> tr)
 {
-	VerifyEncoding(tr);
-
 	ParserMicroCore core;
 	core.Reset(accpt);
 	tr->Reset();
@@ -93,14 +91,16 @@ void XmlReader::Parse(ref<ISaxAccepter> accpt, ref<TextReader> tr)
 
 void XmlReader::Parse(ref<ISaxAccepter> accpt, ref<Stream> stream)
 {
-	ref<TextReader> tr = gc_new<TextReader>(stream);
-	Parse(accpt, tr);
+	ref<StreamReader> tr = gc_new<StreamReader>(stream);
+	VerifyEncoding(tr);
+	Parse(accpt, ref<TextReader>(tr));
 }
 
 void XmlReader::Parse(ref<ISaxAccepter> accpt, stringx filename)
 {
-	ref<TextReader> tr = gc_new<TextReader>(filename);
-	Parse(accpt, tr);
+	ref<StreamReader> tr = gc_new<StreamReader>(filename);
+	VerifyEncoding(tr);
+	Parse(accpt, ref<TextReader>(tr));
 }
 
 // -------------------------------------------------------------------------- //

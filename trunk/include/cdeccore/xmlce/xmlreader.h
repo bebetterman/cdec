@@ -30,8 +30,7 @@ interface ISaxAccepter: Object
 class XmlReader
 {
 protected:
-	static void VerifyEncoding(ref<TextReader> pReader);
-	static void VerifyEncodingUnicode(ref<TextReader> pReader);
+	static void VerifyEncoding(ref<StreamReader> pReader);
 
 public:
 	static void ParseText(ref<ISaxAccepter> accpt, stringx xmlText);

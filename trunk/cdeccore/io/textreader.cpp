@@ -163,21 +163,21 @@ DWORD SequenceReadingBuffer::ReadInt32()
 
 // -------------------------------------------------------------------------- //
 
-TextReader::TextReader(stringx filename)
+StreamReader::StreamReader(stringx filename)
 {
 	ref<FileStream> pStream = gc_new<FileStream>(filename, FileStream::AccessRead, false);
 	m_sqb = gc_new<SequenceReadingBuffer>();
 	OpenNoEncoding(pStream);
 }
 
-TextReader::TextReader(stringx filename, ref<Encoding> encoding)
+StreamReader::StreamReader(stringx filename, ref<Encoding> encoding)
 {
 	ref<FileStream> pStream = gc_new<FileStream>(filename, FileStream::AccessRead, false);
 	m_sqb = gc_new<SequenceReadingBuffer>();
 	OpenEncoding(pStream, encoding);
 }
 
-UINT TextReader::DetectCP()
+UINT StreamReader::DetectCP()
 {
 	UINT	cp = 0;		// 0 表示系统默认 ANSI 代码页
 	DWORD	dwMark = m_sqb->ReadInt32();
@@ -207,7 +207,7 @@ UINT TextReader::DetectCP()
 	return cp;
 }
 
-void TextReader::OpenNoEncoding(ref<Stream> pStream)
+void StreamReader::OpenNoEncoding(ref<Stream> pStream)
 {
 	m_sqb->Open(pStream);
 
@@ -219,7 +219,7 @@ void TextReader::OpenNoEncoding(ref<Stream> pStream)
 		m_encoding = Encoding::get_Default();
 }
 
-void TextReader::OpenEncoding(ref<Stream> pStream, ref<Encoding> encoding)
+void StreamReader::OpenEncoding(ref<Stream> pStream, ref<Encoding> encoding)
 {
 	m_sqb->Open(pStream);
 	m_encoding = encoding;
@@ -232,33 +232,30 @@ void TextReader::OpenEncoding(ref<Stream> pStream, ref<Encoding> encoding)
 		cdec_throw(IOException(EC_InvalidArg));
 }
 
-void TextReader::Close()
+void StreamReader::Close()
 {
 	m_sqb->Close();
 }
 
-bool TextReader::ReadLine(stringx& s)
+stringx StreamReader::ReadLine()
 {
-	s = NULL;
 	if (m_encoding->IsWideChar())
 	{
 		std::wstring16 _ws;
 		bool f = FetchLineWideChars(_ws);
-		s = _ws;
-		return f;
+		ASSERT(f || IsEnd());
+		return f ? stringx(_ws) : NULL;
 	}
 	else
 	{
 		std::string ss;
 		bool f = FetchLineMultiBytes(ss);
-		if (f)
-			s = m_encoding->ToUnicode(ss);
 		ASSERT(f || IsEnd());
-		return f;
+		return f ? m_encoding->ToUnicode(ss) : NULL;
 	}
 }
 
-bool TextReader::FetchLineMultiBytes(std::string& s)
+bool StreamReader::FetchLineMultiBytes(std::string& s)
 {
 	ASSERT(s.empty());
 	if (m_sqb->IsEnd())
@@ -287,7 +284,7 @@ bool TextReader::FetchLineMultiBytes(std::string& s)
 	return true;
 }
 
-bool TextReader::FetchLineWideChars(std::wstring16& s)
+bool StreamReader::FetchLineWideChars(std::wstring16& s)
 {
 	ASSERT(s.empty());
 	if (m_sqb->IsEnd())
@@ -316,7 +313,7 @@ bool TextReader::FetchLineWideChars(std::wstring16& s)
 	return true;
 }
 
-WCHAR TextReader::ReadCharMultiBytes()
+WCHAR StreamReader::ReadCharMultiBytes()
 {
 	// 缓存下来效率更高
 	Encoding::CodePageClass cpc = m_encoding->get_Class();
@@ -352,7 +349,7 @@ WCHAR TextReader::ReadCharMultiBytes()
 	}
 }
 
-stringx TextReader::ReadToEnd()
+stringx StreamReader::ReadToEnd()
 {
 	std::wstring16 s;
 	s.reserve(32);
@@ -365,14 +362,14 @@ stringx TextReader::ReadToEnd()
 }
 
 // TODO 需要优化
-void TextReader::ReadToEndWideChar(std::wstring16& s)
+void StreamReader::ReadToEndWideChar(std::wstring16& s)
 {
 	while (!m_sqb->IsEnd())
 		s.append(1, m_sqb->ReadInt16());
 }
 
 // TODO 需要优化
-void TextReader::ReadToEndMultiBytes(std::wstring16& s)
+void StreamReader::ReadToEndMultiBytes(std::wstring16& s)
 {
 	while (!m_sqb->IsEnd())
 		s.append(1, ReadCharMultiBytes());
