@@ -23,6 +23,10 @@ using namespace cdec;
 extern WCHAR TEXT_ChsLine2[];
 extern WCHAR TEXT_Chs[];
 
+extern char	TEXT_ChsEng_UTF8[];
+extern WCHAR TEXT_ChsEng_Wide[];
+
+
 // -------------------------------------------------------------------------- //
 
 template<class _Ty>
