@@ -41,6 +41,7 @@ class TestTextWriter: public UnitTestSuite
 		UNITTEST_METHOD(testBufferEnabled)
 		UNITTEST_METHOD(testBufferDisabled)
 		UNITTEST_METHOD(testWriter)
+		UNITTEST_METHOD(testFileWriter)
 	UNITTEST_SUITE_END()
 
 public:
@@ -141,6 +142,23 @@ public:
 		UNITTEST_ASSERT(os->Length() == 9 && memcmp(os->GetRawBuffer(), TEXT_ChsEng_UTF8, 9) == 0);
 
 		tw->Close();
+	}
+
+	void testFileWriter()
+	{
+		stringx filename = __X("test-textwr.txt");
+		ref<TextWriter> tw = gc_new<StreamWriter>(filename, Encoding::get_UTF8(), 8);
+		tw->WriteLine(__X("Line 1"));
+		tw->Write(TEXT_ChsEng_Wide);
+		tw->WriteChar('\n');
+		tw->Close();
+
+		ref<TextReader> tr = gc_new<TextReader>(filename, Encoding::get_UTF8());
+		stringx line;
+		UNITTEST_ASSERT(tr->ReadLine(line) && line == __X("Line 1"));
+		UNITTEST_ASSERT(tr->ReadLine(line) && line == TEXT_ChsEng_Wide);
+		UNITTEST_ASSERT(!tr->ReadLine(line));
+		tr->Close();
 	}
 };
 
