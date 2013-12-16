@@ -7,33 +7,43 @@ CDEC_NS_BEGIN
 // -------------------------------------------------------------------------- //
 
 SequenceWritingBuffer::SequenceWritingBuffer():
-m_pBuffer(NULL), m_iob(0)
+m_bufferSize(0), m_pBuffer(NULL), m_iob(0)
 {
 }
 
-SequenceWritingBuffer::SequenceWritingBuffer(ref<Stream> pStream):
-m_pBuffer(NULL), m_iob(0)
+SequenceWritingBuffer::SequenceWritingBuffer(ref<Stream> pStream, int bufferSize):
+m_bufferSize(0), m_pBuffer(NULL), m_iob(0)
 {
-	Open(pStream);
+	Open(pStream, bufferSize);
 }
 
-void SequenceWritingBuffer::Open(ref<Stream> stream)
+void SequenceWritingBuffer::Open(ref<Stream> stream, int bufferSize)
 {
+	if (bufferSize < 0)
+		cdec_throw(Exception(EC_InvalidArg));
+
 	Close();
 
+	if (bufferSize != 0)
+	{
+		if (bufferSize < 8)
+			bufferSize = 8;
+		m_bufferSize = bufferSize;
+		m_pBuffer = (BYTE*)malloc(m_bufferSize);
+	}
+
 	m_stream = stream;
-	m_pBuffer = (BYTE*)malloc(BufferSize);
 	m_iob = 0;
 }
 
 void SequenceWritingBuffer::Flush()
 {
-	if (m_iob != 0)
+	if (m_bufferSize != 0 && m_iob != 0)
 	{
 		m_stream->Write(m_pBuffer, m_iob);
 		m_iob = 0;
-		m_stream->Flush();
 	}
+	m_stream->Flush();
 }
 
 void SequenceWritingBuffer::Close()
@@ -46,29 +56,28 @@ void SequenceWritingBuffer::Close()
 		m_stream->Close();
 		free(m_pBuffer);
 
+		m_bufferSize = 0;
 		m_pBuffer = NULL;
 		m_iob = 0;
 		m_stream = NULL;
 	}
 }
 
-// Patch, Windows.h contains a macro named min
-#undef min
-
 const BYTE* SequenceWritingBuffer::_Append(const BYTE* ps, UINT cb)
 {
 	if (cb == 0)
 		return ps;
 
-	cb = std::min(cb, BufferSize - m_iob);
+	ASSERT(m_bufferSize != 0);
+	cb = Math::Min(cb, m_bufferSize - m_iob);
 	memcpy(m_pBuffer + m_iob, ps, cb);
 	ps += cb;
 	m_iob += cb;
 
-	if (m_iob >= BufferSize)
+	if (m_iob >= m_bufferSize)
 	{
-		ASSERT(m_iob == BufferSize);
-		m_stream->Write(m_pBuffer, BufferSize);
+		ASSERT(m_iob == m_bufferSize);
+		m_stream->Write(m_pBuffer, m_bufferSize);
 		m_iob = 0;
 	}
 
@@ -77,39 +86,44 @@ const BYTE* SequenceWritingBuffer::_Append(const BYTE* ps, UINT cb)
 
 void SequenceWritingBuffer::Write(const void* buffer, UINT cb)
 {
-	const BYTE* pb = (const BYTE*)buffer;
-	const BYTE* pe = pb + cb;
-
-	pb = _Append(pb, (UINT)(pe - pb));
-
-	while ((UINT)(pe - pb) >= BufferSize)
+	if (m_bufferSize != 0)
 	{
-		ASSERT(m_iob == 0);
-		m_stream->Write(pb, BufferSize);
-		pb += BufferSize;
-	}
+		const BYTE* pb = (const BYTE*)buffer;
+		const BYTE* pe = pb + cb;
 
-	if (pe > pb)
-	{
-		ASSERT(m_iob == 0);
-		_Append(pb, (UINT)(pe - pb));
+		pb = _Append(pb, (UINT)(pe - pb));
+
+		while ((UINT)(pe - pb) >= m_bufferSize)
+		{
+			ASSERT(m_iob == 0);
+			m_stream->Write(pb, m_bufferSize);
+			pb += m_bufferSize;
+		}
+
+		if (pe > pb)
+		{
+			ASSERT(m_iob == 0);
+			_Append(pb, (UINT)(pe - pb));
+		}
 	}
+	else
+		m_stream->Write(buffer, cb);
 }
 
 // -------------------------------------------------------------------------- //
 // StreawmWriter
 // -------------------------------------------------------------------------- //
 
-StreamWriter::StreamWriter(stringx filename, ref<Encoding> encoding)
+StreamWriter::StreamWriter(stringx filename, ref<Encoding> encoding, int bufferSize)
 {
 	ref<Stream> stream = gc_new<FileStream>(filename, FileStream::AccessWrite, true);
-	OpenEncoding(stream, encoding);
+	OpenEncoding(stream, encoding, bufferSize);
 }
 
-void StreamWriter::OpenEncoding(ref<Stream> stream, ref<Encoding> encoding)
+void StreamWriter::OpenEncoding(ref<Stream> stream, ref<Encoding> encoding, int bufferSize)
 {
 	Close();
-	m_sqb = gc_new<SequenceWritingBuffer>(stream);
+	m_sqb = gc_new<SequenceWritingBuffer>(stream, bufferSize);
 	m_encoding = encoding;
 }
 

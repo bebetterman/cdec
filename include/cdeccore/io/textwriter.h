@@ -4,6 +4,9 @@ CDEC_NS_BEGIN
 
 // -------------------------------------------------------------------------- //
 // SequenceWritingBuffer (inner)
+//
+// Buffer will be 8-bytes if specified size is less than 8 while greater than 0
+// Buffer will be disabled if specified size is 0
 // -------------------------------------------------------------------------- //
 
 class CDECCOREEXPORT SequenceWritingBuffer : public Object
@@ -11,18 +14,17 @@ class CDECCOREEXPORT SequenceWritingBuffer : public Object
 	DECLARE_REF_CLASS(SequenceWritingBuffer)
 
 protected:
-	const static UINT BufferSize = 4096;
-
 	ref<Stream>	m_stream;
+	UINT		m_bufferSize;
 	BYTE*		m_pBuffer;
 	UINT		m_iob;
 
 public:
 	SequenceWritingBuffer();
-	SequenceWritingBuffer(ref<Stream> pStream);
+	SequenceWritingBuffer(ref<Stream> pStream, int bufferSize);
 	~SequenceWritingBuffer() { Close(); }
 
-	void	Open(ref<Stream> pStream);
+	void	Open(ref<Stream> pStream, int bufferSize);
 	void	Flush();
 	void	Close();
 
@@ -91,16 +93,19 @@ protected:
 	ref<SequenceWritingBuffer>	m_sqb;
 	ref<Encoding>	m_encoding;
 
-	void	OpenEncoding(ref<Stream> stream, ref<Encoding> encoding);
+	void	OpenEncoding(ref<Stream> stream, ref<Encoding> encoding, int bufferSize);
 
 public:
 	// 打开文本文件，使用指定的编码
-	StreamWriter(stringx filename, ref<Encoding> encoding);
+	StreamWriter(stringx filename, ref<Encoding> encoding, int bufferSize = 4096);
 
 	// 写入给定流，使用指定编码
-	StreamWriter(ref<Stream> pStream, ref<Encoding> encoding) { OpenEncoding(pStream, encoding); }
+	inline StreamWriter(ref<Stream> pStream, ref<Encoding> encoding, int bufferSize = 4096)
+	{
+		OpenEncoding(pStream, encoding, bufferSize);
+	}
 
-	~StreamWriter() { Close(); }
+	inline ~StreamWriter() { Close(); }
 
 	void Write(stringx line);
 	void WriteChar(WCHAR ch);
