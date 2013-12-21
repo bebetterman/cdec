@@ -261,6 +261,9 @@
     <ClCompile Include="io\test\test_io_textreader.cpp">
       <Filter>cdec\io\test</Filter>
     </ClCompile>
+    <ClCompile Include="io\test\test_io_path.cpp">
+      <Filter>cdec\io\test</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">

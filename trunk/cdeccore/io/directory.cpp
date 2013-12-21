@@ -20,7 +20,7 @@ stringx Path::GetFileName(stringx path)
 {
 	static WCHAR seps[] = { '\\', '/' };
 	int pos = path.LastIndexOfAny(seps, 2);
-	return pos >= 0 ? path.Substring(pos) : path;
+	return pos >= 0 ? path.Substring(pos + 1) : path;
 }
 
 //---------------------------------------------------------------------------//
