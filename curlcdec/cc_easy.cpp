@@ -45,10 +45,16 @@ CurlEasy::CurlEasy(CurlOption ops): m_ops(ops)
 	}
 }
 
-CurlEasy::~CurlEasy()
+void CurlEasy::CleanUp()
 {
-	curl_easy_cleanup(m_curl);
-	m_curl = NULL;
+	if (m_curl != NULL)
+	{
+		m_response->Stream->Close();
+		m_response = NULL;
+
+		curl_easy_cleanup(m_curl);
+		m_curl = NULL;
+	}
 }
 
 void CurlEasy::SetUrl(const char* url)
@@ -133,7 +139,6 @@ void CurlEasy::SetCustomRequest(stringx method)
 	SetCustomRequest(method_cs.c_str());
 }
 
-//size_t xxx(size_t, void*, void*, size_t) { return 0; }
 void CurlEasy::Request()
 {
 	int code = 0;

@@ -209,7 +209,9 @@ public:
 	static void GlobalTerm();
 
 	CurlEasy(CurlOption ops = CCO_None);
-	~CurlEasy();
+	inline ~CurlEasy() { CleanUp(); }
+
+	void	CleanUp();
 
 	void	SetUrl(const char* url);
 	void	SetUrl(stringx url);
