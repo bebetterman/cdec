@@ -79,7 +79,7 @@ public:
 	void WriteMessage(const std::string& message, LoggerLevel level);
 };
 
-extern LogOutputConsole g_stdlogout;
+extern STAVLCOMMONEXPORT LogOutputConsole g_stdlogout;
 
 // -------------------------------------------------------------------------- //
 
