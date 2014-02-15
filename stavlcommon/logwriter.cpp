@@ -14,10 +14,10 @@ ref<Encoding> g_utf8 = Encoding::get_UTF8();
 
 const char* LMSG[] = 
 {
-	"LOG",	// KLOG_INFORMATION,
-	"CLM",	// KLOG_CLAIM,
-	"WARN",	// KLOG_WARNING,
-	"ERR",	// KLOG_ERROR,
+	"",			// KLOG_INFORMATION,
+	"CLAIM\t",	// KLOG_CLAIM,
+	"WARN\t",	// KLOG_WARNING,
+	"ERROR\t",	// KLOG_ERROR,
 };
 
 // -------------------------------------------------------------------------- //
@@ -30,7 +30,6 @@ Logger::Logger(ILogOutput* out, LoggerLevel level, const char* function, const c
 	m_out = out;
 	m_level = level;
 	m_message = LMSG[level];
-	m_message += '\t';
 	if (file != NULL)
 		m_message.append(file).append("(").append(itoa(line, buffer, 10)).append("): ");
 }
