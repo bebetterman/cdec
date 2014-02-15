@@ -19,8 +19,10 @@ class X : public Object
 	~X() {}
 
 public:
-	int Getv() { return v; }
+	int& V() { return v; }
 };
+
+typedef Array<X> XArray;
 
 struct Z
 {
@@ -36,6 +38,7 @@ class TestCdecArray : public UnitTestSuite
 	UNITTEST_SUITE(TestCdecArray)
 		UNITTEST_METHOD(testValueTypeArray)
 		UNITTEST_METHOD(testReferenceTypeArray)
+		UNITTEST_METHOD(testConstructors)
 		UNITTEST_METHOD(testEnumArrayV)
 		UNITTEST_METHOD(testEnumArray)
 		UNITTEST_METHOD(testSort)
@@ -71,10 +74,30 @@ public:
 		UNITTEST_ASSERT(a->Count() == 3);
 
 		a->at(0) = gc_new<X>();
-		UNITTEST_ASSERT(a->at(0)->Getv() == 0);
+		UNITTEST_ASSERT(a->at(0)->V() == 0);
 
-		a->at(1) =gc_new<X>(4);
-		UNITTEST_ASSERT(a->at(1)->Getv() == 4);
+		a->at(1) = gc_new<X>(4);
+		UNITTEST_ASSERT(a->at(1)->V() == 4);
+	}
+
+	void testConstructors()
+	{
+		int r[] = { 1, 2, 3, 4 };
+		ref<IntArray> a = gc_new<IntArray>(r, 4);
+		UNITTEST_ASSERT(a->Count() == 4 && CheckSequence(a, r, 4));
+
+		ref<IntArray> b = gc_new<IntArray>(a, 1, 2);
+		UNITTEST_ASSERT(b->Count() == 2 && CheckSequence(b, r + 1, 2));
+
+		ref<X> x = gc_new<X>(1);
+		ref<X> xr[] = { x, x, x, x };
+		ref<XArray> xa = gc_new<XArray>(xr, 4);
+		x->V() = 2;
+		UNITTEST_ASSERT(xa->Count() == 4 && xa->at(0)->V() == 2 && xa->at(3)->V() == 2);
+
+		ref<XArray> xb = gc_new<XArray>(xa, 1, 2);
+		x->V() = 3;
+		UNITTEST_ASSERT(xb->Count() == 2 && xb->at(0)->V() == 3 && xb->at(1)->V() == 3);
 	}
 
 	void testEnumArrayV()
