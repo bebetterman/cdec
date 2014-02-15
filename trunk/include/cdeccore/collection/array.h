@@ -30,7 +30,7 @@ protected:
 	_Ty*			m_buffer;
 
 protected:
-	ArrayV(size_t count) : m_count(count), m_buffer(NULL)
+	void _CreateArray()
 	{
 		if (m_count != 0)
 		{
@@ -39,16 +39,21 @@ protected:
 		}
 	}
 
-	ArrayV(const _Ty* origin, size_t count): m_count(count), m_buffer(NULL)
+	ArrayV(size_t count) : m_count(count), m_buffer(NULL)
 	{
-		if (m_count != 0)
-		{
-			m_buffer = gc_type::CreateArray(m_count);
-			ASSERT(m_buffer != NULL);
-		}
+		_CreateArray();
+	}
 
-		for (size_t i = 0; i < count; ++i)
-			m_buffer[i] = *origin++;
+	ArrayV(const _Ty* source, size_t count): m_count(count), m_buffer(NULL)
+	{
+		_CreateArray();
+		CopyFrom(0, source, count);
+	}
+
+	ArrayV(ref<this_type> source, int offset, int count): m_count(count), m_buffer(NULL)
+	{
+		_CreateArray();
+		CopyFrom(0, source, offset, count);
 	}
 
 	~ArrayV()
@@ -171,12 +176,14 @@ class Array: public ArrayV<ref<_Ty> >
 
 public:
 	typedef ArrayV<ref<_Ty> >	base_type;
+	typedef Array<_Ty>			this_type;
 
 protected:
 	using base_type::m_buffer;
 
 	Array(size_t count) : base_type(count) {}
-	Array(const ref<_Ty>* origin, size_t count): base_type(origin, count) {}
+	Array(const ref<_Ty>* source, size_t count): base_type(source, count) {}
+	Array(ref<this_type> source, int offset, int count): base_type(source, offset, count) {}
 };
 
 // -------------------------------------------------------------------------- //
