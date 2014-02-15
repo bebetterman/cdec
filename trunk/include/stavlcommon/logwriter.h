@@ -20,18 +20,23 @@ enum LoggerLevel
 
 interface ILogOutput
 {
-
+	virtual void WriteMessage(const std::string& message, LoggerLevel level) = 0;
 };
 
 // -------------------------------------------------------------------------- //
 
 struct STAVLCOMMONEXPORT Logger
 {
+	ILogOutput* m_out;
+	LoggerLevel	m_level;
 	std::string m_message;
 
-	Logger(LoggerLevel level, const char* function, const char* file, int line);
+	Logger(ILogOutput* out, LoggerLevel level, const char* function, const char* file, int line);
 
-	~Logger();
+	inline ~Logger()
+	{
+		m_out->WriteMessage(m_message, m_level);
+	}
 
 	Logger& operator << (stringx value);
 
@@ -65,6 +70,60 @@ struct STAVLCOMMONEXPORT Logger
 		return (operator <<)((unsigned int)value);
 	}
 };
+
+// -------------------------------------------------------------------------- //
+
+class STAVLCOMMONEXPORT LogOutputConsole : public ILogOutput
+{
+public:
+	void WriteMessage(const std::string& message, LoggerLevel level);
+};
+
+extern LogOutputConsole g_stdlogout;
+
+// -------------------------------------------------------------------------- //
+
+#if 1
+
+#define KLOG_(out)		Logger(out, KLOG_INFORMATION, __FUNCTION__, __FILE__, __LINE__)
+#define KCLAIM_(out)	Logger(out, KLOG_CLAIM, __FUNCTION__, __FILE__, __LINE__)
+#define KWARN_(out)		Logger(out, KLOG_WARNING, __FUNCTION__, __FILE__, __LINE__)
+#define KERR_(out)		Logger(out, KLOG_ERROR, __FUNCTION__, __FILE__, __LINE__)
+
+#define KLOGT_(out)		Logger(out, KLOG_INFORMATION, NULL, NULL, 0)
+#define KCLAIMT_(out)	Logger(out, KLOG_CLAIM, NULL, NULL, 0)
+#define KWARNT_(out)	Logger(out, KLOG_WARNING, NULL, NULL, 0)
+#define KERRT_(out)		Logger(out, KLOG_ERROR, NULL, NULL, 0)
+
+#else
+
+struct Logger
+{
+	template<typename T>
+	Logger& operator << (T) { return *this; }
+};
+
+#define KLOG_(out)		Logger()
+#define KCLAIM_(out)	Logger()
+#define KWARN_(out)		Logger()
+#define KERR_(out)		Logger()
+
+#define KLOGT_(out)		Logger()
+#define KCLAIMT_(out)	Logger()
+#define KWARNT_(out)	Logger()
+#define KERRT_(out)		Logger()
+
+#endif
+
+#define KLOG	KLOG_(&g_stdlogout)
+#define KCLAIM	KCLAIM_(&g_stdlogout)
+#define KWARN	KWARN_(&g_stdlogout)
+#define KERR	KERR_(&g_stdlogout)
+
+#define KLOGT	KLOGT_(&g_stdlogout)
+#define KCLAIMT	KCLAIMT_(&g_stdlogout)
+#define KWARNT	KWARNT_(&g_stdlogout)
+#define KERRT	KERRT_(&g_stdlogout)
 
 // -------------------------------------------------------------------------- //
 
