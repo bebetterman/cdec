@@ -80,7 +80,7 @@ inline char ConverterA::ToDigit(UINT d, UINT n)
 template<typename T>
 T ConverterA::ParseNumber(const char* s, UINT n, T)
 {
-	WCHAR ch = s[0];
+	char ch = s[0];
 	if (ch == '+')
 		return ParseNumberPositive(s + 1, n, T());
 	else if (ch == '-')
