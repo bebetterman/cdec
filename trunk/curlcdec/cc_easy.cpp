@@ -28,7 +28,7 @@ CurlEasy::CurlEasy(CurlOption ops): m_ops(ops)
 		throw CurlException(EC_CURL_FAILED_INIT);
 
 	m_response = gc_new<CurlResponse>();
-
+#if 0
 	// Default time-out values
 	SetConnectionTimeOut(60);
 	SetTimeOut(120);
@@ -43,6 +43,7 @@ CurlEasy::CurlEasy(CurlOption ops): m_ops(ops)
 		code = curl_easy_setopt(m_curl, CURLOPT_WRITEHEADER, m_response.__GetPointer());
 		VERIFY_CURL_CODE(code);
 	}
+#endif
 }
 
 void CurlEasy::CleanUp()
@@ -143,6 +144,7 @@ void CurlEasy::Request()
 {
 	int code = 0;
 
+#if 0
 	// Write headers
 	struct curl_slist *headers = NULL;
 	if (m_headers.size() != 0)
@@ -154,6 +156,7 @@ void CurlEasy::Request()
 		code = curl_easy_setopt(m_curl, CURLOPT_HTTPHEADER, headers);
 		VERIFY_CURL_CODE(code);
 	}
+#endif
 
 	// Set response receiver
 	m_response->Stream->SetLength(0);
@@ -175,9 +178,11 @@ void CurlEasy::Request()
 	VERIFY_CURL_CODE(code);
 	m_response->HttpCode = (int)responseCode;
 
+#if 0
 	// Clean up
 	if (headers != NULL)
 		curl_slist_free_all(headers); // free the header list
+#endif
 }
 
 size_t CurlEasy::CurlDataReadCallback(void *buffer, size_t size, size_t nmemb, void *user_p)
