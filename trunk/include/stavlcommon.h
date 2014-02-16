@@ -17,6 +17,7 @@
 #define STAVLCOMMONEXPORT DECLSPEC_IMPORT
 #endif
 
+#include "stavlcommon/convertera.h"
 #include "stavlcommon/fastlogreader.h"
 #include "stavlcommon/logwriter.h"
 

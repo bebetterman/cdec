@@ -11,16 +11,31 @@
     <ClInclude Include="..\include\stavlcommon\logwriter.h">
       <Filter>export</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\stavlcommon\convertera.h">
+      <Filter>export</Filter>
+    </ClInclude>
+    <ClInclude Include="test\testenv.h">
+      <Filter>test</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp" />
     <ClCompile Include="stavlcommon.cpp" />
     <ClCompile Include="fastlogreader.cpp" />
     <ClCompile Include="logwriter.cpp" />
+    <ClCompile Include="test\test_convertera.cpp">
+      <Filter>test</Filter>
+    </ClCompile>
+    <ClCompile Include="test\testenv.cpp">
+      <Filter>test</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="export">
       <UniqueIdentifier>{6a0e2a10-4aea-4979-89c7-53f641591076}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="test">
+      <UniqueIdentifier>{c0defd2c-539c-4b09-9e54-ec3100b85507}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>
