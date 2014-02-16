@@ -52,13 +52,29 @@ struct STAVLCOMMONEXPORT Logger
 		return *this;
 	}
 
-	Logger& operator << (int value);
+	inline Logger& operator << (int value)
+	{
+		m_message.append(ConverterA::ToString(value));
+		return *this;
+	}
 
-	Logger& operator << (UINT value);
+	inline Logger& operator << (UINT value)
+	{
+		m_message.append(ConverterA::ToString(value));
+		return *this;
+	}
 
-	Logger& operator << (INT64 value);
+	inline Logger& operator << (INT64 value)
+	{
+		m_message.append(ConverterA::ToString(value));
+		return *this;
+	}
 
-	Logger& operator << (UINT64 value);
+	inline Logger& operator << (UINT64 value)
+	{
+		m_message.append(ConverterA::ToString(value));
+		return *this;
+	}
 
 	inline Logger& operator << (long value)
 	{
