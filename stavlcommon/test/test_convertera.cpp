@@ -26,7 +26,11 @@ public:
 	void testStrToInt32()
 	{
 		UNITTEST_ASSERT(ConverterA::ToInt32("0") == 0);
-		UNITTEST_ASSERT(ConverterA::ToInt32("123") == 123);
+		UNITTEST_ASSERT(ConverterA::ToInt32("2147483647") == 2147483647);
+		//UNITTEST_ASSERT(ConverterA::ToInt32("2147483648") == -2147483648);	// overflow
+		UNITTEST_ASSERT(ConverterA::ToInt32("-2147483647") == -2147483647);
+		//UNITTEST_ASSERT(ConverterA::ToInt32("-2147483648") == -2147483648);	// overflow
+		UNITTEST_ASSERT(ConverterA::ToInt32("-1") == -1);
 		
 		UNITTEST_ASSERT(ConverterA::ToInt32("1001011000111110", 2) == 0x963E);
 		UNITTEST_ASSERT(ConverterA::ToInt32("330face", 16) == 0x330FACE);
