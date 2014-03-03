@@ -10,6 +10,15 @@
     <ClInclude Include="..\include\curlcdec.h">
       <Filter>export</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\curlcdec\curl_common.h">
+      <Filter>export</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\curlcdec\curl_easy.h">
+      <Filter>export</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\curlcdec\curl_response.h">
+      <Filter>export</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="export">
