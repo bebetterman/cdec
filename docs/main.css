@@ -5,7 +5,7 @@ h2           { font-size: 150%; color: #3366FF }
 h3           { font-size: 125%; color: #008080 }
 p, li, td  { font-size: 100% }
 p.remark     { font-size: small; margin-top: 2pt; margin-bottom: 2pt }
-p.code       {
+.code       {
 	border: thin solid #3366FF;
 	font-family: Courier New;
 	font-size: small;
