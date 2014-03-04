@@ -8,36 +8,103 @@ interface ICurlContentWriter: public Object
 {
 	DECLARE_REF_CLASS(ICurlContentWriter)
 
-	virtual void OnCurlReset() = 0;
-	virtual void OnCurlReceive(const void* buffer, int size) = 0;
+	virtual void Reset() = 0;
+	virtual void Write(const void* buffer, int size) = 0;
 };
 
-class CurlResponse: public Object
+class StreamCurlContentWriter : public ICurlContentWriter
+{
+	DECLARE_REF_CLASS(StreamCurlContentWriter)
+
+protected:
+	ref<Stream>	m_stream;
+
+public:
+	StreamCurlContentWriter(ref<Stream> stream): m_stream(stream) {}
+
+	void Reset()
+	{
+		m_stream->SetLength(0);
+		m_stream->Seek(0);
+	}
+
+	void Write(const void* buffer, int size)
+	{
+		if (m_stream->Write(buffer, size) != size)
+			cdec_throw(IOException(EC_IO_ReadWriteFail));
+	}
+};
+
+// -------------------------------------------------------------------------- //
+
+interface ICurlResponseWriter : public Object
+{
+	DECLARE_REF_CLASS(ICurlResponseWriter)
+
+	virtual void SetResponseCode(int code) = 0;
+	virtual void SetHttpState(stringx value) = 0;
+	virtual void AddHeader(stringx key, stringx value) = 0;
+	virtual ref<ICurlContentWriter> GetContentWriter() = 0;
+};
+
+class CurlResponse: public ICurlResponseWriter
 {
 	DECLARE_REF_CLASS(Response)
 
-public:
+protected:
 	typedef SortedMapVV<stringx, stringx> Map;
 
-	int					HttpCode;		// 200
-	stringx				HttpState;		// HTTP/1.1 200 OK	
-	ref<Map>			Headers;		// CCO_ResponseHeaders required
-	ref<MemoryStream>	Stream;
+	int					m_responseCode;		// 200
+	stringx				m_httpState;			// HTTP/1.1 200 OK	
+	ref<Map>			m_headers;			// CCO_ResponseHeaders required
+	ref<MemoryStream>	m_stream;
 
-	inline CurlResponse(): HttpCode(0)
+public:
+	inline CurlResponse(): m_responseCode(0)
 	{
-		Stream = gc_new<MemoryStream>();
+		m_stream = gc_new<MemoryStream>();
 	}
 
-	inline ref<ByteArray> GetBytes()
+	inline ~CurlResponse() { Close(); }
+
+	void SetResponseCode(int code)
 	{
-		return Stream->GetBytes();
+		m_responseCode = code;
 	}
+
+	void SetHttpState(stringx value)
+	{
+		ASSERT(m_httpState == NULL);
+		m_httpState = value;
+	}
+
+	void AddHeader(stringx key, stringx value)
+	{
+		m_headers->Insert(key, value);
+	}
+
+	ref<ICurlContentWriter> GetContentWriter()
+	{
+		return gc_new<StreamCurlContentWriter>(m_stream);
+	}
+
+	inline ref<MemoryStream> GetStream() { return m_stream; }
+
+	inline ref<ByteArray> GetBytes() { return m_stream->GetBytes(); }
 
 	inline stringx GetString()
 	{
 		ref<ByteArray> data = GetBytes();
 		return Encoding::get_UTF8()->GetString(data);
+	}
+
+	void Close()
+	{
+		if (m_stream != NULL)
+		{
+			m_stream->Close();
+			m_stream = NULL;
+		}
 	}
 };
 
