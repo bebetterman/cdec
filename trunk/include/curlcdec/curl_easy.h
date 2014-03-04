@@ -4,12 +4,6 @@ CDEC_NS_BEGIN
 
 // -------------------------------------------------------------------------- //
 
-enum CurlOption
-{
-	CCO_None = 0,
-	CCO_ResponseHeaders	= 1,
-};
-
 class CURLCDECEXPORT CurlEasy: public Object
 {
 	DECLARE_REF_CLASS(CurlEasy)
@@ -19,7 +13,6 @@ class CURLCDECEXPORT CurlEasy: public Object
 	std::vector<std::string>	m_headers;
 
 	ref<Stream>					m_istream;	// PUT
-	ref<CurlResponse>			m_response;
 
 public:
 	static void GlobalInit();

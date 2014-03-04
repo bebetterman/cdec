@@ -52,16 +52,18 @@ class CurlResponse: public ICurlResponseWriter
 	DECLARE_REF_CLASS(Response)
 
 protected:
-	typedef SortedMapVV<stringx, stringx> Map;
+	typedef SortedMapVV<stringx, stringx> HeaderMap;
 
 	int					m_responseCode;		// 200
 	stringx				m_httpState;			// HTTP/1.1 200 OK	
-	ref<Map>			m_headers;			// CCO_ResponseHeaders required
+	ref<HeaderMap>		m_headers;			// CCO_ResponseHeaders required
 	ref<MemoryStream>	m_stream;
 
 public:
-	inline CurlResponse(): m_responseCode(0)
+	inline CurlResponse(CurlOption ops): m_responseCode(0)
 	{
+		if (ops & CCO_ResponseHeaders)
+			m_headers = gc_new<HeaderMap>();
 		m_stream = gc_new<MemoryStream>();
 	}
 
@@ -88,6 +90,8 @@ public:
 		return gc_new<StreamCurlContentWriter>(m_stream);
 	}
 
+	inline int GetResponseCode() { return m_responseCode; }
+
 	inline ref<MemoryStream> GetStream() { return m_stream; }
 
 	inline ref<ByteArray> GetBytes() { return m_stream->GetBytes(); }
@@ -105,6 +109,7 @@ public:
 			m_stream->Close();
 			m_stream = NULL;
 		}
+		m_headers = NULL;
 	}
 };
 
