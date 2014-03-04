@@ -54,13 +54,8 @@ public:
 	void	SetCustomRequest(PCSTR method);
 	void	SetCustomRequest(stringx method);
 
-	void	Request();
-
-	ref<CurlResponse>	GetResponse() { return m_response; }
-	int		GetResponseCode() { return m_response->HttpCode; }
-	
-	inline ref<ByteArray>	ReadResponseData() { return m_response->GetBytes(); }
-	inline stringx			ReadResponseText() { return m_response->GetString(); }
+	void	Request(ref<ICurlResponseWriter> wr);
+	ref<CurlResponse>	Request();
 
 private:
 	static size_t CurlDataReadCallback(void *ptr, size_t size, size_t nmemb, void *userdata);
