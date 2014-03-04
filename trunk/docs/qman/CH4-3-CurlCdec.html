@@ -21,6 +21,31 @@ CurlResponse 对象获得结果。</p>
 <p>调用 Request 方法时，可以使用自己的 ICurlResponseWriter 实现。这种情况下，HTTP 调用结果将传到该 
 ICurlResponseWriter 实现，而不是默认的 CurlResponse。实现该类同时还需要实现 ICurlContentWriter 或使用 
 Curl Cdec 提供的默认实现，用于接收 Response body 数据。</p>
+<h2>使用 Easy 对象</h2>
+<h3>Sample 读取网页</h3>
+<pre class="code">ref&lt;CurlEasy&gt; curl = gc_new&lt;CurlEasy&gt;();
+curl-&gt;SetUrl(url);
+ref&lt;CurlResponse&gt; response = curl-&gt;Request();
+int responseCode = response-&gt;GetResponseCode();
+stringx text = response-&gt;GetString();</pre>
+<p>CurlResponse 类提供了 GetStream, GetBytes, GetString 
+三种方法，分别返回流（MemoryStream）、Byte 数组和 UTF-8 解码后的字符串。</p>
+<h3>Sample 设置 POST 数据</h3>
+<p>使用 SetPostText 方法可以设置 POST 文本（将用 UTF-8 编码）：</p>
+<pre class="code">ref&lt;CurlEasy&gt; curl = gc_new&lt;CurlEasy&gt;();
+curl-&gt;SetUrl(url);
+curl-&gt;SetPostText(__X(&quot;name=abc&amp;value=123&quot;));</pre>
+<p>该方法将默认设置 POST 格式为 application/x-www-form-urlencoded。如果要设置其他的格式，可以手动设置 
+Content-Type 头。</p>
+<pre class="code">ref&lt;CurlEasy&gt; curl = gc_new&lt;CurlEasy&gt;();
+curl-&gt;SetUrl(url);
+curl-&gt;AddHeader(__X(&quot;Content-Type&quot;), __X(&quot;text/plain&quot;));
+curl-&gt;SetPostText(__X(&quot;name=abc&amp;value=123&quot;));</pre>
+<p>一般情况下，请不要手动设置 Content-Length 头。</p>
+<p>另外，SetPostBytes 和 SetPostStream（未完成）可以设置 Byte 数组和流。</p>
+<h2>其他应用</h2>
+<p>SetPutBytes 和 SetPutStream 可以发出 HTTP PUT 请求，其使用方法类似 POST 请求。</p>
+<p>SetCustomRequest 可以发出非标准 HTTP 命令。</p>
 <h2>Windows 工程编译</h2>
 <p>为使用方便，Cdec 代码库已经包含了适用于 Visual C++ 2010 的 libcurl 二进制文件。位于 
 import-win\curl-7.31.0。该目录结构如下。</p>
