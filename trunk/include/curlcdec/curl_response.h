@@ -51,9 +51,10 @@ class CurlResponse: public ICurlResponseWriter
 {
 	DECLARE_REF_CLASS(Response)
 
-protected:
+public:
 	typedef SortedMapVV<stringx, stringx> HeaderMap;
 
+protected:
 	int					m_responseCode;		// 200
 	stringx				m_httpState;			// HTTP/1.1 200 OK	
 	ref<HeaderMap>		m_headers;			// CCO_ResponseHeaders required
@@ -101,6 +102,8 @@ public:
 		ref<ByteArray> data = GetBytes();
 		return Encoding::get_UTF8()->GetString(data);
 	}
+
+	inline stringx GetHttpState() { return m_httpState; }
 
 	inline ref<HeaderMap> GetHeaders() { return m_headers; }
 

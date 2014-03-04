@@ -62,6 +62,20 @@ void TestRawPostPage()
 	Console::WriteLine(s);
 }
 
+void TestReadResponseHeaders()
+{
+	Console::WriteLine(__X("TestReadResponseHeaders"));
+	ref<CurlEasy> curl = gc_new<CurlEasy>(CCO_ResponseHeaders);
+	curl->SetUrl("http://www.google.com/");
+	ref<CurlResponse> response = curl->Request();
+
+	Console::WriteLine(__X("Response code: ") + Converter::ToString(response->GetResponseCode()));
+	Console::WriteLine(__X("State: ") + response->GetHttpState());
+	ref<CurlResponse::HeaderMap> headers = response->GetHeaders();
+	foreach (CurlResponse::HeaderMap::KeyValuePair, pair, headers)
+		Console::WriteLine('\"' + pair.first + __X("\" : \"") + pair.second + '\"');
+}
+
 int main(int argc, char* argv[])
 {
 	CurlEasy::GlobalInit();
@@ -70,6 +84,7 @@ int main(int argc, char* argv[])
 	TestGetPage();
 	TestPostPage();
 	TestRawPostPage();
+	TestReadResponseHeaders();
 
 	CurlEasy::GlobalTerm();
 	return 0;
