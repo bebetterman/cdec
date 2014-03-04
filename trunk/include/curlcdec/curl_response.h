@@ -102,6 +102,8 @@ public:
 		return Encoding::get_UTF8()->GetString(data);
 	}
 
+	inline ref<HeaderMap> GetHeaders() { return m_headers; }
+
 	void Close()
 	{
 		if (m_stream != NULL)
