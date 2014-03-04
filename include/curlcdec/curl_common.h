@@ -2,7 +2,13 @@
 
 // -------------------------------------------------------------------------- //
 
-enum
+enum CurlOption
+{
+	CCO_None = 0,
+	CCO_ResponseHeaders	= 1,
+};
+
+enum CurlExceptionCode
 {
 	ECNS_CURL	= 0x101,
 

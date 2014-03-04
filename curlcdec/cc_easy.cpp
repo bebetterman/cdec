@@ -27,8 +27,6 @@ CurlEasy::CurlEasy(CurlOption ops): m_ops(ops)
 	if ((m_curl = curl_easy_init()) == NULL)
 		throw CurlException(EC_CURL_FAILED_INIT);
 
-	m_response = gc_new<CurlResponse>();
-
 	// Default time-out values
 	SetConnectionTimeOut(60);
 	SetTimeOut(120);
@@ -179,7 +177,7 @@ void CurlEasy::Request(ref<ICurlResponseWriter> response)
 
 ref<CurlResponse> CurlEasy::Request()
 {
-	ref<CurlResponse> response;
+	ref<CurlResponse> response = gc_new<CurlResponse>(m_ops);
 	Request(response);
 	return response;
 }
