@@ -42,10 +42,26 @@ curl-&gt;SetUrl(url);
 curl-&gt;AddHeader(__X(&quot;Content-Type&quot;), __X(&quot;text/plain&quot;));
 curl-&gt;SetPostText(__X(&quot;name=abc&amp;value=123&quot;));</pre>
 <p>一般情况下，请不要手动设置 Content-Length 头。</p>
-<p>另外，SetPostBytes 和 SetPostStream（未完成）可以设置 Byte 数组和流。</p>
-<h2>其他应用</h2>
+<p>另外，SetPostBytes 和 SetPostStream 可以设置 Byte 数组和流。</p>
+<h3>读取 Response Headers</h3>
+<p>在初始化时，使用 CCO_ResponseHeaders 来指示 Curl Easy 处理 Response headers。</p>
+<p>参考代码如下。</p>
+<pre class="code">ref&lt;CurlEasy&gt; curl = gc_new&lt;CurlEasy&gt;(CCO_ResponseHeaders);
+curl-&gt;SetUrl(&quot;http://www.google.com/&quot;);
+ref&lt;CurlResponse&gt; response = curl-&gt;Request();
+
+Console::WriteLine(__X(&quot;Response code: &quot;) + Converter::ToString(response-&gt;GetResponseCode()));
+Console::WriteLine(__X(&quot;State: &quot;) + response-&gt;GetHttpState());
+ref&lt;CurlResponse::HeaderMap&gt; headers = response-&gt;GetHeaders();
+foreach (CurlResponse::HeaderMap::KeyValuePair, pair, headers)
+Console::WriteLine(&#39;\&quot;&#39; + pair.first + __X(&quot;\&quot; : \&quot;&quot;) + pair.second + &#39;\&quot;&#39;);</pre>
+<h3>其他 HTTP 命令</h3>
 <p>SetPutBytes 和 SetPutStream 可以发出 HTTP PUT 请求，其使用方法类似 POST 请求。</p>
 <p>SetCustomRequest 可以发出非标准 HTTP 命令。</p>
+<h3>自定义 Response 接收者</h3>
+<p>Request 方法接受自定义的 ICurlResponseWriter 实现。请参考 CurlResponse 来实现自己的 Response 接收器。</p>
+<p>实现 Response writer 时需要 ICurlContentWriter 的实现，可以自行实现或使用现有的（例如 
+StreamCurlContentWriter）。</p>
 <h2>Windows 工程编译</h2>
 <p>为使用方便，Cdec 代码库已经包含了适用于 Visual C++ 2010 的 libcurl 二进制文件。位于 
 import-win\curl-7.31.0。该目录结构如下。</p>
