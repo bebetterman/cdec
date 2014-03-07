@@ -3,6 +3,67 @@
 #define VERIFY_CURL_CODE(code)	if (code != 0) throw CurlException((code) + EC_CURL_ST);
 
 CDEC_NS_BEGIN
+
+// -------------------------------------------------------------------------- //
+// Callback functions
+// -------------------------------------------------------------------------- //
+
+size_t CurlDataReadCallback(void *buffer, size_t size, size_t nmemb, void *user_p)
+{
+	Stream* pStream = (Stream*)user_p;
+	size_t cbop = size * nmemb;
+	cbop = pStream->Read(buffer, cbop);
+	return cbop;
+}
+
+size_t CurlDataWriteCallback(void *buffer, size_t size, size_t nmemb, void *user_p)
+{
+	ICurlContentWriter* contentw = (ICurlContentWriter*)user_p;
+	size_t cbop = size * nmemb;
+	contentw->Write(buffer, cbop);
+	return cbop;
+}
+
+size_t CurlHeaderWriteCallback(void* buffer, size_t size, size_t nmemb, void* user_p)
+{
+	ICurlResponseWriter* response = (ICurlResponseWriter*)user_p;
+	size_t cbop = size * nmemb;
+	stringx s = Encoding::get_UTF8()->GetString((BYTE*)buffer, cbop);
+	s = s.TrimRight();
+
+	if (s.StartsWith(__X("HTTP")))
+	{
+		// Console::WriteLine(__X("[HTTP State] ") + s);
+		response->SetHttpState(s);
+	}
+	else if (s.Length() != 0)
+	{
+		int pos = s.IndexOf(':');
+		ASSERT(pos > 0);
+		stringx key = s.Substring(0, pos).TrimRight();
+		stringx value = s.Substring(pos + 1).TrimLeft();
+
+		// Console::WriteLine(__X("[Header] Key=\"") + key + __X("\" Value=\"") + value + '\"');
+		response->AddHeader(key, value);
+	}
+
+	return cbop;
+}
+
+int CurlProgressCallback(void *clientp, double dltotal, double dlnow, double ultotal, double ulnow)
+{
+	ICurlProgress* prog = (ICurlProgress*)clientp;
+
+	if (dltotal != 0.0)
+		return prog->OnDownload(dltotal, dlnow);
+	else if (ultotal != 0.0)
+		return prog->OnUpload(ultotal, ulnow);
+	else
+		return 0;
+}
+
+// -------------------------------------------------------------------------- //
+// Curl Easy
 // -------------------------------------------------------------------------- //
 
 void CurlEasy::GlobalInit()
@@ -123,6 +184,18 @@ void CurlEasy::SetCustomRequest(stringx method)
 	SetCustomRequest(method_cs.c_str());
 }
 
+void CurlEasy::SetProgressCallback(ref<ICurlProgress> prog)
+{
+	int code = curl_easy_setopt(m_curl, CURLOPT_NOPROGRESS, 0);
+	VERIFY_CURL_CODE(code);
+
+	code = curl_easy_setopt(m_curl, CURLOPT_PROGRESSFUNCTION, CurlProgressCallback);
+	VERIFY_CURL_CODE(code);
+
+	code = curl_easy_setopt(m_curl, CURLOPT_PROGRESSDATA, prog.__GetPointer());
+	VERIFY_CURL_CODE(code);
+}
+
 void CurlEasy::Request(ref<ICurlResponseWriter> response)
 {
 	int code = 0;
@@ -180,48 +253,6 @@ ref<CurlResponse> CurlEasy::Request()
 	ref<CurlResponse> response = gc_new<CurlResponse>(m_ops);
 	Request(response);
 	return response;
-}
-
-size_t CurlEasy::CurlDataReadCallback(void *buffer, size_t size, size_t nmemb, void *user_p)
-{
-	Stream* pStream = (Stream*)user_p;
-	size_t cbop = size * nmemb;
-	cbop = pStream->Read(buffer, cbop);
-	return cbop;
-}
-
-size_t CurlEasy::CurlDataWriteCallback(void *buffer, size_t size, size_t nmemb, void *user_p)
-{
-	ICurlContentWriter* contentw = (ICurlContentWriter*)user_p;
-	size_t cbop = size * nmemb;
-	contentw->Write(buffer, cbop);
-	return cbop;
-}
-
-size_t CurlEasy::CurlHeaderWriteCallback(void* buffer, size_t size, size_t nmemb, void* user_p)
-{
-	ICurlResponseWriter* response = (ICurlResponseWriter*)user_p;
-	size_t cbop = size * nmemb;
-	stringx s = Encoding::get_UTF8()->GetString((BYTE*)buffer, cbop);
-	s = s.TrimRight();
-
-	if (s.StartsWith(__X("HTTP")))
-	{
-		// Console::WriteLine(__X("[HTTP State] ") + s);
-		response->SetHttpState(s);
-	}
-	else if (s.Length() != 0)
-	{
-		int pos = s.IndexOf(':');
-		ASSERT(pos > 0);
-		stringx key = s.Substring(0, pos).TrimRight();
-		stringx value = s.Substring(pos + 1).TrimLeft();
-
-		// Console::WriteLine(__X("[Header] Key=\"") + key + __X("\" Value=\"") + value + '\"');
-		response->AddHeader(key, value);
-	}
-
-	return cbop;
 }
 
 // -------------------------------------------------------------------------- //

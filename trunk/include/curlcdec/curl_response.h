@@ -4,6 +4,16 @@ CDEC_NS_BEGIN
 
 // -------------------------------------------------------------------------- //
 
+interface ICurlProgress : public Object
+{
+	DECLARE_REF_CLASS(ICurlProgress)
+
+	virtual bool OnUpload(INT64 total, INT64 now) = 0;
+	virtual bool OnDownload(INT64 total, INT64 now) = 0;
+};
+
+// -------------------------------------------------------------------------- //
+
 interface ICurlContentWriter: public Object
 {
 	DECLARE_REF_CLASS(ICurlContentWriter)
