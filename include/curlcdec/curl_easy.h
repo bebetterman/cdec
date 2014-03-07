@@ -29,9 +29,6 @@ public:
 	void	SetConnectionTimeOut(int seconds);
 	void	SetTimeOut(int seconds);
 
-	// SetOutputStream will be supported as an alternative
-//	void	SetContentWriter(ref<ICurlContentWriter> cWriter) { m_cWriter = cWriter; }
-
 	void	AddHeader(stringx key, stringx value);
 
 	void	SetPostBytes(const void* data, int length);
@@ -47,17 +44,10 @@ public:
 	void	SetCustomRequest(PCSTR method);
 	void	SetCustomRequest(stringx method);
 
+	void	SetProgressCallback(ref<ICurlProgress> prog);
+
 	void	Request(ref<ICurlResponseWriter> wr);
 	ref<CurlResponse>	Request();
-
-private:
-	static size_t CurlDataReadCallback(void *ptr, size_t size, size_t nmemb, void *userdata);
-
-	// callback for writing response headers
-	static size_t CurlHeaderWriteCallback(void *ptr, size_t size, size_t nmemb, void *userdata);
-
-	// callback for writing response body data (stream)
-	static size_t CurlDataWriteCallback(void *buffer, size_t size, size_t nmemb, void *user_p);
 };
 
 // -------------------------------------------------------------------------- //
