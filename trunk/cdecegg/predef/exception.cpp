@@ -25,7 +25,7 @@ int Exception::FromWindowsErr(DWORD err)
 	case ERROR_ALREADY_EXISTS:
 		return EC_IO_AlreadyExists;
 	default:
-		ASSERT(false);	// Unexpected
+		// ASSERT(false);	// Unexpected
 		return EC_Unexpected;
 	}
 }
