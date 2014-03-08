@@ -35,7 +35,11 @@ inline void* operator new[](size_t size, const char* file, int line) { return Cd
 inline void operator delete(void* p, const char* file, int line) { CdecDebugFree(p, file, line); }
 inline void operator delete[](void* p, const char* file, int line) { CdecDebugFree(p, file, line); }
 
+#define DEBUG_NEW new(__FILE__, __LINE__)
+
 #else
+
+#define DEBUG_NEW new
 
 #endif
 
