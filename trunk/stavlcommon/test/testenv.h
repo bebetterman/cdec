@@ -3,7 +3,7 @@
 #if defined(_DEBUG) || ENABLE_RELEASE_TEST
 #	define ENABLE_TEST	1
 #else
-#	define ENABLE_TEST	0
+#	define ENABLE_TEST	1
 #endif
 
 #if ENABLE_TEST
