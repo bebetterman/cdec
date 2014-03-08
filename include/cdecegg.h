@@ -21,9 +21,10 @@
 #	define CDECEGGEXPORT		DECLSPEC_IMPORT
 #endif
 
-#define CDECEGGAPI(type)		CDECEGGEXPORT type
-
 #include "cdecegg/predef/diagnostics.h"
+
+#include "cdecegg/diagnostic/debug_new.h"
+
 #include "cdecegg/predef/exception.h"
 #include "cdecegg/predef/wstring16.h"
 
