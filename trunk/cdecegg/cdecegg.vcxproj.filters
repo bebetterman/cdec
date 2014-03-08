@@ -55,6 +55,9 @@
     <ClInclude Include="..\include\cdecegg\predef\diagnostics.h">
       <Filter>predef\export</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\cdecegg\diagnostic\debug_new.h">
+      <Filter>diagnostic\export</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="common\basic\bitorg.cpp">
@@ -130,6 +133,12 @@
     </Filter>
     <Filter Include="intern\algorithm\test">
       <UniqueIdentifier>{f828ff8c-63d2-4b6e-a0a2-487950c24b13}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="diagnostic">
+      <UniqueIdentifier>{abae0e92-471a-4e87-93ca-a7f17daab1b6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="diagnostic\export">
+      <UniqueIdentifier>{59e14f0e-d08c-4c46-8d5f-a7f38d4c6fa9}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

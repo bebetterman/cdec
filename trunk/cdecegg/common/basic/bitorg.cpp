@@ -57,7 +57,7 @@ UINT	DW_ACCU_HI[33] = {	0,
 
 // -------------------------------------------------------------------------- //
 
-CDECEGGAPI(int) GetHighTrueBit(UINT x)
+CDECEGGEXPORT int GetHighTrueBit(UINT x)
 {
 #ifdef _DEBUG
 	// 用简单的算法算出一个结果作为验证
@@ -102,7 +102,7 @@ CDECEGGAPI(int) GetHighTrueBit(UINT x)
 	return i;
 }
 
-CDECEGGAPI(int) GetLowTrueBit(UINT x)
+CDECEGGEXPORT int GetLowTrueBit(UINT x)
 {
 #ifdef _DEBUG
 	// 用简单的算法算出一个结果作为验证
@@ -146,25 +146,25 @@ CDECEGGAPI(int) GetLowTrueBit(UINT x)
 	return i;
 }
 
-CDECEGGAPI(UINT) GetBitMask(int i)
+CDECEGGEXPORT UINT GetBitMask(int i)
 {
 	ASSERT(i >= 0 && i < 32);
 	return DW_BITMASK[i];
 }
 
-CDECEGGAPI(UINT) GetAccuHigh(int i)
+CDECEGGEXPORT UINT GetAccuHigh(int i)
 {
 	ASSERT(i >= 0 && i <= 32);
 	return DW_ACCU_HI[i];
 }
 
-CDECEGGAPI(UINT) GetAccuLow(int i)
+CDECEGGEXPORT UINT GetAccuLow(int i)
 {
 	ASSERT(i >= 0 && i <= 32);
 	return DW_ACCU_LO[i];
 }
 
-CDECEGGAPI(UINT) GetMaxPow2LE(UINT x)
+CDECEGGEXPORT UINT GetMaxPow2LE(UINT x)
 {
 	if (x == 0)
 		return 0;

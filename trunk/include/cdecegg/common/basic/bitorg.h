@@ -25,11 +25,11 @@ const UINT	DW_FULLBIT		= 0xFFFFFFFF,
 
 // 返回 x 从高位开始的第一个值为 1 的位
 // 如果所有位都为 0，返回 0
-CDECEGGAPI(int) GetHighTrueBit(UINT x);
+CDECEGGEXPORT int GetHighTrueBit(UINT x);
 
 // 返回 x 从低位开始的第一个值为 1 的位
 // 如果所有位都为 0，返回 31
-CDECEGGAPI(int) GetLowTrueBit(UINT x);
+CDECEGGEXPORT int GetLowTrueBit(UINT x);
 
 // 返回 x 从高位开始的第一个值为 0 的位
 // 如果所有位都为 1，返回 0
@@ -46,19 +46,19 @@ inline int GetLowFalseBit(UINT x)
 }
 
 // 获取第 i 位的屏蔽位，例如，第 3 位的屏蔽位为 0x8
-CDECEGGAPI(UINT) GetBitMask(int i);
+CDECEGGEXPORT UINT GetBitMask(int i);
 
 // 获取高 i 位为 1，其余低位为 0 的值，例如
 // i = 6 时，结果为 0xFC000000
-CDECEGGAPI(UINT) GetAccuHigh(int i);
+CDECEGGEXPORT UINT GetAccuHigh(int i);
 
 // 获取低 i 位为 1，其余高位为 0 的值，例如
 // i = 6 时，结果为 0x0000003F
-CDECEGGAPI(UINT) GetAccuLow(int i);
+CDECEGGEXPORT UINT GetAccuLow(int i);
 
 // 获取不大于给定的 x 的最大的 2^n
 // 如果传入参数为 0，则返回 0
-CDECEGGAPI(UINT) GetMaxPow2LE(UINT x);
+CDECEGGEXPORT UINT GetMaxPow2LE(UINT x);
 
 // 获取不小于给定的 x 的最小的 2^n
 // 如果传入参数为 0，则返回 1

@@ -134,6 +134,7 @@
     <ClInclude Include="..\include\cdecegg.h" />
     <ClInclude Include="..\include\cdecegg\common\basic\bitop.h" />
     <ClInclude Include="..\include\cdecegg\common\basic\bitorg.h" />
+    <ClInclude Include="..\include\cdecegg\diagnostic\debug_new.h" />
     <ClInclude Include="..\include\cdecegg\intern\algorithm\search.h" />
     <ClInclude Include="..\include\cdecegg\intern\collection\bitarray.h" />
     <ClInclude Include="..\include\cdecegg\intern\collection\guidset.h" />
