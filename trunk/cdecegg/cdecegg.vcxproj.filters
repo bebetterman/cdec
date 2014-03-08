@@ -93,6 +93,9 @@
     <ClCompile Include="predef\diagnostics.cpp">
       <Filter>predef</Filter>
     </ClCompile>
+    <ClCompile Include="diagnostic\debug_new.cpp">
+      <Filter>diagnostic</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="common">
