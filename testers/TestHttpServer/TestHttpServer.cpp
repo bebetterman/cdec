@@ -3,6 +3,7 @@
 
 #include "stdafx.h"
 
+#pragma comment(lib, "cdecegg.lib")
 #pragma comment(lib, "cdeccore.lib")
 #pragma comment(lib, "httpserv.lib")
 #pragma comment(lib, "../../import-win/libmicrohttpd-0.9.17-w32/lib/libmicrohttpd.dll.a")
