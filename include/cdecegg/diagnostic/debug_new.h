@@ -5,7 +5,11 @@
 #pragma once
 
 #ifdef _DEBUG
-#	define	Cdec_Enable_DebugNew	1
+#	ifdef X_OS_WINDOWS
+#		define	Cdec_Enable_DebugNew	1
+#	else
+#		define	Cdec_Enable_DebugNew	0
+#	endif
 #else
 #	define	Cdec_Enable_DebugNew	0
 #endif
