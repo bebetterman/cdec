@@ -8,6 +8,12 @@ enum CurlOption
 	CCO_ResponseHeaders	= 1,
 };
 
+enum CurlProxyType
+{
+	CPT_SOCKS4 = 0,
+	CPT_SOCKS5 = 1,
+};
+
 enum CurlExceptionCode
 {
 	ECNS_CURL	= 0x101,

@@ -66,7 +66,7 @@ public:
 
 protected:
 	int					m_responseCode;		// 200
-	stringx				m_httpState;			// HTTP/1.1 200 OK	
+	stringx				m_httpState;		// HTTP/1.1 200 OK	
 	ref<HeaderMap>		m_headers;			// CCO_ResponseHeaders required
 	ref<MemoryStream>	m_stream;
 
