@@ -102,6 +102,25 @@ void CurlEasy::CleanUp()
 	}
 }
 
+void CurlEasy::SetProxy(stringx proxyHost, UINT proxyPort, CurlProxyType proxyType /* = CPT_SOCKS4 */)
+{
+	stringx hostPort = proxyHost + __X(":") + Converter::ToString(proxyPort);
+
+	CURLcode code = curl_easy_setopt(
+		m_curl, 
+		CURLOPT_PROXY, 
+		Encoding::get_UTF8()->FromUnicode(hostPort).c_str()
+	);
+	VERIFY_CURL_CODE(code);
+
+	code = curl_easy_setopt(
+		m_curl,
+		CURLOPT_PROXYTYPE,
+		proxyType == CPT_SOCKS4 ? CURLPROXY_SOCKS4 : CURLPROXY_SOCKS5
+	);
+	VERIFY_CURL_CODE(code);
+}
+
 void CurlEasy::SetUrl(const char* url)
 {
 	int code = curl_easy_setopt(m_curl, CURLOPT_URL, url);
