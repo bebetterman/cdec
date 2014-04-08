@@ -102,6 +102,11 @@ void ResourcePool::Return(ref<IResource> r)
 		r->Dispose();
 		return;
 	}
+	if(r->IsDamage())
+	{
+		r->Dispose();
+		return;
+	}
 
 	ASSERT(index >= 0);
 	m_cs->Enter();
