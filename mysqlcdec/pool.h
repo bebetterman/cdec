@@ -9,13 +9,15 @@ class ConnResource: public IResource
 
 protected:
 	int	m_index;
+	bool m_isDamage;
 	sql::Connection*	m_impl;
 
 public:
-	ConnResource(int index, sql::Connection* impl): m_index(index), m_impl(impl)
+	ConnResource(int index, sql::Connection* impl): m_index(index), m_impl(impl), m_isDamage(false)
 	{
 	}
-
+	bool IsDamage(){return m_isDamage;}
+	void SetDamage(bool isDamage){ m_isDamage = isDamage; }
 	int Index() { return m_index; }
 	sql::Connection* Impl() { return m_impl; }
 	void Dispose();

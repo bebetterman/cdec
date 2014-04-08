@@ -70,6 +70,8 @@ namespace cdec
 
 		virtual int Index() = 0;
 		virtual void Dispose() = 0;
+		virtual bool IsDamage() = 0;
+		virtual void SetDamage(bool isDamage) = 0;
 	};
 
 	interface IResourceFactory: public Object

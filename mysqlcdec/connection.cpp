@@ -23,6 +23,7 @@ ref<Statement> Connection::CreateStatement()
     }
     catch (sql::SQLException& e)
     {
+		m_rc->SetDamage(true);
 		cdec_throw(MysqlException(e.getErrorCode(), e.getSQLState(), e.what()));
     }
 }
@@ -45,6 +46,7 @@ ref<PreparedStatement> Connection::CreatePreparedStatement(stringx sql)
 		printf("Message: %s\n", e.what());
 		printf("State: %s\n", e.getSQLState().c_str());
 #endif
+		m_rc->SetDamage(true);
 		cdec_throw(MysqlException(e.getErrorCode(), e.getSQLState(), e.what()));
     }
 }
