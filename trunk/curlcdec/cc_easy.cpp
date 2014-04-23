@@ -87,7 +87,7 @@ CurlEasy::CurlEasy(CurlOption ops): m_ops(ops)
 {
 	if ((m_curl = curl_easy_init()) == NULL)
 		throw CurlException(EC_CURL_FAILED_INIT);
-
+	curl_easy_setopt(m_curl, CURLOPT_NOSIGNAL, 1);
 	// Default time-out values
 	SetConnectionTimeOut(60);
 	SetTimeOut(120);
