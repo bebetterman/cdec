@@ -40,6 +40,12 @@ struct STAVLCOMMONEXPORT Logger
 
 	Logger& operator << (stringx value);
 
+	inline Logger& operator << (char value)
+	{
+		m_message.append(1, value);
+		return *this;
+	}
+
 	inline Logger& operator << (const char* value)
 	{
 		m_message.append(value);
