@@ -23,7 +23,10 @@ public:
 
 	void	CleanUp();
 
+	// Added by Diego Lee
 	void	SetProxy(stringx proxyHost, UINT proxyPort, CurlProxyType proxyType = CPT_SOCKS4);
+	void	SetNoBody(bool bNobody);
+	void	SetMaxRedirs(long amount);
 
 	void	SetUrl(const char* url);
 	void	SetUrl(stringx url);
