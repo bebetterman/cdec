@@ -121,6 +121,18 @@ void CurlEasy::SetProxy(stringx proxyHost, UINT proxyPort, CurlProxyType proxyTy
 	VERIFY_CURL_CODE(code);
 }
 
+void CurlEasy::SetNoBody(bool bNobody)
+{
+	CURLcode code = curl_easy_setopt(m_curl, CURLOPT_NOBODY, bNobody);
+	VERIFY_CURL_CODE(code);
+}
+
+void CurlEasy::SetMaxRedirs(long amount)
+{
+	CURLcode code = curl_easy_setopt(m_curl, CURLOPT_MAXREDIRS, amount);
+	VERIFY_CURL_CODE(code);
+}
+
 void CurlEasy::SetUrl(const char* url)
 {
 	int code = curl_easy_setopt(m_curl, CURLOPT_URL, url);
